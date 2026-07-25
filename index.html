@@ -858,8 +858,6 @@ window.isConnectedToSupabase = true;
         if (typeof renderDashboard === 'function') {
             renderDashboard();
         }
-    }
-}
     } else if (tabId === 'servicos') {
         renderServicos();
     } else if (tabId === 'agenda') {
@@ -867,7 +865,7 @@ window.isConnectedToSupabase = true;
         const ano = hoje.getFullYear();
         const mes = String(hoje.getMonth() + 1).padStart(2, '0');
         const dia = String(hoje.getDate()).padStart(2, '0');
-        selectDay(`${ano}-${mes}-${dia}`);
+        selectedDay = `${ano}-${mes}-${dia}`;
     } else if (tabId === 'motoristas') {
         renderDrivers();
     } else if (tabId === 'financeiro') {
@@ -875,8 +873,7 @@ window.isConnectedToSupabase = true;
     } else if (tabId === 'clientes') {
         renderClientes();
     }
-}
-
+        }
         function renderDashboard() {
             const hoje = databaseAgenda.filter(item => {
                 const itemDia = String(item.dia || '').trim();
