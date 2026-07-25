@@ -2140,6 +2140,36 @@ async function deletarServico(id) {
                 elementoTituloHoje.innerText = `Próximas Atividades de Hoje (${dataFormatada})`;
             }
         });
+        async function editarCategoria(nomeAntigo) {
+    const novoNome = prompt(`Digite o novo nome para a categoria "${nomeAntigo}":`, nomeAntigo);
+    if (!novoNome || novoNome.trim() === '' || novoNome === nomeAntigo) return;
+
+    const { error } = await window.supabaseClient
+        .from('servicos')
+        .update({ categoria: novoNome.toUpperCase() })
+        .eq('categoria', nomeAntigo);
+
+    if (error) {
+        alert('Erro ao atualizar categoria: ' + error.message);
+    } else {
+        renderServicos();
+    }
+}
+
+async function deletarCategoria(categoriaNome) {
+    if (!confirm(`Tem certeza que deseja excluir a categoria "${categoriaNome}" e TODOS os seus serviços vinculados?`)) return;
+
+    const { error } = await window.supabaseClient
+        .from('servicos')
+        .delete()
+        .eq('categoria', categoriaNome);
+
+    if (error) {
+        alert('Erro ao excluir categoria: ' + error.message);
+    } else {
+        renderServicos();
+    }
+}
     </script>
 </body>
 </html>
