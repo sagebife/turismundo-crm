@@ -819,53 +819,58 @@ window.isConnectedToSupabase = true;
             }
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.view-section').forEach(view => {
-                view.classList.add('hidden');
-            });
-            
-            const element = document.getElementById('view-' + tabId);
-            if (element) {
-                element.classList.remove('hidden');
-            }
+        async function switchTab(tabId) {
+    // Força a atualização dos dados do Supabase ao trocar de aba
+    if (typeof loadRealData === 'function') {
+        await loadRealData();
+    }
 
-            const navDash = document.getElementById('nav-dash');
-            const navAgenda = document.getElementById('nav-agenda');
-            const navMoto = document.getElementById('nav-moto');
-            const navFin = document.getElementById('nav-fin');
-            const navServ = document.getElementById('nav-serv');
-            const navClientes = document.getElementById('nav-clientes');
+    document.querySelectorAll('.view-section').forEach(view => {
+        view.classList.add('hidden');
+    });
 
-            if (navDash) navDash.className = tabId === 'dashboard' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
-            if (navAgenda) navAgenda.className = tabId === 'agenda' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
-            if (navMoto) navMoto.className = tabId === 'motoristas' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
-            if (navServ) navServ.className = tabId === 'servicos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
-            if (navFin) navFin.className = tabId === 'financeiro' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
-            if (navClientes) navClientes.className = tabId === 'clientes' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+    const element = document.getElementById('view-' + tabId);
+    if (element) {
+        element.classList.remove('hidden');
+    }
 
-            if (tabId === 'dashboard') {
-                const hojeObj = new Date();
-                const ano = hojeObj.getFullYear();
-                const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
-                const dia = String(hojeObj.getDate()).padStart(2, '0');
-                window.selectedDay = `${ano}-${mes}-${dia}`;
-                renderDashboard();
-                } else if (tabId === 'servicos') {
-                renderServicos();
-            } else if (tabId === 'agenda') {
-                const hoje = new Date();
-                const ano = hoje.getFullYear();
-                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-                const dia = String(hoje.getDate()).padStart(2, '0');
-                selectDay(`${ano}-${mes}-${dia}`);
-            } else if (tabId === 'motoristas') {
-                renderDrivers();
-            } else if (tabId === 'financeiro') {
-                renderFinanceiro();
-            } else if (tabId === 'clientes') {
-                renderClientes();
-            }
-        }
+    const navDash = document.getElementById('nav-dash');
+    const navAgenda = document.getElementById('nav-agenda');
+    const navMoto = document.getElementById('nav-moto');
+    const navFin = document.getElementById('nav-fin');
+    const navServ = document.getElementById('nav-serv');
+    const navClientes = document.getElementById('nav-clientes');
+
+    if (navDash) navDash.className = tabId === 'dashboard' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+    if (navAgenda) navAgenda.className = tabId === 'agenda' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+    if (navMoto) navMoto.className = tabId === 'motoristas' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+    if (navServ) navServ.className = tabId === 'servicos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+    if (navFin) navFin.className = tabId === 'financeiro' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+    if (navClientes) navClientes.className = tabId === 'clientes' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+
+    if (tabId === 'dashboard') {
+        const hojeObj = new Date();
+        const ano = hojeObj.getFullYear();
+        const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
+        const dia = String(hojeObj.getDate()).padStart(2, '0');
+        window.selectedDay = `${ano}-${mes}-${dia}`;
+        renderDashboard();
+    } else if (tabId === 'servicos') {
+        renderServicos();
+    } else if (tabId === 'agenda') {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        selectDay(`${ano}-${mes}-${dia}`);
+    } else if (tabId === 'motoristas') {
+        renderDrivers();
+    } else if (tabId === 'financeiro') {
+        renderFinanceiro();
+    } else if (tabId === 'clientes') {
+        renderClientes();
+    }
+}
 
         function renderDashboard() {
             const hoje = databaseAgenda.filter(item => {
