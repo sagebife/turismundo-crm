@@ -1196,18 +1196,40 @@ async function renderServicos() {
         return;
     }
 
-    // Renderiza cada serviço encontrado com sua respectiva categoria e preço
+    // Renderiza cada serviço encontrado com o botão de excluir
     container.innerHTML = data.map(servico => `
         <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex justify-between items-center mb-3">
             <div>
                 <span class="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full">${servico.categoria || 'Geral'}</span>
                 <h4 class="font-bold text-gray-800 mt-2 text-base">${servico.nome}</h4>
             </div>
-            <div class="text-right">
+            <div class="flex items-center gap-4">
                 <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
+                <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
             </div>
         </div>
     `).join('');
+}
+
+// Função auxiliar para deletar o serviço do Supabase
+async function deletarServico(id) {
+    if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+
+    const { error } = await window.supabaseClient
+        .from('servicos')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Erro ao excluir o serviço: " + error.message);
+    } else {
+        // Atualiza a listagem na tela automaticamente após excluir
+        renderServicos();
+    }
 }
         function renderFinanceiro() {
             const tableBody = document.getElementById('financeTableBody');
