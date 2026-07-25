@@ -2195,11 +2195,11 @@ async function deletarCategoria(categoriaNome) {
         .delete()
         .eq('nome', categoriaNome);
 
-    // Deleta os serviços vinculados
+    // Deleta os serviços vinculados a esta categoria específica
     const { error } = await window.supabaseClient
         .from('servicos')
         .delete()
-        .eq('categoria', categoriaNome);
+        .eq('categoria', categoriaNome); // <--- Esse filtro é essencial!
 
     if (error) {
         alert('Erro ao excluir categoria: ' + error.message);
