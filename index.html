@@ -1171,30 +1171,43 @@ window.isConnectedToSupabase = true;
                 select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo})</option>`;
             });
         }
-function renderServicos() {
+async function renderServicos() {
     const container = document.getElementById('catalogList');
     if (!container) return;
-    
-    container.innerHTML = '';
-    
-    const listaServicos = window.servicos || window.dbServicos || []; 
 
-    if (listaServicos.length === 0) {
-        container.innerHTML = '<p class="text-gray-400 text-sm">Nenhum serviço cadastrado até o momento.</p>';
+    if (!window.supabaseClient) {
+        container.innerHTML = `<p class="text-gray-500">Supabase não conectado.</p>`;
         return;
     }
 
-    listaServicos.forEach(servico => {
-        container.innerHTML += `
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center mb-2">
-                <div>
-                    <h4 class="font-bold text-gray-800">${servico.rota || servico.nome || 'Serviço'}</h4>
-                    <p class="text-xs text-gray-500">Categoria: ${servico.categoria || 'Geral'}</p>
-                </div>
-                <span class="font-semibold text-emerald-600">R$ ${servico.valor || '0'}</span>
+    // Busca os serviços cadastrados no Supabase
+    const { data, error } = await window.supabaseClient
+        .from('servicos')
+        .select('*');
+
+    if (error) {
+        console.error('Erro ao carregar serviços:', error.message);
+        container.innerHTML = `<p class="text-red-500">Erro ao carregar os serviços.</p>`;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        container.innerHTML = `<p class="text-gray-500">Nenhum serviço cadastrado até o momento.</p>`;
+        return;
+    }
+
+    // Renderiza a lista na tela
+    container.innerHTML = data.map(servico => `
+        <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex justify-between items-center mb-2">
+            <div>
+                <span class="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-800 rounded">${servico.categoria}</span>
+                <h4 class="font-bold text-gray-800 mt-1">${servico.nome}</h4>
             </div>
-        `;
-    });
+            <div class="text-right">
+                <span class="text-green-600 font-bold">R$ ${servico.preco}</span>
+            </div>
+        </div>
+    `).join('');
 }
         function renderFinanceiro() {
             const tableBody = document.getElementById('financeTableBody');
