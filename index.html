@@ -1180,38 +1180,59 @@ async function renderServicos() {
         return;
     }
 
-    // Busca os serviços cadastrados no Supabase
-    const { data, error } = await window.supabaseClient
+    // 1. Busca todas as categorias cadastradas
+    const { data: categoriasData, error: catError } = await window.supabaseClient
+        .from('categorias_servicos')
+        .select('nome')
+        .order('nome', { ascending: true });
+
+    if (catError) {
+        console.error('Erro ao carregar categorias:', catError.message);
+    }
+
+    // 2. Busca todos os serviços cadastrados
+    const { data: servicosData, error: servError } = await window.supabaseClient
         .from('servicos')
         .select('*')
         .order('categoria', { ascending: true });
 
-    if (error) {
-        console.error('Erro ao carregar serviços:', error.message);
+    if (servError) {
+        console.error('Erro ao carregar serviços:', servError.message);
         container.innerHTML = `<p class="text-red-500">Erro ao carregar os serviços.</p>`;
         return;
     }
 
-    if (!data || data.length === 0) {
-        container.innerHTML = `<p class="text-gray-500">Nenhum serviço cadastrado até o momento.</p>`;
+    // Junta todas as categorias (tanto as da tabela de categorias quanto eventuais avulsas nos serviços)
+    const categoriasSet = new Set();
+    if (categoriasData) categoriasData.forEach(c => categoriasSet.add(c.nome));
+    if (servicosData) servicosData.forEach(s => { if (s.categoria) categoriasSet.add(s.categoria); });
+
+    const listaCategorias = Array.from(categoriasSet);
+
+    if (listaCategorias.length === 0) {
+        container.innerHTML = `<p class="text-gray-500">Nenhuma categoria cadastrada até o momento.</p>`;
         return;
     }
 
     // Agrupa os serviços por categoria
-    const servicosPorCategoria = data.reduce((acc, servico) => {
-        const cat = servico.categoria || 'Geral';
-        if (!acc[cat]) {
-            acc[cat] = [];
-        }
-        acc[cat].push(servico);
-        return acc;
-    }, {});
+    const servicosPorCategoria = {};
+    listaCategorias.forEach(cat => { servicosPorCategoria[cat] = []; });
+    
+    if (servicosData) {
+        servicosData.forEach(servico => {
+            const cat = servico.categoria || 'GERAL';
+            if (!servicosPorCategoria[cat]) {
+                servicosPorCategoria[cat] = [];
+            }
+            servicosPorCategoria[cat].push(servico);
+        });
+    }
 
-    // Renderiza em blocos separados por Categoria com botões de gestão no cabeçalho
-    container.innerHTML = Object.keys(servicosPorCategoria).map(categoria => {
-        const itens = servicosPorCategoria[categoria];
+    // Renderiza os blocos de categoria (mesmo as vazias)
+    container.innerHTML = listaCategorias.map(categoria => {
+        const itens = servicosPorCategoria[categoria] || [];
         
-        const itensHTML = itens.map(servico => `
+        const itensHTML = itens.length > 0 ? itens.map(servico => `
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
                 <div>
                     <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
@@ -1232,7 +1253,7 @@ async function renderServicos() {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `).join('') : `<p class="text-gray-400 text-sm italic py-2">Nenhum serviço cadastrado nesta categoria ainda.</p>`;
 
         return `
             <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
@@ -2140,25 +2161,41 @@ async function deletarServico(id) {
                 elementoTituloHoje.innerText = `Próximas Atividades de Hoje (${dataFormatada})`;
             }
         });
-        async function editarCategoria(nomeAntigo) {
+       async function editarCategoria(nomeAntigo) {
     const novoNome = prompt(`Digite o novo nome para a categoria "${nomeAntigo}":`, nomeAntigo);
     if (!novoNome || novoNome.trim() === '' || novoNome === nomeAntigo) return;
+    const nomeNovoUpper = novoNome.toUpperCase();
 
+    // Atualiza na tabela de categorias
+    await window.supabaseClient
+        .from('categorias_servicos')
+        .update({ nome: nomeNovoUpper })
+        .eq('nome', nomeAntigo);
+
+    // Atualiza nos serviços vinculados
     const { error } = await window.supabaseClient
         .from('servicos')
-        .update({ categoria: novoNome.toUpperCase() })
+        .update({ categoria: nomeNovoUpper })
         .eq('categoria', nomeAntigo);
 
     if (error) {
         alert('Erro ao atualizar categoria: ' + error.message);
     } else {
         renderServicos();
+        if (typeof carregarCategoriasSelect === 'function') carregarCategoriasSelect();
     }
 }
 
 async function deletarCategoria(categoriaNome) {
-    if (!confirm(`Tem certeza que deseja excluir a categoria "${categoriaNome}" e TODOS os seus serviços vinculados?`)) return;
+    if (!confirm(`Tem certeza que deseja excluir a categoria "${categoriaNome}" e todos os seus serviços vinculados?`)) return;
 
+    // Deleta da tabela de categorias
+    await window.supabaseClient
+        .from('categorias_servicos')
+        .delete()
+        .eq('nome', categoriaNome);
+
+    // Deleta os serviços vinculados
     const { error } = await window.supabaseClient
         .from('servicos')
         .delete()
@@ -2168,6 +2205,7 @@ async function deletarCategoria(categoriaNome) {
         alert('Erro ao excluir categoria: ' + error.message);
     } else {
         renderServicos();
+        if (typeof carregarCategoriasSelect === 'function') carregarCategoriasSelect();
     }
 }
     </script>
