@@ -853,8 +853,12 @@ window.isConnectedToSupabase = true;
         const ano = hojeObj.getFullYear();
         const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
         const dia = String(hojeObj.getDate()).padStart(2, '0');
-        window.selectedDay = `${ano}-${mes}-${dia}`;
-        renderDashboard();
+        selectedDay = `${ano}-${mes}-${dia}`;
+        
+        if (typeof renderDashboard === 'function') {
+            renderDashboard();
+        }
+    }
     } else if (tabId === 'servicos') {
         renderServicos();
     } else if (tabId === 'agenda') {
