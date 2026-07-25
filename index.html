@@ -749,6 +749,7 @@ window.isConnectedToSupabase = true;
             renderAgenda();
             renderDrivers();
             renderFinanceiro();
+            renderServicos();
             updateDriverDropdowns();
             gerarDiasAgenda();
         }
@@ -808,6 +809,7 @@ window.isConnectedToSupabase = true;
                 renderAgenda();
                 renderDrivers();
                 renderFinanceiro();
+                renderServicos();
                 updateDriverDropdowns();
                 gerarDiasAgenda();
             } catch (err) {
@@ -848,6 +850,8 @@ window.isConnectedToSupabase = true;
                 const dia = String(hojeObj.getDate()).padStart(2, '0');
                 window.selectedDay = `${ano}-${mes}-${dia}`;
                 renderDashboard();
+                } else if (tabId === 'servicos') {
+                renderServicos();
             } else if (tabId === 'agenda') {
                 const hoje = new Date();
                 const ano = hoje.getFullYear();
@@ -1168,22 +1172,23 @@ window.isConnectedToSupabase = true;
             });
         }
 function renderServicos() {
-    const container = document.getElementById('servicosList'); // ou o ID da tabela/div onde os serviços deveriam aparecer
+    const container = document.getElementById('catalogList');
     if (!container) return;
     
-    // Supondo que você tenha um array 'servicos' carregado do banco ou localStorage:
     container.innerHTML = '';
     
-    if (!window.servicos || window.servicos.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-gray-400">Nenhum serviço cadastrado.</div>';
+    const listaServicos = window.servicos || window.dbServicos || []; 
+
+    if (listaServicos.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm">Nenhum serviço cadastrado até o momento.</p>';
         return;
     }
 
-    window.servicos.forEach(servico => {
+    listaServicos.forEach(servico => {
         container.innerHTML += `
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center mb-2">
                 <div>
-                    <h4 class="font-bold text-gray-800">${servico.nome || servico. Rota || 'Serviço'}</h4>
+                    <h4 class="font-bold text-gray-800">${servico.rota || servico.nome || 'Serviço'}</h4>
                     <p class="text-xs text-gray-500">Categoria: ${servico.categoria || 'Geral'}</p>
                 </div>
                 <span class="font-semibold text-emerald-600">R$ ${servico.valor || '0'}</span>
