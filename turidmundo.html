@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turismundo CRM | Painel Operacional Unificado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- BIBLIOTECA DO SUPABASE OFICIAL -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+    // Inicialização global do Supabase
+const supabaseUrl = 'https://xjjflsdtaruzaekadqoq.supabase.co';
+const supabaseKey = 'sb_publishable_4w28HISw0UqCywyYMbm-8w_LVHV2ltM';
+
+// Criação do cliente de forma segura
+window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+window.isConnectedToSupabase = true;
+</script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-950 pb-24 lg:pb-0 min-h-screen flex flex-col">
+
+    <!-- Header Principal -->
+    <header class="bg-blue-900 text-white p-4 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- LOGO TURISMUNDO EM VERDE ESMERALDA -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <span class="text-xl font-black tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors">
+                    Turismundo
+                </span>
+            </div>
+
+            <!-- Botão de Status do Banco de Dados (Supabase) -->
+            <button onclick="openDbSettingsModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-dashed border-blue-400 text-blue-200 hover:border-white hover:text-white" id="db-status-btn">
+                <i class="fas fa-database" id="db-icon"></i> <span id="db-status-text">Conectar Banco</span>
+            </button>
+
+            <!-- Menu Desktop -->
+            <div class="hidden md:flex space-x-6">
+                <button onclick="switchTab('dashboard')" id="nav-dash" class="text-white font-bold border-b-2 border-white pb-1 transition">Dashboard</button>
+                <button onclick="switchTab('agenda')" id="nav-agenda" class="text-blue-200 hover:text-white font-semibold transition">Agenda</button>
+                <button onclick="switchTab('motoristas')" id="nav-moto" class="text-blue-200 hover:text-white font-semibold transition">Motoristas</button>
+                <button onclick="switchTab('servicos')" id="nav-serv" class="text-blue-200 hover:text-white font-semibold transition">Serviços</button>
+                <button onclick="switchTab('financeiro')" id="nav-fin" class="text-blue-200 hover:text-white font-semibold transition">Financeiro</button>
+                <button onclick="switchTab('clientes')" id="nav-clientes" class="text-blue-200 hover:text-white font-semibold transition">Clientes</button>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="openQuickAddModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl font-bold text-sm flex items-center gap-1.5 transition">
+                    <i class="fas fa-plus"></i> <span class="hidden sm:inline">Nova Reserva</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTAINER DAS TELAS OPERACIONAIS -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
+
+        <!-- VIEW: DASHBOARD -->
+        <div id="view-dashboard" class="view-section">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- COLUNA ESQUERDA: ALERTAS & MENSAGENS RÁPIDAS -->
+                <section class="lg:col-span-1 space-y-6">
+                    
+                    <!-- Painel de Atenção / Alertas -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-exclamation-triangle text-amber-500 animate-bounce"></i> Atenção Operacional
+                            </h2>
+                            <span class="bg-red-50 text-red-600 font-bold text-[10px] px-2 py-0.5 rounded-full">2 Alertas</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <!-- Alerta de Voo -->
+                            <div class="p-3 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-3">
+                                <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-sm"></i></span>
+                                <div>
+                                    <p class="text-xs font-bold text-gray-900 leading-tight">Voo TK15 Atrasado</p>
+                                    <p class="text-[11px] text-gray-600 mt-0.5">Pouso estimado para 16:05 (Atraso de 45 min).</p>
+                                    <button onclick="sendQuickWhatsApp('5511977777777', 'Paulo (Spin)', 'TK15', '16:05')" class="text-[10px] text-blue-900 font-bold hover:underline mt-1.5 block">
+                                        <i class="fab fa-whatsapp"></i> Avisar Motorista Paulo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Alerta de Pagamento -->
+                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-3">
+                                <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-sm"></i></span>
+                                <div>
+                                    <p class="text-xs font-bold text-gray-900 leading-tight">Pagamento Pendente</p>
+                                    <p class="text-[11px] text-gray-600 mt-0.5">Cliente Carlos Gomez ainda não efetuou o pagamento parcial.</p>
+                                    <button onclick="sendPaymentCobranca('5531955555555', 'Carlos Gomez', '150 USD')" class="text-[10px] text-amber-700 font-bold hover:underline mt-1.5 block">
+                                        <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disparo de Mensagens Rápidas -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                            <i class="fas fa-comment-alt text-blue-900"></i> Central de Mensagens Rápidas
+                        </h3>
+                        <div class="space-y-2">
+                            <button onclick="openMessageTemplate('welcome')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                                <span>👋 Boas-vindas Buenos Aires</span>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button onclick="openMessageTemplate('driver')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                                <span>🚐 Enviar Dados do Motorista</span>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                            <button onclick="openMessageTemplate('checkout')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                                <span>🛫 Instruções de Retorno (Out)</span>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- COLUNA CENTRAL E DIREITA: MÉTRICAS & OPERAÇÃO -->
+                <section class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Cards de Indicadores -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Chegadas Hoje</p>
+                            <p class="text-2xl font-black text-blue-900" id="dash-chegadas-hoje">0</p>
+                            <span class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-circle text-[6px] mr-1"></i>Conectado</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Passeios Hoje</p>
+                            <p class="text-2xl font-black text-orange-600" id="dash-passeios-hoje">0</p>
+                            <span class="text-[10px] text-gray-400">Operando</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Mês</p>
+                            <p class="text-2xl font-black text-emerald-600" id="dash-faturamento">$ 0</p>
+                            <span class="text-[10px] text-emerald-600 font-bold">USD</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Motoristas Parceiros</p>
+                            <p class="text-2xl font-black text-gray-900" id="dash-drivers-count">0</p>
+                            <span class="text-[10px] text-blue-700 font-semibold">Ativos</span>
+                        </div>
+                    </div>
+
+                    <!-- Rastreador de Voo Rápido -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                            <i class="fas fa-radar text-blue-900 animate-pulse"></i> Painel de Rastreamento de Voos (Ezeiza / AEP)
+                        </h3>
+                        
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="flightInput" placeholder="Ex: TK15 ou G3 7680" class="flex-1 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition uppercase">
+                            <button onclick="simulateFlightSearch()" class="px-5 bg-blue-900 hover:bg-blue-800 text-white rounded-xl text-sm font-bold transition">
+                                Buscar Voo
+                            </button>
+                        </div>
+
+                        <!-- Resultado Simulado -->
+                        <div id="flightResult" class="hidden p-4 rounded-xl border border-blue-100 bg-blue-50/20 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-blue-900 text-sm" id="resFlightCode">TK15</span>
+                                <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="resFlightStatus">ATRASADO</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">Turkish Airlines</span></p>
+                                <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800">15:20</span></p>
+                                <p class="text-gray-600">Estimado: <span class="font-bold text-red-600" id="resFlightEstimated">16:05 (+45 min)</span></p>
+                                <p class="text-gray-600">Origem: <span class="font-bold text-gray-800">São Paulo (GRU)</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visão Geral Operacional (Resumo do Dia) -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-route text-blue-900"></i> <span id="tituloAtividadesHoje">Próximas Atividades de Hoje</span>
+                            </h3>
+                            <button onclick="switchTab('agenda')" class="text-xs text-blue-900 font-bold hover:underline">Ver agenda completa</button>
+                        </div>
+
+                        <div class="space-y-3" id="dashActivitiesContainer">
+                            <!-- Gerado dinamicamente -->
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+
+        <!-- VIEW: AGENDA -->
+        <div id="view-agenda" class="view-section hidden space-y-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Selecione o Dia</span>
+                    <span class="text-sm font-semibold text-blue-900" id="labelMesAnoAgenda">Julho 2026</span>
+                </div>
+                
+                <!-- Carrossel de Dias Horizontal Dinâmico -->
+                <div id="containerDiasAgenda" class="flex gap-2 overflow-x-auto pb-2 justify-between">
+                    <!-- Gerado via JavaScript -->
+                </div>
+            </div>
+            <!-- Filtros Rápidos -->
+            <div class="flex gap-2">
+                <button onclick="filterCategory('todos')" id="btn-filter-todos" class="filter-btn px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold transition shadow-sm">
+                    Todos (<span id="count-todos">0</span>)
+                </button>
+                <button onclick="filterCategory('transfer')" id="btn-filter-transfer" class="filter-btn px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 text-xs font-bold transition hover:bg-gray-50">
+                    🚐 Transfers (<span id="count-transfers">0</span>)
+                </button>
+                <button onclick="filterCategory('passeio')" id="btn-filter-passeio" class="filter-btn px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 text-xs font-bold transition hover:bg-gray-50">
+                    📸 Passeios (<span id="count-passeios">0</span>)
+                </button>
+            </div>
+
+            <!-- Linha do Tempo -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider" id="tituloDiaSelecionado">Agenda: Terça-feira, 14 de Julho</h3>
+                    <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded-full flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Atualizado agora
+                    </span>
+                </div>
+
+                <div id="timelineContainer" class="space-y-4 relative border-l-2 border-gray-200 pl-4 ml-3">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: MOTORISTAS -->
+        <div id="view-motoristas" class="view-section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- FORMULÁRIO DE CADASTRO -->
+                <section class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-base font-bold text-blue-900 flex items-center gap-2">
+                            <i class="fas fa-user-plus text-blue-600"></i> Cadastrar Motorista
+                        </h2>
+                        <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-semibold">Novo Parceiro</span>
+                    </div>
+
+                    <form id="driverForm" onsubmit="addDriver(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Completo</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" id="driverName" required placeholder="Ex: Paulo Souza" 
+                                    class="w-full pl-10 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">WhatsApp</label>
+                                <input type="tel" id="driverPhone" required placeholder="Ex: 55119999999" 
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Veículo / Modelo</label>
+                                <input type="text" id="driverVehicle" required placeholder="Ex: Chevrolet Spin" 
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Placa</label>
+                                <input type="text" id="driverPlate" required placeholder="Ex: PNG-8D43" 
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Capacidade (Pax)</label>
+                                <input type="number" id="driverCapacity" required min="1" value="4" 
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Valor Combinado</label>
+                                <input type="number" id="driverValue" required placeholder="Ex: 80" 
+                                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Moeda</label>
+                                <select id="driverCurrency" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="BRL">BRL (R$)</option>
+                                    <option value="ARS">ARS ($)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Chave Pix / Alias</label>
+                            <input type="text" id="driverPix" required placeholder="Alias bancário ou chave Pix" 
+                                class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 text-sm mt-2">
+                            <i class="fas fa-plus-circle"></i> Cadastrar e Ativar
+                        </button>
+                    </form>
+                </section>
+
+                <!-- LISTA DE MOTORISTAS -->
+                <section class="lg:col-span-2 space-y-4">
+                    
+                    <!-- Barra de Busca e Filtros -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-3 justify-between items-center">
+                        <div class="relative w-full md:w-72">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" id="searchInput" oninput="filterDrivers()" placeholder="Buscar motorista ou veículo..." 
+                                class="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                        </div>
+                        
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 w-full md:w-auto justify-center">
+                                <i class="fas fa-users"></i> <span id="activeCount">0</span> Ativos
+                            </span>
+                            <span class="text-xs bg-blue-50 text-blue-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 w-full md:w-auto justify-center">
+                                <i class="fas fa-car"></i> <span id="totalTripsCount">0</span> Viagens total
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Container Dinâmico -->
+                    <div id="driversList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Injetado por JS -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div id="view-servicos" class="view-section hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-blue-900 mb-6">Cadastrar novo serviço</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <!-- Cadastro de Categoria -->
+                    <div class="p-4 bg-gray-50 rounded-xl border">
+                        <h3 class="font-bold text-sm mb-3">1. Criar Categoria (ex: Translado)</h3>
+                        <input type="text" id="catName" placeholder="Nome da Categoria" class="w-full p-2 rounded-lg border mb-2">
+                        <button onclick="addCategoria()" class="w-full py-2 bg-blue-900 text-white rounded-lg text-sm font-bold">Criar Categoria</button>
+                    </div>
+                    
+                    <!-- Cadastro de Item -->
+                    <div class="p-4 bg-gray-50 rounded-xl border">
+                        <h3 class="font-bold text-sm mb-3">2. Adicionar Rota e Preço</h3>
+                        <select id="catSelect" class="w-full p-2 rounded-lg border mb-2">
+                            <option>Selecione uma categoria...</option>
+                        </select>
+                        <input type="text" id="nomeItemInput" placeholder="Rota (ex: Centro x Aeroparque)" class="w-full p-2 rounded-lg border mb-2">
+                        <input type="number" id="precoInput" placeholder="Valor (R$)" class="w-full p-2 rounded-lg border mb-2">
+                        <button onclick="addItem()" class="w-full py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold">Adicionar Serviço</button>
+                    </div>
+                </div>
+
+                <div id="catalogList" class="space-y-4">
+                    <!-- A lista organizada aparecerá aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: FINANCEIRO -->
+        <div id="view-financeiro" class="view-section hidden space-y-6">
+            <!-- Cards de Métricas Financeiras -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Bruto</p>
+                    <p class="text-2xl font-black text-blue-900" id="fin-faturamento">$ 0</p>
+                    <span class="text-[10px] text-emerald-600 font-semibold"><i class="fas fa-arrow-trend-up"></i> Entradas Clientes</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Repasses Motoristas</p>
+                    <p class="text-2xl font-black text-red-600" id="fin-repasses">$ 0</p>
+                    <span class="text-[10px] text-red-600 font-semibold"><i class="fas fa-arrow-trend-down"></i> Custos do Serviço</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Lucro Operacional</p>
+                    <p class="text-2xl font-black text-emerald-600" id="fin-lucro">$ 0</p>
+                    <span class="text-[10px] text-gray-400 font-medium">Margem Líquida</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Pendente Cobrança</p>
+                    <p class="text-2xl font-black text-amber-600" id="fin-pendente">$ 0</p>
+                    <span class="text-[10px] text-amber-600 font-semibold">A Receber</span>
+                </div>
+            </div>
+
+            <!-- Tabela de Controle Financeiro de Lançamentos -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-cash-register text-blue-900"></i> Fluxo de Caixa Operacional (Histórico Geral)
+                    </h3>
+                    <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-bold">Consolidado em USD</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase bg-gray-50">
+                                <th class="p-4">Cliente / Serviço</th>
+                                <th class="p-4">Motorista Escalado</th>
+                                <th class="p-4 text-right">Valor cobrado</th>
+                                <th class="p-4 text-right">Repasse Mot.</th>
+                                <th class="p-4 text-right">Lucro líq.</th>
+                                <th class="p-4 text-center">Status Cliente</th>
+                                <th class="p-4 text-center">Repasse Motorista</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeTableBody" class="divide-y divide-gray-100 text-xs text-gray-700">
+                            <!-- Gerado dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOVA ABA CLIENTES -->
+        <div id="view-clientes" class="view-section hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <h2 class="text-xl font-bold text-blue-900">Banco de Inteligência de Clientes</h2>
+                
+                <!-- BARRA DE PESQUISA EM TEMPO REAL -->
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="searchClientInput" oninput="filtrarClientesTempoReal()" placeholder="Pesquisar cliente por nome..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
+                </div>
+
+                <div id="clientesList" class="flex flex-col gap-3">
+                    <!-- Os clientes aparecerão aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Edição de Cliente -->
+        <div id="modalBioCliente" class="fixed inset-0 bg-gray-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl">
+                <h3 class="text-lg font-bold text-blue-900 mb-4" id="modalNomeCliente">Biografia do Cliente</h3>
+                <div class="space-y-4">
+                    <input type="hidden" id="modalIdCliente">
+                    <textarea id="modalBioInput" rows="4" placeholder="Escreva aqui sobre os interesses, gostos e histórico do cliente..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm"></textarea>
+                    <input type="text" id="modalTagsInput" placeholder="Tags (Ex: #vinho #familia)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm">
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button onclick="fecharModalBio()" class="flex-1 py-2 bg-gray-100 rounded-xl font-bold text-sm">Cancelar</button>
+                    <button onclick="salvarBio()" class="flex-1 py-2 bg-blue-900 text-white rounded-xl font-bold text-sm">Salvar Inteligência</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAIS GLOBAIS -->
+
+    <!-- Modal: Configuração de Conexão com Banco de Dados (Supabase) -->
+    <div id="dbSettingsModal" class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                <h3 class="font-bold text-gray-900 text-lg flex items-center gap-2">
+                    <i class="fas fa-plug text-blue-900"></i> Conexão Supabase
+                </h3>
+                <button onclick="closeDbSettingsModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3">
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    Insira abaixo os dados de conexão da API do seu projeto Supabase para sincronizar a interface com as tabelas reais do banco de dados na nuvem.
+                </p>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Project URL</label>
+                    <input type="text" id="dbUrlInput" placeholder="Ex: https://xxxx.supabase.co" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">API Anon / Public Key</label>
+                    <textarea id="dbKeyInput" rows="3" placeholder="Insira a chave pública gigante (anon key)" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none"></textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="clearDbConfig()" class="py-3 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-200 transition">
+                    Desconectar
+                </button>
+                <button onclick="saveDbConfig()" class="py-3 bg-blue-900 text-white font-bold text-xs rounded-xl hover:bg-blue-800 transition">
+                    Testar e Conectar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Mensagens Rápidas do WhatsApp -->
+    <div id="messageModal" class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                <h3 class="font-bold text-gray-900 text-base" id="modalTemplateTitle">Template de Mensagem</h3>
+                <button onclick="closeMessageTemplate()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Destinatário (WhatsApp)</label>
+                    <input type="text" id="tempWhatsApp" placeholder="Ex: 5511999999999" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nome do Cliente</label>
+                    <input type="text" id="tempClient" placeholder="Ex: Marcos" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Visualização da Mensagem</label>
+                    <textarea id="tempBody" rows="6" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono text-gray-750 focus:outline-none focus:bg-white leading-relaxed"></textarea>
+                </div>
+            </div>
+
+            <button onclick="triggerWhatsAppRedirect()" class="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition shadow-md flex items-center justify-center gap-2 text-sm">
+                <i class="fab fa-whatsapp"></i> Abrir WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Adicionar Reserva Rápido -->
+    <div id="quickModal" class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200">
+        <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                <h3 class="font-bold text-gray-900 text-lg">Agendamento Rápido</h3>
+                <button onclick="closeQuickAddModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            
+           <form onsubmit="saveQuickReserva(event)" class="space-y-4">
+    
+    <!-- Linha 1: Cliente e WhatsApp -->
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Cliente</label>
+            <input type="text" id="modalClient" required placeholder="Ex: Lucas Ramos" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">WhatsApp</label>
+            <input type="tel" id="modalPhone" required placeholder="Ex: 5511..." class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+    </div>
+
+    <!-- Linha 2: Data e Hora -->
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data</label>
+            <input type="date" id="modalDate" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Hora</label>
+            <input type="time" id="modalTime" required value="12:00" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+    </div>
+
+    <!-- Linha 3: Categoria e Serviço -->
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Categoria</label>
+            <select id="catSelectReserva" onchange="filtrarServicosPorCategoria()" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                <option value="">Selecione...</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Serviço</label>
+            <select id="servicoSelectReserva" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                <option value="">Selecione primeiro a categoria...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Linha 4: Motorista e Voo -->
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Motorista</label>
+            <select id="modalDriverSelect" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"></select>
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Voo (Opcional)</label>
+            <input type="text" id="modalFlight" placeholder="Ex: AR1250" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+    </div>
+
+    <!-- Linha 5: Cobrança e Repasse -->
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Cobrança Cliente ($)</label>
+            <input type="number" id="modalValueTotal" required class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Custo Repasse ($)</label>
+            <input type="number" id="modalValueDriver" required class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+        </div>
+    </div>
+
+    <!-- Linha 6: Descrição -->
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Descrição / Detalhe</label>
+        <textarea id="modalDesc" rows="2" placeholder="Ex: Aeroparque -> Hotel NH..." class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"></textarea>
+    </div>
+
+    <button type="submit" class="w-full py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md">
+        Confirmar e Agendar
+    </button>
+</form>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmação Customizada -->
+    <div id="confirmModal" class="fixed inset-0 bg-gray-950/75 backdrop-blur-sm z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition duration-150">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 text-lg" id="confirmTitle">Confirmar Ação</h3>
+                <p class="text-xs text-gray-600 leading-relaxed" id="confirmText">Você tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeConfirmModal(false)" class="py-2.5 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-200 transition">Cancelar</button>
+                <button onclick="closeConfirmModal(true)" class="py-2.5 bg-red-600 text-white font-semibold text-xs rounded-xl hover:bg-red-700 transition" id="confirmConfirmBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notificação Geral -->
+   <div id="toast" class="fixed bottom-24 lg:bottom-6 right-6 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+    <i class="fas fa-check-circle text-emerald-400" id="toast-icon"></i>
+    <span id="toastMessage">Ação realizada!</span>
+</div>
+
+    <!-- Navegação Mobile Inferior -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 shadow-lg z-30">
+        <button onclick="switchTab('dashboard')" id="mobile-nav-dash" class="text-blue-900 py-1 flex flex-col items-center"><i class="fas fa-home text-lg"></i><span class="text-[10px] mt-0.5 font-bold">Início</span></button>
+        <button onclick="switchTab('agenda')" id="mobile-nav-agenda" class="text-gray-400 py-1 flex flex-col items-center"><i class="fas fa-calendar-alt text-lg"></i><span class="text-[10px] mt-0.5">Agenda</span></button>
+        <button onclick="switchTab('motoristas')" id="mobile-nav-moto" class="text-gray-400 py-1 flex flex-col items-center"><i class="fas fa-users text-lg"></i><span class="text-[10px] mt-0.5">Motoristas</span></button>
+        <button onclick="switchTab('financeiro')" id="mobile-nav-fin" class="text-gray-400 py-1 flex flex-col items-center"><i class="fas fa-wallet text-lg"></i><span class="text-[10px] mt-0.5">Financeiro</span></button>
+    </nav>
+
+    <!-- LÓGICA DO CRM UNIFICADO COM SUPABASE -->
+    <script>
+        let mockAgenda = [
+            { id: '1', dia: 13, hora: "08:15", tipo: "transfer", cliente: "Marcos Vinicius", pax: "3 pax", localizacao: "Ezeiza (EZE) ✈ Hotel Savoy", motorista: "Paulo Souza", status: "concluido", voo: "G3 7680", statusVoo: "Finalizado", telefone: "551199999999", valorCliente: 120, valorMotorista: 80, pagoCliente: true, pagoMotorista: true },
+            { id: '2', dia: 13, hora: "14:00", tipo: "passeio", cliente: "Família Barbosa", pax: "6 pax", localizacao: "Delta do Tigre (Passeio Barco)", motorista: "Carlos Gomez", status: "concluido", voo: "", statusVoo: "", telefone: "5521988888888", valorCliente: 250, valorMotorista: 150, pagoCliente: true, pagoMotorista: true },
+            { id: '3', dia: 14, hora: "08:00", tipo: "transfer", cliente: "João Silva", pax: "2 pax", localizacao: "Ezeiza (EZE) ✈ Hilton Puerto Madero", motorista: "Paulo Souza", status: "concluido", voo: "TK15", statusVoo: "Pousado", telefone: "5511977777777", valorCliente: 130, valorMotorista: 80, pagoCliente: true, pagoMotorista: false },
+            { id: '4', dia: 14, hora: "10:30", tipo: "passeio", cliente: "Maria Souza", pax: "4 pax", localizacao: "City Tour Clássico Buenos Aires", motorista: "Jorge Martinez", status: "em-andamento", voo: "", statusVoo: "", telefone: "5511966666666", valorCliente: 180, valorMotorista: 100, pagoCliente: false, pagoMotorista: false },
+            { id: '5', dia: 14, hora: "15:20", tipo: "transfer", cliente: "Carlos Gomez", pax: "1 pax", localizacao: "Aeroparque (AEP) ✈ Hotel NH City", motorista: "Paulo Souza", status: "atrasado", voo: "AR1250", statusVoo: "+45 min Atrasado", telefone: "5531955555555", valorCliente: 110, valorMotorista: 80, pagoCliente: false, pagoMotorista: false },
+            { id: '6', dia: 14, hora: "19:00", tipo: "transfer", cliente: "Ana Lima", pax: "2 pax", localizacao: "Faena Hotel ✈ Ezeiza (EZE)", motorista: "Jorge Martinez", status: "confirmado", voo: "LA2415", statusVoo: "Programado", telefone: "5521944444444", valorCliente: 140, valorMotorista: 80, pagoCliente: false, pagoMotorista: false }
+        ];
+
+        let mockDrivers = [
+            { id: 'd1111111-1111-1111-1111-111111111111', nome: "Paulo Souza", telefone: "5511999999999", veiculo: "Chevrolet Spin", placa: "PNG-8D43", pix: "paulo.transfers@gmail.com", valor: "80", moeda: "USD", capacidade: "6", avaliacao: 5, corridas: 142 },
+            { id: 'd2222222-2222-2222-2222-222222222222', nome: "Jorge Martinez", telefone: "5491133334444", veiculo: "Toyota Corolla", placa: "AE-234-OP", pix: "jorge.mercado.pago", valor: "50", moeda: "USD", capacidade: "4", avaliacao: 4, corridas: 98 },
+            { id: 'd3333333-3333-3333-3333-333333333333', nome: "Carlos Gomez", telefone: "5491155556666", veiculo: "Mercedes Sprinter", placa: "AD-987-ZZ", pix: "carlos.sprinter.pix", valor: "150", moeda: "USD", capacidade: "15", avaliacao: 5, corridas: 210 }
+        ];
+
+        let databaseAgenda = [...mockAgenda];
+        let drivers = [...mockDrivers];
+
+        let selectedDay = new Date().toISOString().split('T')[0];
+        let selectedCategory = 'todos';
+        let confirmPromiseResolver = null;
+        
+        window.supabaseClient = window.supabaseClient || null;
+        let isConnectedToSupabase = false;
+
+        async function initSupabase() {
+            const savedUrl = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
+            const savedKey = localStorage.getItem('supabase_key') || 'sb_publishable_4w28HiSW0UqCywyYMbm-8w_LVHV2ltM';
+
+            const statusBtn = document.getElementById('db-status-btn');
+            const statusText = document.getElementById('db-status-text');
+            const dbIcon = document.getElementById('db-icon');
+
+            if (savedUrl && savedKey) {
+                try {
+                    window.supabaseClient = supabase.createClient(savedUrl, savedKey);
+                    
+                    const { error } = await window.supabaseClient
+                        .from('motoristas')
+                        .select('*')
+                        .limit(1);
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    window.isConnectedToSupabase = true;
+
+                    if (statusBtn) {
+                        statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-emerald-500/30 bg-emerald-500/10 text-emerald-600";
+                        statusText.innerText = "Supabase Conectado";
+                        dbIcon.className = "fas fa-cloud text-emerald-500 animate-pulse";
+                    }
+                    loadRealData();
+                } catch (e) {
+                    console.error("Falha ao inicializar ou conectar ao cliente Supabase", e);
+                    window.isConnectedToSupabase = false;
+                    switchToSimulationMode();
+                }
+            } else {
+                switchToSimulationMode();
+            }
+        }
+
+        function switchToSimulationMode() {
+            window.isConnectedToSupabase = false;
+            const statusBtn = document.getElementById('db-status-btn');
+            const statusText = document.getElementById('db-status-text');
+            const dbIcon = document.getElementById('db-icon');
+            if (statusBtn) {
+                statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-dashed border-blue-400 text-blue-200 hover:border-white hover:text-white";
+                statusText.innerText = "Modo Simulação";
+                dbIcon.className = "fas fa-database text-blue-200";
+            }
+            renderDashboard();
+            renderAgenda();
+            renderDrivers();
+            renderFinanceiro();
+            updateDriverDropdowns();
+            gerarDiasAgenda();
+        }
+
+        async function loadRealData() {
+            if (!window.isConnectedToSupabase || !window.supabaseClient) return;
+
+            try {
+                let { data: dbDrivers, error: driverErr } = await window.supabaseClient.from('motoristas').select('*');
+                if (driverErr) throw driverErr;
+
+                if (dbDrivers) {
+                    drivers = dbDrivers.map(d => ({
+                        id: d.id,
+                        nome: d.nome,
+                        telefone: d.telefone,
+                        veiculo: d.veiculo,
+                        placa: d.placa,
+                        pix: d.pix,
+                        valor: d.valor_combinado,
+                        moeda: d.moeda,
+                        capacidade: d.capacidade,
+                        avaliacao: d.avaliacao,
+                        corridas: d.corridas
+                    }));
+                }
+
+                let { data: dbReservas, error: resErr } = await window.supabaseClient.from('reservas').select('*, clientes(nome, whatsapp), motoristas(nome, valor_combinado)');
+                if (resErr) throw resErr;
+
+                if (dbReservas) {
+                    databaseAgenda = dbReservas.map(r => {
+                        const valMotorista = r.valor_repasse_motorista || (r.motoristas ? r.motoristas.valor_combinado : 0);
+                        return {
+                            id: r.id,
+                            dia: r.dia,
+                            hora: r.hora,
+                            tipo: r.tipo,
+                            cliente: r.clientes ? r.clientes.nome : 'Cliente Desconhecido',
+                            pax: r.pax,
+                            localizacao: r.localizacao,
+                            motorista: r.motoristas ? r.motoristas.nome : 'Sem Motorista',
+                            status: r.status,
+                            voo: r.voo,
+                            statusVoo: r.status_voo,
+                            telefone: r.clientes ? r.clientes.whatsapp : '',
+                            valorCliente: r.valor_total || 120,
+                            valorMotorista: valMotorista || 80,
+                            pagoCliente: r.pago_cliente || false,
+                            pagoMotorista: r.pago_motorista || false
+                        };
+                    });
+                }
+
+                showToast("Dados sincronizados com o Supabase!");
+                renderDashboard();
+                renderAgenda();
+                renderDrivers();
+                renderFinanceiro();
+                updateDriverDropdowns();
+                gerarDiasAgenda();
+            } catch (err) {
+                console.error("Erro ao puxar dados do Supabase: ", err);
+                showToast("Erro de sincronização. Voltando ao modo local.");
+                switchToSimulationMode();
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            const element = document.getElementById('view-' + tabId);
+            if (element) {
+                element.classList.remove('hidden');
+            }
+
+            const navDash = document.getElementById('nav-dash');
+            const navAgenda = document.getElementById('nav-agenda');
+            const navMoto = document.getElementById('nav-moto');
+            const navFin = document.getElementById('nav-fin');
+            const navServ = document.getElementById('nav-serv');
+            const navClientes = document.getElementById('nav-clientes');
+
+            if (navDash) navDash.className = tabId === 'dashboard' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+            if (navAgenda) navAgenda.className = tabId === 'agenda' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+            if (navMoto) navMoto.className = tabId === 'motoristas' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+            if (navServ) navServ.className = tabId === 'servicos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+            if (navFin) navFin.className = tabId === 'financeiro' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+            if (navClientes) navClientes.className = tabId === 'clientes' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition";
+
+            if (tabId === 'dashboard') {
+                const hojeObj = new Date();
+                const ano = hojeObj.getFullYear();
+                const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
+                const dia = String(hojeObj.getDate()).padStart(2, '0');
+                window.selectedDay = `${ano}-${mes}-${dia}`;
+                renderDashboard();
+            } else if (tabId === 'agenda') {
+                const hoje = new Date();
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                selectDay(`${ano}-${mes}-${dia}`);
+            } else if (tabId === 'motoristas') {
+                renderDrivers();
+            } else if (tabId === 'financeiro') {
+                renderFinanceiro();
+            } else if (tabId === 'clientes') {
+                renderClientes();
+            }
+        }
+
+        function renderDashboard() {
+            const hoje = databaseAgenda.filter(item => {
+                const itemDia = String(item.dia || '').trim();
+                return itemDia === String(selectedDay) || itemDia === String(new Date(selectedDay).getDate());
+            });
+            
+            const dashChegadas = document.getElementById('dash-chegadas-hoje');
+            const dashPasseios = document.getElementById('dash-passeios-hoje');
+            const dashDrivers = document.getElementById('dash-drivers-count');
+            const dashFaturamento = document.getElementById('dash-faturamento');
+
+            if (dashChegadas) dashChegadas.innerText = hoje.filter(item => item.tipo === 'transfer').length;
+            if (dashPasseios) dashPasseios.innerText = hoje.filter(item => item.tipo === 'passeio').length;
+            if (dashDrivers) dashDrivers.innerText = drivers.length;
+
+            const faturamentoTotal = databaseAgenda.reduce((sum, item) => sum + (Number(item.valorCliente) || 0), 0);
+            if (dashFaturamento) dashFaturamento.innerText = `$ ${faturamentoTotal.toLocaleString()}`;
+
+            const container = document.getElementById('dashActivitiesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (hoje.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 py-3 text-center">Nenhuma atividade para esta data.</p>`;
+                return;
+            }
+
+            hoje.forEach(item => {
+                let badge = '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+                if (item.status === 'concluido') badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+
+                container.innerHTML += `
+                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between text-xs">
+                        <div>
+                            <p class="font-bold text-gray-900">${item.hora || '--:--'} - ${item.cliente || 'Cliente'}</p>
+                            <p class="text-[11px] text-gray-600">${item.localizacao || ''}</p>
+                        </div>
+                        ${badge}
+                    </div>
+                `;
+            });
+        }
+
+        async function renderAgenda() {
+            const container = document.getElementById('timelineContainer');
+            if (!container) return;
+            container.innerHTML = '<div class="text-center py-8 text-gray-500">Carregando agenda...</div>';
+
+            try {
+                let list = [];
+                if (window.isConnectedToSupabase && window.supabaseClient) {
+                    let { data, error } = await window.supabaseClient.from('reservas').select('*');
+                    if (error) throw error;
+                    list = data || [];
+                } else {
+                    list = [...databaseAgenda];
+                }
+
+                list = list.filter(item => {
+                    const dataItem = String(item.dia || item.date || item.data || '').trim();
+                    return dataItem === String(selectedDay);
+                });
+
+                if (selectedCategory && selectedCategory !== 'todos') {
+                    list = list.filter(item => (item.tipo || item.category) === selectedCategory);
+                }
+
+                list.sort((a, b) => String(a.hora || '').localeCompare(String(b.hora || '')));
+
+                const countTodos = document.getElementById('count-todos');
+                const countTransfers = document.getElementById('count-transfers');
+                const countPasseios = document.getElementById('count-passeios');
+
+                if (countTodos) countTodos.innerText = list.length;
+                if (countTransfers) countTransfers.innerText = list.filter(i => (i.tipo || i.category) === 'transfer').length;
+                if (countPasseios) countPasseios.innerText = list.filter(i => (i.tipo || i.category) === 'passeio').length;
+
+                if (list.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este dia (${selectedDay}).</p>
+                            <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(item => {
+                    let statusBadge = '<span class="bg-gray-50 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>';
+                    let borderStatusColor = 'border-l-4 border-gray-300';
+
+                    const status = String(item.status || '').toLowerCase();
+                    if (status.includes('concluido')) {
+                        statusBadge = '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Concluído</span>';
+                        borderStatusColor = 'border-l-4 border-emerald-500';
+                    } else if (status.includes('andamento')) {
+                        statusBadge = '<span class="bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Em Andamento</span>';
+                        borderStatusColor = 'border-l-4 border-sky-500';
+                    } else if (status.includes('atrasado')) {
+                        statusBadge = '<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>';
+                        borderStatusColor = 'border-l-4 border-red-500';
+                    } else if (status.includes('confirmado')) {
+                        statusBadge = '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+                        borderStatusColor = 'border-l-4 border-blue-900';
+                    }
+
+                    return `
+                        <div class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3">
+                            <div class="flex items-start gap-3">
+                                <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
+                                    <span class="block text-sm font-black text-gray-900">${item.hora || '--:--'}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || 'Serviço'}</span>
+                                </div>
+                                <div class="space-y-1 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="font-extrabold text-gray-800 text-sm leading-none">${item.cliente || item.nome || 'Cliente'}</h4>
+                                        ${statusBadge}
+                                    </div>
+                                    <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
+                                        <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || 'Local não informado'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+
+            } catch (err) {
+                console.error("Erro ao renderizar agenda:", err);
+                container.innerHTML = '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
+            }
+        }
+
+        function renderDrivers(dataToRender = drivers) {
+            const container = document.getElementById('driversList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            dataToRender.forEach(driver => {
+                let stars = '';
+                for (let i = 0; i < 5; i++) {
+                    stars += `<i class="fas fa-star ${i < driver.avaliacao ? 'text-amber-400' : 'text-gray-200'} text-xs"></i>`;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
+                                        ${driver.nome.charAt(0)}${driver.nome.split(' ')[1] ? driver.nome.split(' ')[1].charAt(0) : ''}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
+                                        <div class="flex gap-1 mt-1">${stars}</div>
+                                    </div>
+                                </div>
+                                <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+
+                            <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
+                                <p class="flex justify-between">
+                                    <span class="font-medium">🚗 Veículo:</span> 
+                                    <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
+                                </p>
+                                <p class="flex justify-between">
+                                    <span class="font-medium">🔢 Placa:</span> 
+                                    <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
+                                </p>
+                                <p class="flex justify-between">
+                                    <span class="font-medium">👥 Cap. Max:</span> 
+                                    <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
+                                </p>
+                            </div>
+
+                            <div class="space-y-1 text-xs mb-4">
+                                <p class="flex justify-between items-center">
+                                    <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
+                                    <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
+                                </p>
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
+                                        <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
+                                            <i class="fas fa-copy text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100">
+                            <a href="https://wa.me/${driver.telefone}" target="_blank" 
+                                class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1.5">
+                                <i class="fab fa-whatsapp text-sm"></i> Chamar
+                            </a>
+                            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1.5">
+                                <i class="fas fa-route text-blue-500"></i> ${driver.corridas} viagens
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const activeCountEl = document.getElementById('activeCount');
+            const totalTripsEl = document.getElementById('totalTripsCount');
+
+            if (activeCountEl) activeCountEl.innerText = drivers.length;
+            if (totalTripsEl) {
+                const totalTrips = drivers.reduce((sum, d) => sum + Number(d.corridas), 0);
+                totalTripsEl.innerText = totalTrips;
+            }
+        }
+
+        async function addDriver(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('driverName').value;
+            const phone = document.getElementById('driverPhone').value;
+            const vehicle = document.getElementById('driverVehicle').value;
+            const plate = document.getElementById('driverPlate').value.toUpperCase();
+            const pix = document.getElementById('driverPix').value;
+            const value = document.getElementById('driverValue').value;
+            const currency = document.getElementById('driverCurrency').value;
+            const capacity = document.getElementById('driverCapacity').value;
+
+            if (window.isConnectedToSupabase && window.supabaseClient) {
+                try {
+                    const { error } = await window.supabaseClient.from('motoristas').insert([{
+                        nome: name,
+                        telefone: phone,
+                        veiculo: vehicle,
+                        placa: plate,
+                        pix: pix,
+                        valor_combinado: parseFloat(value),
+                        moeda: currency,
+                        capacidade: parseInt(capacity)
+                    }]);
+
+                    if (error) throw error;
+                    showToast("Motorista cadastrado no Supabase!");
+                    loadRealData();
+                } catch (err) {
+                    console.error(err);
+                    showToast("Erro ao salvar motorista no banco.");
+                }
+            } else {
+                const newDriver = {
+                    id: String(Date.now()),
+                    nome: name,
+                    telefone: phone,
+                    veiculo: vehicle,
+                    placa: plate,
+                    pix: pix,
+                    valor: value,
+                    moeda: currency,
+                    capacidade: capacity,
+                    avaliacao: 5,
+                    corridas: 0
+                };
+                drivers.unshift(newDriver);
+                renderDrivers();
+                showToast("Motorista ativado na simulação!");
+            }
+            
+            document.getElementById('driverForm').reset();
+            document.getElementById('driverCapacity').value = "4";
+        }
+
+        async function deleteDriver(id) {
+            const confirmed = await openConfirmModal(
+                "Remover Motorista", 
+                "Tem certeza de que deseja remover este motorista? Essa operação é permanente."
+            );
+
+            if (confirmed) {
+                if (window.isConnectedToSupabase && window.supabaseClient) {
+                    try {
+                        const { error } = await window.supabaseClient.from('motoristas').delete().eq('id', id);
+                        if (error) throw error;
+                        showToast("Motorista removido do Supabase!");
+                        loadRealData();
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Erro ao remover motorista.");
+                    }
+                } else {
+                    drivers = drivers.filter(d => String(d.id) !== String(id));
+                    renderDrivers();
+                    showToast("Motorista removido.");
+                }
+            }
+        }
+
+        function updateDriverDropdowns() {
+            const select = document.getElementById('modalDriverSelect');
+            if (!select) return;
+            select.innerHTML = '';
+
+            drivers.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo})</option>`;
+            });
+        }
+
+        function renderFinanceiro() {
+            const tableBody = document.getElementById('financeTableBody');
+            if(!tableBody) return;
+            tableBody.innerHTML = '';
+
+            let totalFaturamento = 0;
+            let totalRepasses = 0;
+            let totalLucro = 0;
+            let totalPendente = 0;
+
+            databaseAgenda.forEach(item => {
+                const valorCliente = Number(item.valorCliente) || 0;
+                const valorMotorista = Number(item.valorMotorista) || 0;
+                const lucro = valorCliente - valorMotorista;
+
+                totalFaturamento += valorCliente;
+                totalRepasses += valorMotorista;
+                totalLucro += lucro;
+
+                if (!item.pagoCliente) {
+                    totalPendente += valorCliente;
+                }
+
+                const statusClienteBtn = item.pagoCliente 
+                    ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
+                    : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
+
+                const statusMotoristaBtn = item.pagoMotorista 
+                    ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
+                    : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
+
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <td class="p-4 font-bold text-gray-900">
+                            <div>${item.cliente}</div>
+                            <div class="text-[10px] text-gray-400 font-normal mt-0.5">${item.tipo === 'transfer' ? '🚐 Transfer' : '📸 Passeio'} • Dia ${item.dia}/07</div>
+                        </td>
+                        <td class="p-4 font-semibold text-gray-700">${item.motorista}</td>
+                        <td class="p-4 text-right font-bold text-blue-900">$ ${valorCliente}</td>
+                        <td class="p-4 text-right font-bold text-red-600">$ ${valorMotorista}</td>
+                        <td class="p-4 text-right font-black text-emerald-600">$ ${lucro}</td>
+                        <td class="p-4 text-center">${statusClienteBtn}</td>
+                        <td class="p-4 text-center">${statusMotoristaBtn}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('fin-faturamento').innerText = `$ ${totalFaturamento.toLocaleString()}`;
+            document.getElementById('fin-repasses').innerText = `$ ${totalRepasses.toLocaleString()}`;
+            document.getElementById('fin-lucro').innerText = `$ ${totalLucro.toLocaleString()}`;
+            document.getElementById('fin-pendente').innerText = `$ ${totalPendente.toLocaleString()}`;
+        }
+
+        async function toggleFinanceStatus(id, target) {
+            const index = databaseAgenda.findIndex(item => String(item.id) === String(id));
+            if (index === -1) return;
+
+            let nextState = false;
+            let updateObject = {};
+
+            if (target === 'cliente') {
+                nextState = !databaseAgenda[index].pagoCliente;
+                databaseAgenda[index].pagoCliente = nextState;
+                updateObject = { pago_cliente: nextState };
+            } else if (target === 'motorista') {
+                nextState = !databaseAgenda[index].pagoMotorista;
+                databaseAgenda[index].pagoMotorista = nextState;
+                updateObject = { pago_motorista: nextState };
+            }
+
+            renderFinanceiro();
+
+            if (window.isConnectedToSupabase && window.supabaseClient) {
+                try {
+                    const { error } = await window.supabaseClient.from('reservas').update(updateObject).eq('id', id);
+                    if (error) throw error;
+                    showToast("Finanças salvas na nuvem!");
+                    loadRealData();
+                } catch (err) {
+                    console.error("Erro ao atualizar finanças no Supabase: ", err);
+                    showToast("Erro ao salvar. Revertendo alteração.");
+                    if (target === 'cliente') {
+                        databaseAgenda[index].pagoCliente = !nextState;
+                    } else if (target === 'motorista') {
+                        databaseAgenda[index].pagoMotorista = !nextState;
+                    }
+                    renderFinanceiro();
+                }
+            } else {
+                showToast("Finanças atualizadas na simulação!");
+            }
+        }
+
+        async function saveQuickReserva(event) {
+            event.preventDefault();
+
+            const clientName = document.getElementById('modalClient').value.trim();
+            const clientPhone = document.getElementById('modalPhone').value.trim();
+            const date = document.getElementById('modalDate').value;
+            const time = document.getElementById('modalTime').value;
+            const cat = document.getElementById('catSelectReserva').value;
+            const servico = document.getElementById('servicoSelectReserva').value;
+            const desc = document.getElementById('modalDesc').value;
+            const driverId = document.getElementById('modalDriverSelect').value;
+            const flight = document.getElementById('modalFlight').value;
+            const valCliente = parseFloat(document.getElementById('modalValueTotal').value) || 0;
+            const valMotorista = parseFloat(document.getElementById('modalValueDriver').value) || 0;
+
+            if (!clientName || !clientPhone) {
+                showToast("Preencha o nome e o WhatsApp do cliente.");
+                return;
+            }
+
+            if (window.isConnectedToSupabase && window.supabaseClient) {
+                try {
+                    let clientId = null;
+                    const { data: existingClient } = await window.supabaseClient
+                        .from('clientes')
+                        .select('id')
+                        .eq('whatsapp', clientPhone)
+                        .maybeSingle();
+
+                    if (existingClient) {
+                        clientId = existingClient.id;
+                    } else {
+                        const { data: newClientData, error: clientErr } = await window.supabaseClient
+                            .from('clientes')
+                            .insert([{ 
+                                nome: clientName, 
+                                whatsapp: clientPhone, 
+                                origem: 'Brasil', 
+                                biografia: '' 
+                            }])
+                            .select();
+                    
+                        if (clientErr) throw clientErr;
+                        clientId = newClientData[0].id;
+                    }
+
+                    const { error: resErr } = await window.supabaseClient.from('reservas').insert([{
+                        cliente_id: clientId,
+                        motorista_id: driverId,
+                        dia: date.toString(),
+                        hora: time,
+                        tipo: cat,
+                        localizacao: (servico ? servico + " - " : "") + desc,
+                        voo: flight,
+                        valor_total: valCliente,
+                        valor_repasse_motorista: valMotorista,
+                        status: "confirmado"
+                    }]);
+
+                    if (resErr) throw resErr;
+                    
+                    showToast("Cliente atualizado e reserva agendada com sucesso!");
+                    
+                    document.getElementById('modalClient').value = '';
+                    document.getElementById('modalPhone').value = '';
+                    document.getElementById('modalDate').value = '';
+                    document.getElementById('modalTime').value = '';
+                    document.getElementById('modalDesc').value = '';
+                    document.getElementById('modalFlight').value = '';
+                    document.getElementById('modalValueTotal').value = '';
+                    document.getElementById('modalValueDriver').value = '';
+
+                    closeQuickAddModal();
+
+                    if (typeof renderAgenda === 'function') renderAgenda();
+                    if (typeof renderDashboard === 'function') renderDashboard();
+                    if (typeof renderClientes === 'function') renderClientes();
+
+                } catch (err) {
+                    console.error(err);
+                    showToast("Erro ao processar reserva integrada.");
+                }
+            } else {
+                const newEvent = {
+                    id: String(Date.now()),
+                    dia: date ? date : new Date().toISOString().split('T')[0],
+                    hora: time,
+                    tipo: cat || 'transfer',
+                    cliente: clientName,
+                    localizacao: (servico ? servico + " - " : "") + desc,
+                    motorista: driverId,
+                    valorCliente: valCliente,
+                    valorMotorista: valMotorista,
+                    telefone: clientPhone,
+                    status: "confirmado"
+                };
+                databaseAgenda.push(newEvent);
+                
+                document.getElementById('modalClient').value = '';
+                document.getElementById('modalPhone').value = '';
+                document.getElementById('modalDesc').value = '';
+                document.getElementById('modalFlight').value = '';
+                document.getElementById('modalValueTotal').value = '';
+                document.getElementById('modalValueDriver').value = '';
+
+                renderAgenda();
+                renderDashboard();
+                showToast("Reserva e cliente simulados com sucesso!");
+                closeQuickAddModal();
+            }
+        }
+
+        function openDbSettingsModal() {
+            const modal = document.getElementById('dbSettingsModal');
+            document.getElementById('dbUrlInput').value = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
+            document.getElementById('dbKeyInput').value = localStorage.getItem('supabase_key') || '';
+            
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+            }
+        }
+
+        function closeDbSettingsModal() {
+            const modal = document.getElementById('dbSettingsModal');
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function saveDbConfig() {
+            const url = document.getElementById('dbUrlInput').value.trim();
+            const key = document.getElementById('dbKeyInput').value.trim();
+
+            if (!url || !key) {
+                showToast("Por favor, preencha as duas credenciais.");
+                return;
+            }
+
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_key', key);
+            
+            closeDbSettingsModal();
+            initSupabase();
+        }
+
+        function clearDbConfig() {
+            localStorage.removeItem('supabase_url');
+            localStorage.removeItem('supabase_key');
+            closeDbSettingsModal();
+            switchToSimulationMode();
+            showToast("Banco desconectado.");
+        }
+
+        function selectDay(day) {
+            selectedDay = day;
+
+            document.querySelectorAll('#containerDiasAgenda > div').forEach(btn => {
+                const isSelected = btn.getAttribute('data-date') === day;
+                const spans = btn.querySelectorAll('span');
+                
+                if (isSelected) {
+                    btn.className = "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
+                    if (spans[0]) spans[0].className = "block text-xs uppercase text-blue-200";
+                    if (spans[1]) spans[1].className = "text-lg font-bold text-white";
+                } else {
+                    btn.className = "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
+                    if (spans[0]) spans[0].className = "block text-xs uppercase text-gray-500";
+                    if (spans[1]) spans[1].className = "text-lg font-bold text-gray-800";
+                }
+            });
+
+            const labelEl = document.getElementById('tituloDiaSelecionado');
+            if (labelEl) {
+                const [ano, mes, d] = String(selectedDay).split('-');
+                if (ano && mes && d) {
+                    const dataObj = new Date(ano, mes - 1, d);
+                    const nomeFormatado = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+                    labelEl.innerText = `Agenda: ${nomeFormatado.charAt(0).toUpperCase() + nomeFormatado.slice(1)}`;
+                } else {
+                    labelEl.innerText = `Agenda: ${selectedDay}`;
+                }
+            }
+
+            if (typeof renderAgenda === 'function') renderAgenda();
+            if (typeof renderDashboard === 'function') renderDashboard();
+        }
+
+        function filterCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 text-xs font-bold transition hover:bg-gray-50";
+            });
+
+            const activeBtn = document.getElementById(`btn-filter-${category}`);
+            if (activeBtn) {
+                activeBtn.className = "filter-btn px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold transition shadow-sm";
+            }
+
+            renderAgenda();
+        }
+
+        function filterDrivers() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = drivers.filter(d => 
+                d.nome.toLowerCase().includes(query) || 
+                d.veiculo.toLowerCase().includes(query) ||
+                d.placa.toLowerCase().includes(query)
+            );
+            renderDrivers(filtered);
+        }
+
+        function simulateFlightSearch() {
+            const query = document.getElementById('flightInput').value.trim().toUpperCase();
+            const resultBox = document.getElementById('flightResult');
+            
+            if(!query) {
+                showToast("Por favor, digite o número do voo.");
+                return;
+            }
+
+            if(query.includes("15") || query.includes("TK")) {
+                document.getElementById('resFlightCode').innerText = "TK15";
+                document.getElementById('resFlightStatus').innerText = "ATRASADO";
+                document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+                document.getElementById('resFlightCarrier').innerText = "Turkish Airlines";
+                document.getElementById('resFlightEstimated').innerText = "16:05 (+45 min)";
+                document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
+            } else {
+                document.getElementById('resFlightCode').innerText = query;
+                document.getElementById('resFlightStatus').innerText = "NO HORÁRIO";
+                document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+                document.getElementById('resFlightCarrier').innerText = "GOL / Aerolíneas";
+                document.getElementById('resFlightEstimated').innerText = "No horário programado";
+                document.getElementById('resFlightEstimated').className = "font-bold text-emerald-600";
+            }
+
+            resultBox.classList.remove('hidden');
+            showToast("Dados do voo consultados via API!");
+        }
+
+        const templates = {
+            welcome: {
+                title: "👋 Boas-vindas Buenos Aires",
+                text: "Olá {NAME}!\nSeja muito bem-vindo a Buenos Aires! 🇦🇷✈️\n\nNós da Turismundo já estamos prontos para lhe receber. A sua viagem para Buenos Aires está confirmada. Nosso motorista estará lhe aguardando no portão de desembarque com uma placa em seu nome.\n\nQualquer dúvida, estamos à disposição por aqui!"
+            },
+            driver: {
+                title: "🚐 Enviar Dados do Motorista",
+                text: "Olá {NAME}, tudo bem?\n\nPassando para informar os dados do seu transfer de hoje:\n👤 Motorista: Paulo Souza\n🚗 Veículo: Chevrolet Spin\n🔢 Placa: PNG-8D43\n\nEle já está monitorando o seu voo e estará no desembarque aguardando por você! Boa viagem!"
+            },
+            checkout: {
+                title: "🛫 Instruções de Retorno (Out)",
+                text: "Olá {NAME}!\n\nLembrando que o horário agendado para o seu transfer de retorno ao aeroporto hoje é às 19:00h no lobby do hotel.\n\nRecomendamos estar pronto na recepção com 10 minutos de antecedência. Nosso motorista Jorge (Toyota Corolla - Placa AE-234-OP) já está ciente!"
+            }
+        };
+
+        let currentActiveTemplate = '';
+
+        function openMessageTemplate(key) {
+            currentActiveTemplate = key;
+            const modal = document.getElementById('messageModal');
+            if (!modal) return;
+            
+            document.getElementById('modalTemplateTitle').innerText = templates[key].title;
+            document.getElementById('tempWhatsApp').value = "5511999999999";
+            document.getElementById('tempClient').value = "Marcos";
+            
+            updateTemplatePreview();
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+        }
+
+        function updateTemplatePreview() {
+            if (!currentActiveTemplate || !templates[currentActiveTemplate]) return;
+            const clientName = document.getElementById('tempClient').value;
+            let bodyText = templates[currentActiveTemplate].text.replace(/{NAME}/g, clientName);
+            document.getElementById('tempBody').value = bodyText;
+        }
+
+        function closeMessageTemplate() {
+            const modal = document.getElementById('messageModal');
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function triggerWhatsAppRedirect() {
+            const phone = document.getElementById('tempWhatsApp').value.replace(/\D/g, '');
+            const body = encodeURIComponent(document.getElementById('tempBody').value);
+            window.open(`https://wa.me/${phone}?text=${body}`, '_blank');
+            closeMessageTemplate();
+            showToast("WhatsApp aberto!");
+        }
+
+        function sendQuickWhatsApp(phone, driver, flight, hour) {
+            const message = encodeURIComponent(`Olá ${driver}, o voo ${flight} está confirmado para às ${hour}. Favor se alinhar para buscar o cliente neste horário.`);
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
+
+        function sendPaymentCobranca(phone, client, value) {
+            const message = encodeURIComponent(`Olá ${client}, passando para confirmar se deu tudo certo com o seu transfer e para alinhar a questão do pagamento pendente de ${value}.`);
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
+
+        function openQuickAddModal() {
+            const modal = document.getElementById('quickModal');
+            const inputData = document.getElementById('modalDate');
+            if (inputData) {
+                inputData.value = selectedDay;
+            }
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+                carregarMenuCategorias();
+            }
+        }
+
+        function closeQuickAddModal() {
+            const modal = document.getElementById('quickModal');
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function gerarDiasAgenda() {
+            const containerDias = document.getElementById('containerDiasAgenda');
+            if (!containerDias) return;
+            containerDias.innerHTML = '';
+
+            const hoje = new Date();
+
+            for (let i = -3; i <= 3; i++) {
+                const d = new Date();
+                d.setDate(hoje.getDate() + i);
+
+                const anoLoc = d.getFullYear();
+                const mesLoc = String(d.getMonth() + 1).padStart(2, '0');
+                const diaLoc = String(d.getDate()).padStart(2, '0');
+                const diaStr = `${anoLoc}-${mesLoc}-${diaLoc}`;
+                
+                const diaNumero = d.getDate();
+                const diaSemana = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                const isSelected = diaStr === selectedDay;
+
+                containerDias.innerHTML += `
+                <div data-date="${diaStr}" onclick="selectDay('${diaStr}')" class="day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition ${isSelected ? 'bg-blue-900 text-white shadow-md border border-blue-900' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-100'}">
+                    <span class="block text-xs uppercase ${isSelected ? 'text-blue-200' : 'text-gray-500'}">${diaSemana}</span>
+                    <span class="text-lg font-bold ${isSelected ? 'text-white' : 'text-gray-800'}">${diaNumero}</span>
+                </div>
+                `;
+            }
+        }
+
+        function carregarReservasDia(dataStr) {
+            window.selectedDay = dataStr;
+            gerarDiasAgenda(); 
+            renderAgenda();    
+        }
+
+        function openConfirmModal(title, text) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmText').innerText = text;
+            
+            const modal = document.getElementById('confirmModal');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100');
+            }
+
+            return new Promise((resolve) => {
+                confirmPromiseResolver = resolve;
+            });
+        }
+
+        function closeConfirmModal(result) {
+            const modal = document.getElementById('confirmModal');
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+            if (confirmPromiseResolver) {
+                confirmPromiseResolver(result);
+                confirmPromiseResolver = null;
+            }
+        }
+
+        function copyToClipboard(text) {
+            const tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showToast("Chave Pix copiada!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMessage');
+            if (!toast || !msgEl) return;
+
+            msgEl.innerText = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        async function addCategoria() {
+            const nome = document.getElementById('catName').value;
+            if (!nome) return;
+
+            if (!window.supabaseClient) {
+                showToast("Supabase não conectado.");
+                return;
+            }
+
+            const { error } = await window.supabaseClient
+                .from('categorias_servicos')
+                .insert([{ nome: nome }]);
+
+            if (error) {
+                alert("Erro ao salvar categoria: " + error.message);
+                return;
+            }
+
+            const select = document.getElementById('catSelect');
+            const catalog = document.getElementById('catalogList');
+            
+            if (select) select.innerHTML += `<option value="${nome}">${nome}</option>`;
+            if (catalog) catalog.innerHTML += `<div class="p-4 border rounded-xl" id="cat_${nome}">
+                <h3 class="font-bold text-blue-900 border-b pb-2 mb-2">${nome}</h3>
+                <div class="space-y-1"></div>
+            </div>`;
+            
+            document.getElementById('catName').value = '';
+            alert("Categoria criada com sucesso!");
+        }
+
+        async function addItem() {
+            const cat = document.getElementById('catSelect').value;
+            const nomeItem = document.getElementById('nomeItemInput').value;
+            const preco = document.getElementById('precoInput').value;
+
+            if (cat === "Selecione uma categoria..." || !nomeItem || !preco) {
+                alert("Por favor, preencha todos os campos!");
+                return;
+            }
+
+            if (!window.supabaseClient) {
+                showToast("Supabase não conectado.");
+                return;
+            }
+
+            const { error } = await window.supabaseClient
+                .from('servicos')
+                .insert([{ 
+                    nome: nomeItem, 
+                    categoria: cat, 
+                    preco: preco 
+                }]);
+
+            if (error) {
+                alert("Erro ao salvar: " + error.message);
+            } else {
+                alert("Serviço adicionado com sucesso!");
+                document.getElementById('nomeItemInput').value = '';
+                document.getElementById('precoInput').value = '';
+                carregarMenuCategorias(); 
+            }
+        }
+
+        async function carregarMenuCategorias() {
+            if (!window.supabaseClient) return;
+
+            const select = document.getElementById('catSelectReserva');
+            const selectCad = document.getElementById('catSelect');
+            if (!select && !selectCad) return;
+
+            try {
+                const { data: categorias, error } = await window.supabaseClient.from('categorias_servicos').select('*');
+                
+                if (error) {
+                    console.error("Erro ao carregar categorias:", error);
+                    return;
+                }
+                
+                if (select) select.innerHTML = '<option value="">Selecione uma categoria...</option>';
+                if (selectCad) selectCad.innerHTML = '<option value="">Selecione uma categoria...</option>';
+
+                if (categorias) {
+                    categorias.forEach(cat => {
+                        if (select) select.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`;
+                        if (selectCad) selectCad.innerHTML += `<option value="${cat.nome}">${cat.nome}</option>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Erro na conexão ao carregar categorias:", err);
+            }
+        }
+
+        async function filtrarServicosPorCategoria() {
+            const catEscolhida = document.getElementById('catSelectReserva').value;
+            const selectServicos = document.getElementById('servicoSelectReserva');
+            
+            if (!selectServicos) return;
+            selectServicos.innerHTML = '<option value="">Carregando...</option>';
+
+            if (!window.supabaseClient) return;
+
+            const { data: servicos } = await window.supabaseClient
+                .from('servicos')
+                .select('*')
+                .eq('categoria', catEscolhida);
+
+            selectServicos.innerHTML = '<option value="">Selecione um serviço...</option>';
+            
+            if (servicos) {
+                servicos.forEach(s => {
+                    selectServicos.innerHTML += `<option value="${s.nome}" data-preco="${s.preco}">${s.nome} - R$ ${s.preco}</option>`;
+                });
+            }
+        }
+
+        async function renderClientes() {
+            const container = document.getElementById('clientesList');
+            if (!container) return;
+            
+            if (!window.supabaseClient) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Modo Simulação: Sem conexão com banco de clientes.</p>`;
+                return;
+            }
+
+            const { data, error } = await window.supabaseClient
+                .from('clientes')
+                .select('*')
+                .order('nome', { ascending: true });
+
+            if (error) {
+                console.error("Erro ao buscar dados no Supabase:", error);
+                return;
+            }
+
+            container.innerHTML = '';
+
+            data.forEach(cliente => {
+                container.innerHTML += `
+                    <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
+                            <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="abrirModalBio('${cliente.nome}')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+                                Editar Dossiê
+                            </button>
+                            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+                                Deletar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function filtrarClientesTempoReal() {
+            const termo = document.getElementById('searchClientInput').value.trim();
+            const container = document.getElementById('clientesList');
+            if (!container || !window.supabaseClient) return;
+
+            let query = window.supabaseClient.from('clientes').select('*').order('nome', { ascending: true });
+
+            if (termo) {
+                query = query.ilike('nome', `%${termo}%`);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error("Erro na busca de clientes:", error);
+                return;
+            }
+
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Nenhum cliente encontrado.</p>`;
+                return;
+            }
+
+            data.forEach(cliente => {
+                container.innerHTML += `
+                    <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
+                            <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="abrirModalBio('${cliente.nome}')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+                                Editar Dossiê
+                            </button>
+                            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+                                Deletar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function abrirModalBio(nome) {
+            const modal = document.getElementById('modalBioCliente');
+            document.getElementById('modalBioInput').value = '';
+            document.getElementById('modalTagsInput').value = '';
+            document.getElementById('modalNomeCliente').innerText = 'Dossiê: ' + nome;
+
+            if (window.supabaseClient) {
+                const { data } = await window.supabaseClient
+                    .from('clientes')
+                    .select('biografia, tags')
+                    .eq('nome', nome)
+                    .maybeSingle();
+
+                if (data) {
+                    document.getElementById('modalBioInput').value = data.biografia || '';
+                    document.getElementById('modalTagsInput').value = data.tags || '';
+                }
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function fecharModalBio() {
+            document.getElementById('modalBioCliente').classList.add('hidden');
+        }
+
+        async function salvarBio() {
+            const nomeCliente = document.getElementById('modalNomeCliente').innerText.replace('Dossiê: ', '');
+            const bio = document.getElementById('modalBioInput').value;
+            const tags = document.getElementById('modalTagsInput').value;
+
+            if (!window.supabaseClient) return;
+
+            const { error } = await window.supabaseClient
+                .from('clientes')
+                .update({ 
+                    biografia: bio, 
+                    tags: tags 
+                })
+                .eq('nome', nomeCliente);
+
+            if (error) {
+                alert("Erro ao salvar: " + error.message);
+            } else {
+                alert("Dossiê salvo com sucesso!");
+                fecharModalBio();
+                renderClientes();
+            }
+        }
+
+        async function deletarCliente(id) {
+            if (!confirm("Tem certeza que deseja apagar este cliente do banco de dados?")) return;
+            if (!window.supabaseClient) return;
+
+            const { error } = await window.supabaseClient.from('clientes').delete().eq('id', id);
+
+            if (error) {
+                alert("Erro ao deletar: " + error.message);
+            } else {
+                alert("Cliente removido com sucesso!");
+                renderClientes();
+            }
+        }
+
+        // Eventos e inicialização pós DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            initSupabase();
+            switchTab('dashboard');
+            gerarDiasAgenda();
+
+            const servicoSelect = document.getElementById('servicoSelectReserva');
+            if (servicoSelect) {
+                servicoSelect.addEventListener('change', function() {
+                    const optionSelecionada = this.options[this.selectedIndex];
+                    const preco = optionSelecionada.getAttribute('data-preco');
+                    const campoCobrança = document.getElementById('modalValueTotal'); 
+                    
+                    if (campoCobrança && preco) {
+                        campoCobrança.value = preco;
+                    }
+                });
+            }
+
+            const modalClientInput = document.getElementById('modalClient');
+            if (modalClientInput) {
+                modalClientInput.addEventListener('blur', async function() {
+                    const nomeDigitado = this.value.trim();
+                    if (!nomeDigitado || !window.supabaseClient) return;
+
+                    const { data } = await window.supabaseClient
+                        .from('clientes')
+                        .select('whatsapp')
+                        .ilike('nome', `%${nomeDigitado}%`)
+                        .maybeSingle();
+
+                    if (data && data.whatsapp) {
+                        document.getElementById('modalPhone').value = data.whatsapp;
+                    }
+                });
+            }
+
+            const elementoTituloHoje = document.getElementById('tituloAtividadesHoje');
+            if (elementoTituloHoje) {
+                const dataFormatada = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                elementoTituloHoje.innerText = `Próximas Atividades de Hoje (${dataFormatada})`;
+            }
+        });
+    </script>
+</body>
+</html>
