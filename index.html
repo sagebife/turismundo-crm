@@ -1167,7 +1167,30 @@ window.isConnectedToSupabase = true;
                 select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo})</option>`;
             });
         }
+function renderServicos() {
+    const container = document.getElementById('servicosList'); // ou o ID da tabela/div onde os serviços deveriam aparecer
+    if (!container) return;
+    
+    // Supondo que você tenha um array 'servicos' carregado do banco ou localStorage:
+    container.innerHTML = '';
+    
+    if (!window.servicos || window.servicos.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-400">Nenhum serviço cadastrado.</div>';
+        return;
+    }
 
+    window.servicos.forEach(servico => {
+        container.innerHTML += `
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center mb-2">
+                <div>
+                    <h4 class="font-bold text-gray-800">${servico.nome || servico. Rota || 'Serviço'}</h4>
+                    <p class="text-xs text-gray-500">Categoria: ${servico.categoria || 'Geral'}</p>
+                </div>
+                <span class="font-semibold text-emerald-600">R$ ${servico.valor || '0'}</span>
+            </div>
+        `;
+    });
+}
         function renderFinanceiro() {
             const tableBody = document.getElementById('financeTableBody');
             if(!tableBody) return;
