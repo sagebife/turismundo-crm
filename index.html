@@ -78,37 +78,60 @@ window.isConnectedToSupabase = true;
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- COLUNA ESQUERDA: ALERTAS & MENSAGENS RÁPIDAS -->
-                <section class="lg:col-span-1 space-y-6">
+                <!-- COLUNA ESQUERDA: NOTÍCIAS, ALERTAS & MENSAGENS -->
+                <section class="lg:col-span-1 space-y-4">
                     
-                    <!-- Painel de Atenção / Alertas -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <!-- 1. BUENOS AIRES AO VIVO (Agora no Topo) -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>🇦🇷</span> Buenos Aires ao Vivo
+                            </h3>
+                            <span class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span> Rotativo
+                            </span>
+                        </div>
+
+                        <div class="relative overflow-hidden h-[64px] flex items-center">
+                            <div id="tickerNewsCard" class="w-full p-2.5 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-0.5 transition-all duration-500 opacity-100 transform translate-y-0">
+                                <div class="flex justify-between items-center">
+                                    <span id="tickerCategory" class="text-[9px] font-extrabold text-blue-900 uppercase">Trânsito / Alerta</span>
+                                    <span id="tickerTime" class="text-[9px] text-gray-400">Há 15 min</span>
+                                </div>
+                                <p id="tickerText" class="text-xs text-gray-700 leading-tight">Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Painel de Atenção / Alertas -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <i class="fas fa-exclamation-triangle text-amber-500 animate-bounce"></i> Atenção Operacional
                             </h2>
                             <span class="bg-red-50 text-red-600 font-bold text-[10px] px-2 py-0.5 rounded-full">2 Alertas</span>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="space-y-2">
                             <!-- Alerta de Voo -->
-                            <div class="p-3 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-3">
-                                <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-sm"></i></span>
+                            <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
+                                <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
                                 <div>
                                     <p class="text-xs font-bold text-gray-900 leading-tight">Voo TK15 Atrasado</p>
-                                    <p class="text-[11px] text-gray-600 mt-0.5">Pouso estimado para 16:05 (Atraso de 45 min).</p>
-                                    <button onclick="sendQuickWhatsApp('5511977777777', 'Paulo (Spin)', 'TK15', '16:05')" class="text-[10px] text-blue-900 font-bold hover:underline mt-1.5 block">
+                                    <p class="text-[10px] text-gray-600 mt-0.5">Pouso estimado para 16:05 (Atraso de 45 min).</p>
+                                    <button onclick="sendQuickWhatsApp('5511977777777', 'Paulo (Spin)', 'TK15', '16:05')" class="text-[10px] text-blue-900 font-bold hover:underline mt-1 block">
                                         <i class="fab fa-whatsapp"></i> Avisar Motorista Paulo
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Alerta de Pagamento -->
-                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-3">
-                                <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-sm"></i></span>
+                            <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
+                                <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
                                 <div>
                                     <p class="text-xs font-bold text-gray-900 leading-tight">Pagamento Pendente</p>
-                                    <p class="text-[11px] text-gray-600 mt-0.5">Cliente Carlos Gomez ainda não efetuou o pagamento parcial.</p>
-                                    <button onclick="sendPaymentCobranca('5531955555555', 'Carlos Gomez', '150 USD')" class="text-[10px] text-amber-700 font-bold hover:underline mt-1.5 block">
+                                    <p class="text-[10px] text-gray-600 mt-0.5">Cliente Carlos Gomez ainda não efetuou pagamento.</p>
+                                    <button onclick="sendPaymentCobranca('5531955555555', 'Carlos Gomez', '150 USD')" class="text-[10px] text-amber-700 font-bold hover:underline mt-1 block">
                                         <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
                                     </button>
                                 </div>
@@ -116,23 +139,23 @@ window.isConnectedToSupabase = true;
                         </div>
                     </div>
 
-                    <!-- Disparo de Mensagens Rápidas -->
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                    <!-- 3. Disparo de Mensagens Rápidas -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                             <i class="fas fa-comment-alt text-blue-900"></i> Central de Mensagens Rápidas
                         </h3>
-                        <div class="space-y-2">
-                            <button onclick="openMessageTemplate('welcome')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                        <div class="space-y-1.5">
+                            <button onclick="openMessageTemplate('welcome')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
                                 <span>👋 Boas-vindas Buenos Aires</span>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
+                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
                             </button>
-                            <button onclick="openMessageTemplate('driver')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                            <button onclick="openMessageTemplate('driver')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
                                 <span>🚐 Enviar Dados do Motorista</span>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
+                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
                             </button>
-                            <button onclick="openMessageTemplate('checkout')" class="w-full p-3 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                            <button onclick="openMessageTemplate('checkout')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
                                 <span>🛫 Instruções de Retorno (Out)</span>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
+                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
                             </button>
                         </div>
                     </div>
@@ -2215,6 +2238,80 @@ async function deletarCategoria(categoriaNome) {
         if (typeof carregarCategoriasSelect === 'function') carregarCategoriasSelect();
     }
 }
+// Lista de notícias que vão rodar no painel
+    const bairesNoticias = [
+        {
+            cat: "Trânsito / Alerta",
+            color: "text-blue-900",
+            time: "Há 15 min",
+            text: "Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco."
+        },
+        {
+            cat: "Turismo & Agenda",
+            color: "text-emerald-600",
+            time: "Hoje",
+            text: "Festival de Tango em San Telmo com apresentações gratuitas ao ar livre às 18h."
+        },
+        {
+            cat: "Clima / Aeroporto",
+            color: "text-amber-600",
+            time: "Agora",
+            text: "Aeroparque (AEP) operando normalmente com visibilidade perfeita para pousos."
+        },
+        {
+            cat: "Cultura & Lazer",
+            color: "text-purple-600",
+            time: "Dica do Dia",
+            text: "Feira de San Telmo movimentada neste domingo com artesanato e antiques."
+        }
+    ];
+
+    let noticiaAtualIndex = 0;
+
+    function iniciarTickerNoticias() {
+        const card = document.getElementById('tickerNewsCard');
+        const catEl = document.getElementById('tickerCategory');
+        const timeEl = document.getElementById('tickerTime');
+        const textEl = document.getElementById('tickerText');
+
+        if (!card) return;
+
+        // Efeito de fade out / subida
+        card.classList.remove('opacity-100', 'translate-y-0');
+        card.classList.add('opacity-0', '-translate-y-2');
+
+        setTimeout(() => {
+            noticiaAtualIndex = (noticiaAtualIndex + 1) % bairesNoticias.length;
+            const item = bairesNoticias[noticiaAtualIndex];
+
+            catEl.innerText = item.cat;
+            catEl.className = `text-[10px] font-extrabold uppercase ${item.color}`;
+            timeEl.innerText = item.time;
+            textEl.innerText = item.text;
+
+            // Efeito de fade in / descida
+            card.classList.remove('opacity-0', '-translate-y-2');
+            card.classList.add('opacity-100', 'translate-y-0');
+        }, 400); // tempo da animação de troca
+    }
+
+    // Dispara a troca a cada 5 segundos
+    setInterval(iniciarTickerNoticias, 5000);
+   function carregarEventosCidade() {
+    // Força a alteração direta nos elementos visuais do Ticker na tela
+    const txtElement = document.getElementById("tickerText");
+    const catElement = document.getElementById("tickerCategory");
+    
+    if (txtElement) {
+        txtElement.innerText = "Nova agenda de visitas guiadas gratuitas pelos bairros históricos de Buenos Aires.";
+    }
+    if (catElement) {
+        catElement.innerText = "Turismo BA";
+        catElement.className = "text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-900";
+    }
+}
+
+carregarEventosCidade();
     </script>
 </body>
 </html>
