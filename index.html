@@ -2297,51 +2297,20 @@ async function deletarCategoria(categoriaNome) {
 
     // Dispara a troca a cada 5 segundos
     setInterval(iniciarTickerNoticias, 5000);
-   async function carregarEventosCidade() {
-    let bairesNoticias = [];
-    
-    try {
-        // Usando um proxy CORS público para ler feed RSS de notícias de Buenos Aires sem bloqueio
-        const rssUrl = encodeURIComponent('https://www.infobae.com/arc/outboundfeeds/rss/?outputType=xml');
-        const resposta = await fetch(`https://api.allorigins.win/get?url=${rssUrl}`);
-        
-        if (resposta.ok) {
-            const dados = await resposta.json();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(dados.contents, "text/xml");
-            const items = xmlDoc.querySelectorAll("item");
-            
-            if (items.length > 0) {
-                bairesNoticias = Array.from(items).slice(0, 5).map(item => ({
-                    cat: "Infobae BA",
-                    color: "text-blue-900",
-                    time: "Ao Vivo",
-                    text: item.querySelector("title") ? item.querySelector("title").textContent : "Atualização de Buenos Aires"
-                }));
-            }
-        }
-    } catch (erro) {
-        console.log("Modo de segurança ativado para o ticker.");
-    }
+  function carregarEventosCidade() {
+    // Lista local de notícias e avisos em tempo real focada no receptivo de Buenos Aires
+    const bairesNoticias = [
+        { cat: "Turismo BA", color: "text-emerald-700", time: "Ao Vivo", text: "Aeroparque (AEP) operando normalmente com fluxo intenso de voos do Brasil." },
+        { cat: "Câmbio & Dicas", color: "text-blue-900", time: "Atualizado", text: "Cotação do Peso Argentino e dicas de mobilidade para transfers em Puerto Madero." },
+        { cat: "Agenda Cultural", color: "text-amber-700", time: "Hoje", text: "Casas de tango em San Telmo com alta procura e reservas abertas para turistas." }
+    ];
 
-    // Se por acaso a requisição falhar, garantimos dados dinâmicos locais focados no público do Turismundo
-    if (bairesNoticias.length === 0) {
-        const dataHoje = new Date().toLocaleDateString('pt-BR');
-        bairesNoticias = [
-            { cat: "Turismo BA", color: "text-emerald-700", time: dataHoje, text: "Cotação atualizada do Peso Argentino e dicas de câmbio para turistas brasileiros." },
-            { cat: "Agenda Cultural", color: "text-blue-900", time: "Hoje", text: "Casas de tango em San Telmo e Puerto Madero com reservas abertas para o fim de semana." },
-            { cat: "Dica do Receptivo", color: "text-amber-700", time: "Urgente", text: "Novos voos diretos conectando capitais brasileiras ao Aeroparque (AEP)." }
-        ];
-    }
-
-    // Atualiza os elementos visuais do ticker no CRM
     const txtElement = document.getElementById("tickerText");
     const catElement = document.getElementById("tickerCategory");
     
     if (txtElement && bairesNoticias.length > 0) {
         let indexAtual = 0;
         
-        // Função para alternar as notícias automaticamente a cada 6 segundos no ticker
         function rodarTicker() {
             txtElement.innerText = bairesNoticias[indexAtual].text;
             if (catElement) catElement.innerText = bairesNoticias[indexAtual].cat;
