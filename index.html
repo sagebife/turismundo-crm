@@ -102,6 +102,27 @@ window.isConnectedToSupabase = true;
                             </div>
                         </div>
                     </div>
+                    <!-- Card de Agenda / Destino Buenos Aires (Linda) -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[500px] mt-4">
+        
+        <!-- Cabeçalho do Card -->
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agenda Buenos Aires</span>
+                <span class="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Oficial</span>
+            </div>
+            <!-- Link de apoio para abrir em tela cheia se necessário -->
+            <a href="https://linda.buenosaires.gob.ar/" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                Abrir tela cheia ↗
+            </a>
+        </div>
+        
+        <!-- Container do Iframe / Site Embutido -->
+        <div class="flex-1 w-full overflow-hidden rounded-xl border border-gray-100 bg-gray-50 relative">
+            <iframe src="https://linda.buenosaires.gob.ar/" class="w-full h-full border-0" title="Agenda Linda Buenos Aires"></iframe>
+        </div>
+        
+    </div>
 
                     <!-- 2. Painel de Atenção / Alertas -->
                     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
