@@ -1685,7 +1685,7 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
-        function simulateFlightSearch() {
+       async function simulateFlightSearch() {
     const query = document.getElementById('flightInput').value.trim().toUpperCase();
     const resultBox = document.getElementById('flightResult');
 
@@ -1694,28 +1694,35 @@ async function deletarServico(id) {
         return;
     }
 
-    if(query.includes("15") || query.includes("TK")) {
-        document.getElementById('resFlightCode').innerText = "TK15";
-        document.getElementById('resFlightStatus').innerText = "ATRASADO";
-        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-        document.getElementById('resFlightCarrier').innerText = "Turkish Airlines";
-        document.getElementById('resFlightScheduled').innerText = "15:20"; // Agora preenche dinamicamente!
-        document.getElementById('resFlightEstimated').innerText = "16:05 (+45 min)";
-        document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
-        document.getElementById('resFlightOrigin').innerText = "São Paulo (GRU)";
-    } else {
+    try {
+        showToast("Consultando voo em tempo real...");
+
+        // Chama a Edge Function 'verificar-voos' passando o código do voo digitado
+        const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
+            body: { flight_iata: query }
+        });
+
+        if (error || !data) {
+            throw new Error("Erro ao chamar a Edge Function");
+        }
+
+        // Supondo que a função retorne os dados do voo, preenchemos a tela:
         document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = "NO HORÁRIO";
+        document.getElementById('resFlightStatus').innerText = data.status || "EM VOO";
         document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-        document.getElementById('resFlightCarrier').innerText = "GOL / Aerolíneas";
-        document.getElementById('resFlightScheduled').innerText = "No horário"; // Preenche o previsto
-        document.getElementById('resFlightEstimated').innerText = "No horário programado";
+        document.getElementById('resFlightCarrier').innerText = data.airline || "Companhia Aérea";
+        document.getElementById('resFlightScheduled').innerText = data.scheduled || "Horário atualizado";
+        document.getElementById('resFlightEstimated').innerText = data.estimated || "No horário programado";
         document.getElementById('resFlightEstimated').className = "font-bold text-emerald-600";
-        document.getElementById('resFlightOrigin').innerText = "Aeroporto Geral";
+        document.getElementById('resFlightOrigin').innerText = data.origin || "Origem do Voo";
+
+        resultBox.classList.remove('hidden');
+        showToast("Dados do voo atualizados com sucesso!");
+
+    } catch (err) {
+        console.error("Erro na busca:", err);
+        showToast("Erro ao buscar dados na API.");
     }
-    
-    resultBox.classList.remove('hidden');
-    showToast("Dados do voo consultados via API!");
 }
 
         const templates = {
