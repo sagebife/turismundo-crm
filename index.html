@@ -140,30 +140,9 @@ window.isConnectedToSupabase = true;
                         </div>
 
                         <div class="space-y-2">
-                            <!-- Alerta de Voo -->
-                            <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
-                                <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 leading-tight">Voo TK15 Atrasado</p>
-                                    <p class="text-[10px] text-gray-600 mt-0.5">Pouso estimado para 16:05 (Atraso de 45 min).</p>
-                                    <button onclick="sendQuickWhatsApp('5511977777777', 'Paulo (Spin)', 'TK15', '16:05')" class="text-[10px] text-blue-900 font-bold hover:underline mt-1 block">
-                                        <i class="fab fa-whatsapp"></i> Avisar Motorista Paulo
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Alerta de Pagamento -->
-                            <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
-                                <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-900 leading-tight">Pagamento Pendente</p>
-                                    <p class="text-[10px] text-gray-600 mt-0.5">Cliente Carlos Gomez ainda não efetuou pagamento.</p>
-                                    <button onclick="sendPaymentCobranca('5531955555555', 'Carlos Gomez', '150 USD')" class="text-[10px] text-amber-700 font-bold hover:underline mt-1 block">
-                                        <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                           <div class="space-y-2">
+    <!-- Os alertas reais do Supabase vão entrar aqui automaticamente -->
+</div>
                     </div>
 
                     <!-- 3. Disparo de Mensagens Rápidas -->
@@ -228,19 +207,19 @@ window.isConnectedToSupabase = true;
                             </button>
                         </div>
 
-                        <!-- Resultado Simulado -->
-                        <div id="flightResult" class="hidden p-4 rounded-xl border border-blue-100 bg-blue-50/20 space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span class="font-extrabold text-blue-900 text-sm" id="resFlightCode">TK15</span>
-                                <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="resFlightStatus">ATRASADO</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">Turkish Airlines</span></p>
-                                <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800">15:20</span></p>
-                                <p class="text-gray-600">Estimado: <span class="font-bold text-red-600" id="resFlightEstimated">16:05 (+45 min)</span></p>
-                                <p class="text-gray-600">Origem: <span class="font-bold text-gray-800">São Paulo (GRU)</span></p>
-                            </div>
-                        </div>
+                        <!-- Resultado do Voo -->
+<div id="flightResult" class="hidden p-4 rounded-xl border border-blue-100 bg-blue-50/20 space-y-2">
+    <div class="flex justify-between items-center">
+        <span class="font-extrabold text-blue-900 text-sm" id="resFlightCode">TK15</span>
+        <span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="resFlightStatus">STATUS</span>
+    </div>
+    <div class="grid grid-cols-2 gap-2 text-xs">
+        <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">-</span></p>
+        <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800" id="resFlightScheduled">-</span></p>
+        <p class="text-gray-600">Estimado: <span class="font-bold text-gray-800" id="resFlightEstimated">-</span></p>
+        <p class="text-gray-600">Origem: <span class="font-bold text-gray-800" id="resFlightOrigin">-</span></p>
+    </div>
+</div>
                     </div>
 
                     <!-- Visão Geral Operacional (Resumo do Dia) -->
@@ -1707,33 +1686,37 @@ async function deletarServico(id) {
         }
 
         function simulateFlightSearch() {
-            const query = document.getElementById('flightInput').value.trim().toUpperCase();
-            const resultBox = document.getElementById('flightResult');
-            
-            if(!query) {
-                showToast("Por favor, digite o número do voo.");
-                return;
-            }
+    const query = document.getElementById('flightInput').value.trim().toUpperCase();
+    const resultBox = document.getElementById('flightResult');
 
-            if(query.includes("15") || query.includes("TK")) {
-                document.getElementById('resFlightCode').innerText = "TK15";
-                document.getElementById('resFlightStatus').innerText = "ATRASADO";
-                document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-                document.getElementById('resFlightCarrier').innerText = "Turkish Airlines";
-                document.getElementById('resFlightEstimated').innerText = "16:05 (+45 min)";
-                document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
-            } else {
-                document.getElementById('resFlightCode').innerText = query;
-                document.getElementById('resFlightStatus').innerText = "NO HORÁRIO";
-                document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-                document.getElementById('resFlightCarrier').innerText = "GOL / Aerolíneas";
-                document.getElementById('resFlightEstimated').innerText = "No horário programado";
-                document.getElementById('resFlightEstimated').className = "font-bold text-emerald-600";
-            }
+    if(!query) {
+        showToast("Por favor, digite o número do voo.");
+        return;
+    }
 
-            resultBox.classList.remove('hidden');
-            showToast("Dados do voo consultados via API!");
-        }
+    if(query.includes("15") || query.includes("TK")) {
+        document.getElementById('resFlightCode').innerText = "TK15";
+        document.getElementById('resFlightStatus').innerText = "ATRASADO";
+        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+        document.getElementById('resFlightCarrier').innerText = "Turkish Airlines";
+        document.getElementById('resFlightScheduled').innerText = "15:20"; // Agora preenche dinamicamente!
+        document.getElementById('resFlightEstimated').innerText = "16:05 (+45 min)";
+        document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
+        document.getElementById('resFlightOrigin').innerText = "São Paulo (GRU)";
+    } else {
+        document.getElementById('resFlightCode').innerText = query;
+        document.getElementById('resFlightStatus').innerText = "NO HORÁRIO";
+        document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+        document.getElementById('resFlightCarrier').innerText = "GOL / Aerolíneas";
+        document.getElementById('resFlightScheduled').innerText = "No horário"; // Preenche o previsto
+        document.getElementById('resFlightEstimated').innerText = "No horário programado";
+        document.getElementById('resFlightEstimated').className = "font-bold text-emerald-600";
+        document.getElementById('resFlightOrigin').innerText = "Aeroporto Geral";
+    }
+    
+    resultBox.classList.remove('hidden');
+    showToast("Dados do voo consultados via API!");
+}
 
         const templates = {
             welcome: {
@@ -2350,6 +2333,78 @@ async function deletarCategoria(categoriaNome) {
 }
 
 carregarEventosCidade();
+carregarEventosCidade();
+
+// Cole o código dos alertas operacionais aqui dentro do script
+async function carregarAtencaoOperacional() {
+    const container = document.querySelector('.space-y-2'); 
+    if (!container) return;
+
+    const { data: alertas, error } = await supabaseClient
+        .from('operational_alerts')
+        .select('*')
+        .eq('resolved', false)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Erro ao buscar alertas:', error);
+        return;
+    }
+
+    const contadorBadge = document.querySelector('h2 + span');
+    if (contadorBadge) contadorBadge.textContent = `${alertas.length} Alertas`;
+
+    container.innerHTML = '';
+
+    if (alertas.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-400 p-2">Nenhum alerta operacional no momento.</p>`;
+        return;
+    }
+
+    alertas.forEach(alerta => {
+        let cardHtml = '';
+
+        if (alerta.type === 'flight') {
+            cardHtml = `
+                <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
+                    <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
+                    <div>
+                        <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                        <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                        <button onclick="sendQuickWhatsApp('${alerta.action_data.phone}', '${alerta.action_data.driver}', '${alerta.action_data.flight}', '${alerta.action_data.time}')" class="text-[10px] text-red-600 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                            <i class="fab fa-whatsapp"></i> Avisar Motorista ${alerta.action_data.driver}
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (alerta.type === 'payment') {
+            cardHtml = `
+                <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
+                    <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
+                    <div>
+                        <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                        <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                        <button onclick="sendPaymentCobranca('${alerta.action_data.phone}', '${alerta.action_data.client}', '${alerta.action_data.amount}')" class="text-[10px] text-amber-700 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                            <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    });
+}
+
+if (typeof supabaseClient !== 'undefined') {
+    supabaseClient
+        .channel('public:operational_alerts')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'operational_alerts' }, () => {
+            carregarAtencaoOperacional();
+        })
+        .subscribe();
+}
+
+document.addEventListener('DOMContentLoaded', carregarAtencaoOperacional);
     </script>
 </body>
 </html>
