@@ -1685,7 +1685,7 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
-      async function simulateFlightSearch() {
+     async function simulateFlightSearch() {
     const query = document.getElementById('flightInput').value.trim().toUpperCase();
     const resultBox = document.getElementById('flightResult');
 
@@ -1697,50 +1697,42 @@ async function deletarServico(id) {
     try {
         showToast("Consultando voo em tempo real...");
 
-        // Tenta chamar a Edge Function
         const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
             body: { flight_iata: query }
         });
 
-        // Se houver erro na função, usamos dados locais seguros em vez de quebrar a tela
-        let vooInfo = data;
         if (error || !data) {
-            console.warn("Aviso da Edge Function, usando dados simulados de segurança:", error);
-            vooInfo = {
-                status: "NO HORÁRIO",
-                airline: "Aerolíneas Argentinas",
-                scheduled: "15:20",
-                estimated: "No horário programado",
-                origin: "Ezeiza (EZE) / Aeroparque (AEP)"
-            };
+            throw new Error("Não foi possível obter dados da Edge Function.");
         }
 
-        // Preenche os elementos da interface com segurança
+        // Preenche com os dados reais vindos da API
         document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = vooInfo.status || "NO HORÁRIO";
-        document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-        document.getElementById('resFlightCarrier').innerText = vooInfo.airline || "Companhia Aérea";
-        document.getElementById('resFlightScheduled').innerText = vooInfo.scheduled || "15:20";
-        document.getElementById('resFlightEstimated').innerText = vooInfo.estimated || "No horário programado";
-        document.getElementById('resFlightEstimated').className = "font-bold text-emerald-600";
-        document.getElementById('resFlightOrigin').innerText = vooInfo.origin || "Buenos Aires";
+        document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
+        document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+        document.getElementById('resFlightCarrier').innerText = data.airline || "Companhia Aérea";
+        document.getElementById('resFlightScheduled').innerText = data.scheduled || "--:--";
+        document.getElementById('resFlightEstimated').innerText = data.estimated || "Verificar painel do aeroporto";
+        document.getElementById('resFlightEstimated').className = "font-bold text-yellow-600";
+        document.getElementById('resFlightOrigin').innerText = data.origin || "-";
 
         resultBox.classList.remove('hidden');
-        showToast("Painel atualizado com sucesso!");
+        showToast("Consulta realizada!");
 
     } catch (err) {
-        console.error("Erro interno na busca:", err);
-        // Mesmo se tudo falhar, preenche a tela para o usuário não ficar na mão
-        document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = "CONFIRMADO";
-        document.getElementById('resFlightStatus').className = "bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-        document.getElementById('resFlightCarrier').innerText = "Aerolíneas Argentinas";
-        document.getElementById('resFlightScheduled').innerText = "15:20";
-        document.getElementById('resFlightEstimated').innerText = "No horário programado";
-        document.getElementById('resFlightOrigin').innerText = "Buenos Aires";
+        console.error("Erro na busca:", err);
         
+        // Se der erro, mostra claramente que não encontrou, sem inventar horário 15:20
+        document.getElementById('resFlightCode').innerText = query;
+        document.getElementById('resFlightStatus').innerText = "NÃO ENCONTRADO";
+        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+        document.getElementById('resFlightCarrier').innerText = "Verifique o código digitado";
+        document.getElementById('resFlightScheduled').innerText = "--:--";
+        document.getElementById('resFlightEstimated').innerText = "Sem dados para este voo hoje";
+        document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
+        document.getElementById('resFlightOrigin').innerText = "-";
+
         resultBox.classList.remove('hidden');
-        showToast("Voo carregado com dados locais.");
+        showToast("Erro ao buscar dados na API.");
     }
 }
 
