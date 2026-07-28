@@ -1685,7 +1685,7 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
-    async function simulateFlightSearch() {
+   async function simulateFlightSearch() {
     const query = document.getElementById('flightInput').value.trim().toUpperCase();
     const resultBox = document.getElementById('flightResult');
 
@@ -1736,6 +1736,9 @@ async function deletarServico(id) {
 
         resultBox.classList.remove('hidden');
         showToast("Consulta realizada com sucesso!");
+
+        // Chama o alerta operacional integrado
+        atualizarAtencaoOperacional(data);
 
     } catch (err) {
         console.error("Erro na busca:", err);
