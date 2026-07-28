@@ -217,7 +217,7 @@ window.isConnectedToSupabase = true;
         <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">-</span></p>
         <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800" id="resFlightScheduled">-</span></p>
         <p class="text-gray-600">Estimado: <span class="font-bold text-gray-800" id="resFlightEstimated">-</span></p>
-        <p class="text-gray-600">Origem: <span class="font-bold text-gray-800" id="resFlightOrigin">-</span></p>
+        <p class="text-gray-600">Destino: <span class="font-bold text-gray-800" id="resFlightDestination">-</span></p>
     </div>
 </div>
                     </div>
@@ -1509,7 +1509,7 @@ async function deletarServico(id) {
                             .insert([{ 
                                 nome: clientName, 
                                 whatsapp: clientPhone, 
-                                origem: 'Brasil', 
+                                Destino: 'Brasil', 
                                 biografia: '' 
                             }])
                             .select();
@@ -1720,7 +1720,7 @@ async function deletarServico(id) {
             });
         }
 
-     // Pega os horários reais direto da API (sem teste manual)
+   // Pega os horários com segurança
     let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
     let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
 
@@ -1735,13 +1735,14 @@ async function deletarServico(id) {
     const campoEstimado = document.getElementById('resFlightEstimated');
     campoEstimado.innerText = horarioEstimadoLocal;
 
-    // Mostra o Destino ao invés da Origem
+    // Busca o Destino de forma inteligente em qualquer propriedade que a API mande
+    const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || "Buenos Aires (AEP/EZE)";
     const campoOrigemDestino = document.getElementById('resFlightOrigin');
     if (campoOrigemDestino) {
-        campoOrigemDestino.innerText = data.arrival?.airport || data.arrival?.iata || data.destination || "-";
+        campoOrigemDestino.innerText = destinoFinal;
     }
 
-    // Regra de atraso e cor (apenas o estimado fica vermelho se houver diferença)
+    // Regra de atraso e cor (apenas o estimado fica vermelho se houver diferença real)
     if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
         campoEstimado.className = "font-bold text-red-600";
         document.getElementById('resFlightStatus').innerText = "ATRASADO";
@@ -1751,6 +1752,7 @@ async function deletarServico(id) {
     } else {
         campoEstimado.className = "font-bold text-gray-800";
     }
+    
         resultBox.classList.remove('hidden');
         showToast("Consulta realizada com sucesso!");
 
@@ -1765,7 +1767,7 @@ async function deletarServico(id) {
         document.getElementById('resFlightScheduled').innerText = "--:--";
         document.getElementById('resFlightEstimated').innerText = "Sem dados para este voo hoje";
         document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
-        document.getElementById('resFlightOrigin').innerText = "-";
+        document.getElementById('resFlightDestination').innerText = "-";
 
         resultBox.classList.remove('hidden');
         showToast("Erro ao buscar dados na API.");
