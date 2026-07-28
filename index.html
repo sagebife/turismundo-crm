@@ -1700,6 +1700,11 @@ async function deletarServico(id) {
         const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
             body: { flight_iata: query }
         });
+        const { data, error } = await window.supabaseclient.functions.invoke('verificar-voos', {
+        body: { flight_iata: query }
+    });
+    
+    console.log("Retorno da Edge Function verificar-voos:", { data, error });
 
         if (error || !data) {
             throw new Error("Não foi possível obter dados da Edge Function.");
