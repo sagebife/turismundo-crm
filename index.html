@@ -2440,6 +2440,41 @@ if (typeof supabaseClient !== 'undefined') {
 }
 
 document.addEventListener('DOMContentLoaded', carregarAtencaoOperacional);
+// Exemplo de função ao receber os dados do voo na tela
+function atualizarPainelVoo(dadosVoo) {
+    // Atualiza os campos normais do card de voo...
+    document.getElementById('status-voo').innerText = dadosVoo.status;
+    document.getElementById('previsto-voo').innerText = dadosVoo.scheduled;
+    document.getElementById('estimado-voo').innerText = dadosVoo.estimated;
+
+    // Captura o container de Atenção Operacional
+    const containerAtencao = document.querySelector('.atencao-operacional-list'); // Ajuste para a sua classe/ID real
+    
+    if (dadosVoo.isDelayed) {
+        // Cria ou atualiza o card de alerta de atraso
+        const alertaHTML = `
+            <div id="alerta-voo-${dadosVoo.flightNumber}" class="alerta-card-atraso" style="border-left: 4px solid #e74c3c; background: #fdf3f2; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                <div style="font-weight: bold; color: #c0392b; font-size: 13px;">
+                    ⚠️ Voo ${dadosVoo.flightNumber} Atrasado
+                </div>
+                <div style="font-size: 12px; color: #555; margin-top: 2px;">
+                    Previsto: ${dadosVoo.scheduled} | Estimado: ${dadosVoo.estimated} (${dadosVoo.delayMinutes} min de atraso). Verifique o motorista.
+                </div>
+                <button onclick="notificarMotoristaVoo('${dadosVoo.flightNumber}')" style="margin-top: 6px; background: #25d366; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer;">
+                    💬 Avisar Motorista via WhatsApp
+                </button>
+            </div>
+        `;
+        
+        // Evita duplicar se já existir, ou adiciona na lista
+        const alertaExistente = document.getElementById(`alerta-voo-${dadosVoo.flightNumber}`);
+        if (alertaExistente) {
+            alertaExistente.innerHTML = alertaHTML;
+        } else {
+            containerAtencao.insertAdjacentHTML('afterbegin', alertaHTML);
+        }
+    }
+}
     </script>
 </body>
 </html>
