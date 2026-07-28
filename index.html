@@ -1720,33 +1720,37 @@ async function deletarServico(id) {
             });
         }
 
-      // Aplica o ajuste de fuso e a correção manual para o teste do voo AR1461
+     // Pega os horários reais direto da API (sem teste manual)
     let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
-    let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated);
+    let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
 
-    if (query.toUpperCase() === "AR1461") {
-        horarioEstimadoLocal = "12:32";
-    }
-
-    // Preenche com os dados corrigidos
+    // Preenche os dados básicos na tela
     document.getElementById('resFlightCode').innerText = query;
-    document.getElementById('resFlightStatus').innerText = (query.toUpperCase() === "AR1461") ? "ATRASADO" : (data.status || "CONSULTAR");
-    document.getElementById('resFlightStatus').className = (query.toUpperCase() === "AR1461") ? "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded" : "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
+    document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
+    document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
     document.getElementById('resFlightCarrier').innerText = data.airline || "Aerolineas Argentinas";
+    
     document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
     
     const campoEstimado = document.getElementById('resFlightEstimated');
     campoEstimado.innerText = horarioEstimadoLocal;
-    
-    if (horarioEstimadoLocal !== horarioPrevistoLocal) {
+
+    // Mostra o Destino ao invés da Origem
+    const campoOrigemDestino = document.getElementById('resFlightOrigin');
+    if (campoOrigemDestino) {
+        campoOrigemDestino.innerText = data.arrival?.airport || data.arrival?.iata || data.destination || "-";
+    }
+
+    // Regra de atraso e cor (apenas o estimado fica vermelho se houver diferença)
+    if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
         campoEstimado.className = "font-bold text-red-600";
-        atualizarAtencaoOperacional({ ...data, flight_iata: query, estimated: horarioEstimadoLocal, delay: 82 });
+        document.getElementById('resFlightStatus').innerText = "ATRASADO";
+        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
+        
+        atualizarAtencaoOperacional(data);
     } else {
         campoEstimado.className = "font-bold text-gray-800";
     }
-    
-    document.getElementById('resFlightOrigin').innerText = data.origin || "-";
-
         resultBox.classList.remove('hidden');
         showToast("Consulta realizada com sucesso!");
 
