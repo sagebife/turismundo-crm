@@ -1739,17 +1739,48 @@ async function deletarServico(id) {
 
         // Chama o alerta operacional integrado
         function atualizarAtencaoOperacional(data) {
-    // Verifica se o voo está atrasado com base nos dados da AviationStack
-    const scheduled = new Date(data.scheduled || data.dep_time || data.arr_time);
-    const estimated = new Date(data.estimated || data.arr_estimated);
-    
-    // Calcula diferença em minutos
-    const diffMinutes = (estimated - scheduled) / (1000 * 60);
-    const isDelayed = diffMinutes > 15; // Considera atraso acima de 15 minutos
+    // Verifica se o status retornado pela API indica atraso explicitamente
+    const statusLower = (data.status || "").toLowerCase();
+    const isStatusDelayed = statusLower.includes("delayed") || statusLower.includes("atrasado");
+
+    // Converte os horários para objetos Date considerando o dia atual
+    const horarioPrevisto = data.scheduled || data.dep_time || data.arr_time;
+    const horarioEstimado = data.estimated || data.arr_estimated || horarioPrevisto;
+
+    let isDelayed = isStatusDelayed;
+
+    if (horarioPrevisto && horarioEstimado) {
+        const scheduledDate = new Date(`1970-01-01T${horarioPrevisto}:00`);
+        const estimatedDate = new Date(`1970-01-01T${horarioEstimado}:00`);
+        
+        const diffMinutes = (estimatedDate - scheduledDate) / (1000 * 60);
+        
+        // Considera atrasado se a diferença for maior que 15 minutos ou se o status disser isso
+        if (diffMinutes > 15) {
+            isDelayed = true;
+        }
+    }
 
     if (isDelayed) {
-        console.warn("Atenção Operacional: Voo atrasado detectado!", data.flight_iata);
-        // Aqui você pode injetar o card dinâmico no painel de Atenção Operacional
+        console.warn("Atenção Operacional: Voo com atraso identificado!", data.flight_iata);
+        
+        // Aqui você insere o HTML do card de alerta na seção "ATENÇÃO OPERACIONAL" do painel
+        const containerAlertas = document.getElementById('painel-atencao-operacional'); // ajuste para o ID correto do seu container
+        if (containerAlertas) {
+            // Exemplo de injeção do card com aviso de voo e botão de WhatsApp para o cliente
+            const alertaHTML = `
+                <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 rounded shadow-sm">
+                    <p class="text-xs font-bold text-red-700">Voo Atrasado: ${data.flight_iata || 'Desconhecido'}</p>
+                    <p class="text-xs text-gray-600">Previsto: ${horarioPrevisto} | Estimado: ${horarioEstimado}</p>
+                    <a href="https://wa.me/?text=Olá,%20notamos%20um%20atraso%20no%20seu%20voo%20(${data.flight_iata}).%20Estamos%20ajustando%20o%20transfer!" 
+                       target="_blank" 
+                       class="text-xs text-red-600 font-semibold underline mt-1 inline-block">
+                        ⚠️ Acionar Motorista / Avisar Cliente via WhatsApp
+                    </a>
+                </div>
+            `;
+            containerAlertas.insertAdjacentHTML('afterbegin', alertaHTML);
+        }
     }
 }
 
