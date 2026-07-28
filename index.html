@@ -1685,7 +1685,7 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
-     async function simulateFlightSearch() {
+    async function simulateFlightSearch() {
     const query = document.getElementById('flightInput').value.trim().toUpperCase();
     const resultBox = document.getElementById('flightResult');
 
@@ -1705,23 +1705,41 @@ async function deletarServico(id) {
             throw new Error("Não foi possível obter dados da Edge Function.");
         }
 
-        // Preenche com os dados reais vindos da API
+        // Função auxiliar para converter UTC para o fuso horário de Buenos Aires (-03:00)
+        function formatarHoraLocal(utcString) {
+            if (!utcString) return "--:--";
+            const dataUtc = new Date(utcString);
+            if (isNaN(dataUtc.getTime())) return utcString; // Se já vier em formato texto formatado
+
+            // Converte para o horário local de Buenos Aires
+            return dataUtc.toLocaleTimeString('pt-BR', { 
+                timeZone: 'America/Argentina/Buenos_Aires', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+
+        // Aplica o ajuste de fuso nos horários recebidos da API
+        const horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
+        const horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated);
+
+        // Preenche com os dados corrigidos
         document.getElementById('resFlightCode').innerText = query;
         document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
         document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
         document.getElementById('resFlightCarrier').innerText = data.airline || "Companhia Aérea";
-        document.getElementById('resFlightScheduled').innerText = data.scheduled || "--:--";
-        document.getElementById('resFlightEstimated').innerText = data.estimated || "Verificar painel do aeroporto";
-        document.getElementById('resFlightEstimated').className = "font-bold text-yellow-600";
+        document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
+        document.getElementById('resFlightEstimated').innerText = horarioEstimadoLocal !== "--:--" ? horarioEstimadoLocal : "Horário regular";
+        document.getElementById('resFlightEstimated').className = "font-bold text-gray-800";
         document.getElementById('resFlightOrigin').innerText = data.origin || "-";
 
         resultBox.classList.remove('hidden');
-        showToast("Consulta realizada!");
+        showToast("Consulta realizada com sucesso!");
 
     } catch (err) {
         console.error("Erro na busca:", err);
         
-        // Se der erro, mostra claramente que não encontrou, sem inventar horário 15:20
         document.getElementById('resFlightCode').innerText = query;
         document.getElementById('resFlightStatus').innerText = "NÃO ENCONTRADO";
         document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
@@ -1735,7 +1753,6 @@ async function deletarServico(id) {
         showToast("Erro ao buscar dados na API.");
     }
 }
-
         const templates = {
             welcome: {
                 title: "👋 Boas-vindas Buenos Aires",
