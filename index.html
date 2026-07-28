@@ -1735,8 +1735,8 @@ async function deletarServico(id) {
     const campoEstimado = document.getElementById('resFlightEstimated');
     campoEstimado.innerText = horarioEstimadoLocal;
 
-    // Busca o Destino de forma inteligente em qualquer propriedade que a API mande
-    const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || "Buenos Aires (AEP/EZE)";
+    // Busca o Destino com máxima prioridade e fallbacks
+    const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || (query.toUpperCase().startsWith("AR") ? "Aeroparque / Ezeiza (BUE)" : "Buenos Aires");
     const campoDestino = document.getElementById('resFlightDestination');
     if (campoDestino) {
         campoDestino.innerText = destinoFinal;
