@@ -1737,9 +1737,9 @@ async function deletarServico(id) {
 
     // Busca o Destino de forma inteligente em qualquer propriedade que a API mande
     const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || "Buenos Aires (AEP/EZE)";
-    const campoOrigemDestino = document.getElementById('resFlightOrigin');
-    if (campoOrigemDestino) {
-        campoOrigemDestino.innerText = destinoFinal;
+    const campoDestino = document.getElementById('resFlightDestination');
+    if (campoDestino) {
+        campoDestino.innerText = destinoFinal;
     }
 
     // Regra de atraso e cor (apenas o estimado fica vermelho se houver diferença real)
@@ -1752,7 +1752,7 @@ async function deletarServico(id) {
     } else {
         campoEstimado.className = "font-bold text-gray-800";
     }
-    
+
         resultBox.classList.remove('hidden');
         showToast("Consulta realizada com sucesso!");
 
