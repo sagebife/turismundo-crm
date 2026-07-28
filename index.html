@@ -1738,7 +1738,20 @@ async function deletarServico(id) {
         showToast("Consulta realizada com sucesso!");
 
         // Chama o alerta operacional integrado
-        atualizarAtencaoOperacional(data);
+        function atualizarAtencaoOperacional(data) {
+    // Verifica se o voo está atrasado com base nos dados da AviationStack
+    const scheduled = new Date(data.scheduled || data.dep_time || data.arr_time);
+    const estimated = new Date(data.estimated || data.arr_estimated);
+    
+    // Calcula diferença em minutos
+    const diffMinutes = (estimated - scheduled) / (1000 * 60);
+    const isDelayed = diffMinutes > 15; // Considera atraso acima de 15 minutos
+
+    if (isDelayed) {
+        console.warn("Atenção Operacional: Voo atrasado detectado!", data.flight_iata);
+        // Aqui você pode injetar o card dinâmico no painel de Atenção Operacional
+    }
+}
 
     } catch (err) {
         console.error("Erro na busca:", err);
