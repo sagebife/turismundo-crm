@@ -1685,11 +1685,11 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
- async function simulateFlightSearch() {
+   async function simulateFlightSearch() {
     const query = document.getElementById('flightInput').value.trim().toUpperCase();
     const resultBox = document.getElementById('flightResult');
 
-    if (!query) {
+    if(!query) {
         showToast("Por favor, digite o número do voo.");
         return;
     }
@@ -1700,8 +1700,6 @@ async function deletarServico(id) {
         const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
             body: { flight_iata: query }
         });
-        
-        console.log("Retorno da Edge Function verificar-voos:", { data, error });
 
         if (error || !data) {
             throw new Error("Não foi possível obter dados da Edge Function.");
@@ -1711,8 +1709,9 @@ async function deletarServico(id) {
         function formatarHoraLocal(utcString) {
             if (!utcString) return "--:--";
             const dataUtc = new Date(utcString);
-            if (isNaN(dataUtc.getTime())) return utcString;
+            if (isNaN(dataUtc.getTime())) return utcString; // Se já vier em formato texto formatado
 
+            // Converte para o horário local de Buenos Aires
             return dataUtc.toLocaleTimeString('pt-BR', { 
                 timeZone: 'America/Argentina/Buenos_Aires', 
                 hour: '2-digit', 
@@ -1721,37 +1720,42 @@ async function deletarServico(id) {
             });
         }
 
-        let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
-        let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
+   // Pega os horários com segurança
+    let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
+    let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
 
-        document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
-        document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
-        document.getElementById('resFlightCarrier').innerText = data.airline || "Aerolineas Argentinas";
+    // Preenche os dados básicos na tela
+    document.getElementById('resFlightCode').innerText = query;
+    document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
+    document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
+    document.getElementById('resFlightCarrier').innerText = data.airline || "Aerolineas Argentinas";
+    
+    document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
+    
+    const campoEstimado = document.getElementById('resFlightEstimated');
+    campoEstimado.innerText = horarioEstimadoLocal;
+
+    // Busca o Destino de forma inteligente em qualquer propriedade que a API mande
+    const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || "Buenos Aires (AEP/EZE)";
+    const campoDestino = document.getElementById('resFlightDestination');
+    if (campoDestino) {
+        campoDestino.innerText = destinoFinal;
+    }
+
+    // Regra de atraso e cor (apenas o estimado fica vermelho se houver diferença real)
+    if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
+        campoEstimado.className = "font-bold text-red-600";
+        document.getElementById('resFlightStatus').innerText = "ATRASADO";
+        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
         
-        document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
-        
-        const campoEstimado = document.getElementById('resFlightEstimated');
-        campoEstimado.innerText = horarioEstimadoLocal;
-
-        const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || (query.toUpperCase().startsWith("AR") ? "Aeroparque / Ezeiza (BUE)" : "Buenos Aires");
-        const campoDestino = document.getElementById('resFlightDestination');
-        if (campoDestino) {
-            campoDestino.innerText = destinoFinal;
-        }
-
-        if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
-            campoEstimado.className = "font-bold text-red-600";
-            document.getElementById('resFlightStatus').innerText = "ATRASADO";
-            document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
-            
-            atualizarAtencaoOperacional(data);
-        } else {
-            campoEstimado.className = "font-bold text-gray-800";
-        }
+        atualizarAtencaoOperacional(data);
+    } else {
+        campoEstimado.className = "font-bold text-gray-800";
+    }
 
         resultBox.classList.remove('hidden');
         showToast("Consulta realizada com sucesso!");
+
 
     } catch (err) {
         console.error("Erro na busca:", err);
