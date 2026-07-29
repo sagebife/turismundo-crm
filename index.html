@@ -2082,21 +2082,18 @@ async function deletarServico(id) {
 
             data.forEach(cliente => {
                 container.innerHTML += `
-                    <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition" onclick="openClientDossier('${cliente.id}', '${cliente.nome}', '${cliente.whatsapp || ''}', '${cliente.biografia || ''}')">${cliente.nome}</h3>
-                            <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="abrirModalBio('${cliente.nome}')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
-                                Editar Dossiê
-                            </button>
-                            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
-                                Deletar
-                            </button>
-                        </div>
-                    </div>
-                `;
+    <div onclick="openClientDossier('${cliente.id}', '${cliente.nome}', '${cliente.whatsapp || ''}', '${cliente.bio || ''}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between cursor-pointer">
+        <div>
+            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
+            <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
+        </div>
+        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition text-xs">
+                Deletar
+            </button>
+        </div>
+    </div>
+`;
             });
         }
 
