@@ -2716,7 +2716,7 @@ function openNewReservationForCurrentClient() {
     // Fecha o dossiê atual
     closeClientDossier();
 
-    // Procura na página inteira pelo botão original de nova reserva do topo (que tem a classe de botão verde do sistema)
+    // Clica no botão original de Nova Reserva do topo
     const botoes = Array.from(document.querySelectorAll('button, a'));
     const btnTopo = botoes.find(el => el.textContent.trim().includes('Nova Reserva') && !el.closest('#clientDossierModal'));
     
@@ -2724,23 +2724,24 @@ function openNewReservationForCurrentClient() {
         btnTopo.click();
     }
 
-    // Preenche os dados assim que o modal de agendamento aparecer na tela
+    // Injeta os dados usando a estratégia que trazia o nome + o ID exato do telefone
     setTimeout(() => {
-        const inputs = Array.from(document.querySelectorAll('input')).filter(i => i.offsetParent !== null);
-        
-        // Pega os dois primeiros inputs ativos na tela (Nome e WhatsApp do agendamento)
-        if (inputs.length >= 2) {
-            // Input do Cliente
-            inputs[0].value = currentName;
-            inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
-            inputs[0].dispatchEvent(new Event('change', { bubbles: true }));
-
-            // Input do WhatsApp
-            inputs[1].value = currentPhone;
-            inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
-            inputs[1].dispatchEvent(new Event('change', { bubbles: true }));
+        // 1. O Nome (usando o seletor por placeholder que funcionou antes)
+        const inputCliente = document.querySelector('input[placeholder*="Lucas Ramos"]') || document.querySelector('input[placeholder*="Cliente"]');
+        if (inputCliente) {
+            inputCliente.value = currentName;
+            inputCliente.dispatchEvent(new Event('input', { bubbles: true }));
+            inputCliente.dispatchEvent(new Event('change', { bubbles: true }));
         }
-    }, 400);
+
+        // 2. O WhatsApp (usando o ID exato modalPhone que encontramos no HTML)
+        const inputWhatsapp = document.getElementById('modalPhone');
+        if (inputWhatsapp) {
+            inputWhatsapp.value = currentPhone;
+            inputWhatsapp.dispatchEvent(new Event('input', { bubbles: true }));
+            inputWhatsapp.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }, 450);
 }
 </script>
     </script>
