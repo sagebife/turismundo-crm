@@ -2713,24 +2713,34 @@ function openNewReservationForCurrentClient() {
     const currentName = document.getElementById('editClientName').value;
     const currentPhone = document.getElementById('editClientPhone').value;
 
-    // Fecha o dossiê
+    // Fecha o dossiê atual
     closeClientDossier();
 
-    // Dispara o clique no botão global de "+ Nova Reserva" que já abre o modal correto do seu sistema
-    const btnNovaReservaGlobal = document.querySelector('button[onclick*="Reserva"]') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Nova Reserva'));
+    // Procura na página inteira pelo botão original de nova reserva do topo (que tem a classe de botão verde do sistema)
+    const botoes = Array.from(document.querySelectorAll('button, a'));
+    const btnTopo = botoes.find(el => el.textContent.trim().includes('Nova Reserva') && !el.closest('#clientDossierModal'));
     
-    if (btnNovaReservaGlobal) {
-        btnNovaReservaGlobal.click();
+    if (btnTopo) {
+        btnTopo.click();
     }
 
-    // Preenche os dados automaticamente após a abertura do modal
+    // Preenche os dados assim que o modal de agendamento aparecer na tela
     setTimeout(() => {
-        const inputClienteReserva = document.getElementById('clienteNomeReserva') || document.getElementById('nomeCliente') || document.getElementById('reservaCliente');
-        const inputTelefoneReserva = document.getElementById('clienteTelefoneReserva') || document.getElementById('whatsappCliente') || document.getElementById('reservaTelefone');
+        const inputs = Array.from(document.querySelectorAll('input')).filter(i => i.offsetParent !== null);
+        
+        // Pega os dois primeiros inputs ativos na tela (Nome e WhatsApp do agendamento)
+        if (inputs.length >= 2) {
+            // Input do Cliente
+            inputs[0].value = currentName;
+            inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+            inputs[0].dispatchEvent(new Event('change', { bubbles: true }));
 
-        if (inputClienteReserva) inputClienteReserva.value = currentName;
-        if (inputTelefoneReserva) inputTelefoneReserva.value = currentPhone;
-    }, 250);
+            // Input do WhatsApp
+            inputs[1].value = currentPhone;
+            inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+            inputs[1].dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }, 400);
 }
 </script>
     </script>
