@@ -2458,10 +2458,10 @@ if (typeof supabaseClient !== 'undefined') {
 document.addEventListener('DOMContentLoaded', carregarAtencaoOperacional);
 // Exemplo de função ao receber os dados do voo na tela
 function atualizarPainelVoo(dadosVoo) {
-    // Atualiza os campos normais do card de voo...
-    document.getElementById('status-voo').innerText = dadosVoo.status;
-    document.getElementById('previsto-voo').innerText = dadosVoo.scheduled;
-    document.getElementById('estimado-voo').innerText = dadosVoo.estimated;
+  // Atualiza os campos normais do card de voo mapeando corretamente as chaves
+  document.getElementById('status-voo').innerText = dadosVoo.flight_status || dadosVoo.status || 'Consultar';
+  document.getElementById('previsto-voo').innerText = dadosVoo.departure_time || dadosVoo.scheduled || '--:--';
+  document.getElementById('estimado-voo').innerText = dadosVoo.arrival_time || dadosVoo.estimated || '--:--';
 
     // Captura o container de Atenção Operacional
     const containerAtencao = document.querySelector('.atencao-operacional-list'); // Ajuste para a sua classe/ID real
