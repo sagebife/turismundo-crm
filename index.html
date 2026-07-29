@@ -2982,6 +2982,27 @@ async function aprovarOrcamento(id) {
   }
 }
 }
+async function aprovarOrcamento(id) {
+  if (!window.supabaseClient) return;
+
+  try {
+    const { error } = await window.supabaseClient
+      .from('orcamentos')
+      .update({ status: 'Aprovado' })
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erro ao aprovar orçamento:", error.message);
+      alert("Erro ao aprovar orçamento.");
+      return;
+    }
+
+    // Recarrega a lista para atualizar o status na tela
+    carregarOrcamentos();
+  } catch (err) {
+    console.error("Erro inesperado ao aprovar:", err);
+  }
+}
 </script>
     </script>
 </body>
