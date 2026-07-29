@@ -2535,7 +2535,7 @@ function atualizarAtencaoOperacional(data) {
 }
 </script> <!-- Fechou o script aqui para o HTML rodar livremente -->
 
-<!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
+<!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE (FORA DE QUALQUER SCRIPT) -->
 <div id="clientDossierModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
@@ -2571,9 +2571,6 @@ function atualizarAtencaoOperacional(data) {
                     <label class="block text-xs font-semibold text-gray-500 uppercase">Destino / Observações</label>
                     <textarea id="editClientBio" rows="3" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800"></textarea>
                 </div>
-                <div class="flex justify-end pt-2">
-                    <button onclick="saveClientChanges()" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">Salvar Alterações</button>
-                </div>
             </div>
 
             <!-- Aba 2: Linha do Tempo -->
@@ -2584,19 +2581,8 @@ function atualizarAtencaoOperacional(data) {
             </div>
 
         </div>
-    </div>
-</div>
 
-<!-- Aba 2: Linha do Tempo -->
-            <div id="dossierTabTimeline" class="hidden space-y-4">
-                <div id="clientTimelineContent" class="space-y-3">
-                    <!-- Preenchido dinamicamente via JS -->
-                </div>
-            </div>
-
-        </div>
-        
-        <!-- RODAPÉ COM O BOTÃO DE ATALHO -->
+        <!-- Rodapé do Modal com o Botão de Atalho -->
         <div class="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
             <button onclick="openNewReservationForCurrentClient()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -2608,28 +2594,20 @@ function atualizarAtencaoOperacional(data) {
     </div>
 </div>
 
-<script> <!-- Reabre o script para conter as funções... -->
-<script> <!-- Reabre o script para conter as funções do Dossiê que vêm a seguir -->
+<!-- BLOCO DE SCRIPT ÚNICO PARA O DOSSIÊ -->
+<script>
 let currentOpenClientId = null;
 
-// Abre o dossiê e busca os dados e a linha do tempo
 async function openClientDossier(clientId, clientName, clientPhone, clientBio) {
     currentOpenClientId = clientId;
-    
     document.getElementById('dossierClientName').innerText = clientName || 'Cliente';
     document.getElementById('dossierClientPhone').innerText = clientPhone || '';
-    
     document.getElementById('editClientName').value = clientName || '';
     document.getElementById('editClientPhone').value = clientPhone || '';
     document.getElementById('editClientBio').value = clientBio || '';
 
-    // Abre na aba cadastral por padrão
     switchDossierTab('cadastral');
-
-    // Mostra o modal
     document.getElementById('clientDossierModal').classList.remove('hidden');
-
-    // Carregar linha do tempo do cliente
     await loadClientTimeline(clientId);
 }
 
@@ -2638,7 +2616,6 @@ function closeClientDossier() {
     currentOpenClientId = null;
 }
 
-// Alternância de abas do modal
 function switchDossierTab(tabName) {
     const tabCadastral = document.getElementById('dossierTabCadastral');
     const tabTimeline = document.getElementById('dossierTabTimeline');
@@ -2658,7 +2635,6 @@ function switchDossierTab(tabName) {
     }
 }
 
-// Carrega as reservas vinculadas a este cliente para formar a linha do tempo
 async function loadClientTimeline(clientId) {
     const container = document.getElementById('clientTimelineContent');
     container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Carregando histórico...</p>';
@@ -2697,7 +2673,6 @@ async function loadClientTimeline(clientId) {
             });
             html += '</div>';
             container.innerHTML = html;
-
         } catch (err) {
             console.error(err);
             container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">Erro ao carregar linha do tempo.</p>';
@@ -2707,10 +2682,8 @@ async function loadClientTimeline(clientId) {
     }
 }
 
-// Salvar edição cadastral rápida do cliente
 async function saveClientChanges() {
     if (!currentOpenClientId) return;
-    
     const newName = document.getElementById('editClientName').value.trim();
     const newPhone = document.getElementById('editClientPhone').value.trim();
     const newBio = document.getElementById('editClientBio').value.trim();
@@ -2723,7 +2696,6 @@ async function saveClientChanges() {
                 .eq('id', currentOpenClientId);
 
             if (error) throw error;
-
             showToast("Dados do cliente atualizados com sucesso!");
             closeClientDossier();
             if (typeof renderClientes === 'function') renderClientes();
@@ -2733,27 +2705,21 @@ async function saveClientChanges() {
         }
     }
 }
-    // Abre o modal de Nova Reserva já com os dados do cliente atual preenchidos
+
 function openNewReservationForCurrentClient() {
     if (!currentOpenClientId) return;
-
     const currentName = document.getElementById('editClientName').value;
     const currentPhone = document.getElementById('editClientPhone').value;
 
-    // Fecha o dossiê atual
     closeClientDossier();
 
-    // Se o seu sistema usa uma função global para abrir a modal de nova reserva, chamamos ela aqui.
-    // (Ajuste o nome da função abaixo caso a sua de nova reserva tenha outro nome, ex: openNovaReservaModal)
     if (typeof openNovaReservaModal === 'function') {
         openNovaReservaModal();
     } else {
-        // Caso o botão principal da barra superior faça isso, tentamos disparar o clique dele:
         const btnNovaReservaGlobal = document.querySelector('button[onclick*="Reserva"], button:contains("Nova Reserva")');
         if (btnNovaReservaGlobal) btnNovaReservaGlobal.click();
     }
 
-    // Preenche automaticamente nos campos da tela de reserva (ajuste os IDs conforme o seu formulário de reservas)
     setTimeout(() => {
         const inputClienteReserva = document.getElementById('clienteNomeReserva') || document.getElementById('nomeCliente') || document.getElementById('reservaCliente');
         const inputTelefoneReserva = document.getElementById('clienteTelefoneReserva') || document.getElementById('whatsappCliente') || document.getElementById('reservaTelefone');
@@ -2762,6 +2728,7 @@ function openNewReservationForCurrentClient() {
         if (inputTelefoneReserva) inputTelefoneReserva.value = currentPhone;
     }, 200);
 }
+</script>
     </script>
 </body>
 </html>
