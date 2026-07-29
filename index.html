@@ -2530,6 +2530,25 @@ function atualizarAtencaoOperacional(data) {
         }
     }
 }
+const axios = require('axios');
+
+async function consultarVoo(numeroVoo) {
+  const options = {
+    method: 'GET',
+    url: `https://rapidapi.com{numeroVoo}`,
+    headers: {
+      'X-RapidAPI-Key': 'SUA_CHAVE_GRATUITA_AQUI',
+      'X-RapidAPI-Host': '://rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await axios.request(options);
+    return response.data; // Retorna horários, status e aeroportos
+  } catch (error) {
+    console.error("Erro ao buscar voo:", error);
+  }
+}
     </script>
 </body>
 </html>
