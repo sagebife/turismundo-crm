@@ -1418,19 +1418,19 @@ async function deletarServico(id) {
                             <div class="text-[10px] text-gray-400 font-normal mt-0.5">${item.tipo === 'transfer' ? '🚐 Transfer' : '📸 Passeio'} • Dia ${item.dia}/07</div>
                         </td>
                         <td class="p-4 font-semibold text-gray-700">${item.motorista}</td>
-                        <td class="p-4 text-right font-bold text-blue-900">$ ${valorCliente}</td>
-                        <td class="p-4 text-right font-bold text-red-600">$ ${valorMotorista}</td>
-                        <td class="p-4 text-right font-black text-emerald-600">$ ${lucro}</td>
+                        <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente}</td>
+                        <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista}</td>
+                        <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro}</td>
                         <td class="p-4 text-center">${statusClienteBtn}</td>
                         <td class="p-4 text-center">${statusMotoristaBtn}</td>
                     </tr>
                 `;
             });
 
-            document.getElementById('fin-faturamento').innerText = `$ ${totalFaturamento.toLocaleString()}`;
-            document.getElementById('fin-repasses').innerText = `$ ${totalRepasses.toLocaleString()}`;
-            document.getElementById('fin-lucro').innerText = `$ ${totalLucro.toLocaleString()}`;
-            document.getElementById('fin-pendente').innerText = `$ ${totalPendente.toLocaleString()}`;
+            document.getElementById('fin-faturamento').innerText = `R$ ${totalFaturamento.toLocaleString()}`;
+            document.getElementById('fin-repasses').innerText = `R$ ${totalRepasses.toLocaleString()}`;
+            document.getElementById('fin-lucro').innerText = `R$ ${totalLucro.toLocaleString()}`;
+            document.getElementById('fin-pendente').innerText = `R$ ${totalPendente.toLocaleString()}`;
         }
 
         async function toggleFinanceStatus(id, target) {
