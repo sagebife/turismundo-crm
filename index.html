@@ -2826,7 +2826,7 @@ function switchTab(tabName) {
   }
 }
 async function carregarOrcamentos() {
-  if (!window.supabaseclient) return;
+  if (!window.supabaseClient) return;
 
   const tbody = document.getElementById('tabela-orcamentos-body');
   if (!tbody) return;
@@ -2834,7 +2834,7 @@ async function carregarOrcamentos() {
   tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
 
   try {
-    const { data, error } = await window.supabaseclient
+    const { data, error } = await window.supabaseClient
       .from('orcamentos')
       .select('*')
       .order('created_at', { ascending: false });
@@ -2855,11 +2855,10 @@ async function carregarOrcamentos() {
       const tr = document.createElement('tr');
       tr.className = "hover:bg-gray-50 transition-colors";
       
-      // Formatação básica dos campos (ajustaremos conforme o design final)
       tr.innerHTML = `
-        <td class="px-6 py-4 font-medium text-gray-900">${orc.lead_nome || 'Lead sem nome'}</td>
-        <td class="px-6 py-4 text-gray-600">${orc.lead_whatsapp || '-'}</td>
-        <td class="px-6 py-4 text-gray-600">${orc.servicos_resumo || 'Serviços diversos'}</td>
+        <td class="px-6 py-4 font-medium text-gray-900">${orc.nome_lead || 'Lead sem nome'}</td>
+        <td class="px-6 py-4 text-gray-600">${orc.whatsapp || '-'}</td>
+        <td class="px-6 py-4 text-gray-600">${orc.servicos_solicitados || 'Serviços diversos'}</td>
         <td class="px-6 py-4 font-semibold text-gray-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
         <td class="px-6 py-4">
           <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
