@@ -185,7 +185,7 @@ window.isConnectedToSupabase = true;
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Mês</p>
                             <p class="text-2xl font-black text-emerald-600" id="dash-faturamento">$ 0</p>
-                            <span class="text-[10px] text-emerald-600 font-bold">USD</span>
+                            <span class="text-[10px] text-emerald-600 font-bold">R$</span>
                         </div>
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Motoristas Parceiros</p>
@@ -340,7 +340,8 @@ window.isConnectedToSupabase = true;
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Moeda</label>
                                 <select id="driverCurrency" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
-                                    <option value="USD">USD ($)</option>
+                                    <option value="
+                                    R$">R$ ($)</option>
                                     <option value="BRL">BRL (R$)</option>
                                     <option value="ARS">ARS ($)</option>
                                 </select>
@@ -453,7 +454,7 @@ window.isConnectedToSupabase = true;
                     <h3 class="font-bold text-sm text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-cash-register text-blue-900"></i> Fluxo de Caixa Operacional (Histórico Geral)
                     </h3>
-                    <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-bold">Consolidado em USD</span>
+                    <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-bold">Consolidado em R$</span>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -710,9 +711,9 @@ window.isConnectedToSupabase = true;
         ];
 
         let mockDrivers = [
-            { id: 'd1111111-1111-1111-1111-111111111111', nome: "Paulo Souza", telefone: "5511999999999", veiculo: "Chevrolet Spin", placa: "PNG-8D43", pix: "paulo.transfers@gmail.com", valor: "80", moeda: "USD", capacidade: "6", avaliacao: 5, corridas: 142 },
-            { id: 'd2222222-2222-2222-2222-222222222222', nome: "Jorge Martinez", telefone: "5491133334444", veiculo: "Toyota Corolla", placa: "AE-234-OP", pix: "jorge.mercado.pago", valor: "50", moeda: "USD", capacidade: "4", avaliacao: 4, corridas: 98 },
-            { id: 'd3333333-3333-3333-3333-333333333333', nome: "Carlos Gomez", telefone: "5491155556666", veiculo: "Mercedes Sprinter", placa: "AD-987-ZZ", pix: "carlos.sprinter.pix", valor: "150", moeda: "USD", capacidade: "15", avaliacao: 5, corridas: 210 }
+            { id: 'd1111111-1111-1111-1111-111111111111', nome: "Paulo Souza", telefone: "5511999999999", veiculo: "Chevrolet Spin", placa: "PNG-8D43", pix: "paulo.transfers@gmail.com", valor: "80", moeda: "R$", capacidade: "6", avaliacao: 5, corridas: 142 },
+            { id: 'd2222222-2222-2222-2222-222222222222', nome: "Jorge Martinez", telefone: "5491133334444", veiculo: "Toyota Corolla", placa: "AE-234-OP", pix: "jorge.mercado.pago", valor: "50", moeda: "R$", capacidade: "4", avaliacao: 4, corridas: 98 },
+            { id: 'd3333333-3333-3333-3333-333333333333', nome: "Carlos Gomez", telefone: "5491155556666", veiculo: "Mercedes Sprinter", placa: "AD-987-ZZ", pix: "carlos.sprinter.pix", valor: "150", moeda: "R$", capacidade: "15", avaliacao: 5, corridas: 210 }
         ];
 
         let databaseAgenda = [...mockAgenda];
