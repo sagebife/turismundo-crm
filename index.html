@@ -2587,6 +2587,28 @@ function atualizarAtencaoOperacional(data) {
     </div>
 </div>
 
+<!-- Aba 2: Linha do Tempo -->
+            <div id="dossierTabTimeline" class="hidden space-y-4">
+                <div id="clientTimelineContent" class="space-y-3">
+                    <!-- Preenchido dinamicamente via JS -->
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- RODAPÉ COM O BOTÃO DE ATALHO -->
+        <div class="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
+            <button onclick="openNewReservationForCurrentClient()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nova Reserva para este Cliente
+            </button>
+            <button onclick="saveClientChanges()" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">Salvar Alterações</button>
+        </div>
+
+    </div>
+</div>
+
+<script> <!-- Reabre o script para conter as funções... -->
 <script> <!-- Reabre o script para conter as funções do Dossiê que vêm a seguir -->
 let currentOpenClientId = null;
 
@@ -2710,6 +2732,35 @@ async function saveClientChanges() {
             showToast("Erro ao atualizar cliente.");
         }
     }
+}
+    // Abre o modal de Nova Reserva já com os dados do cliente atual preenchidos
+function openNewReservationForCurrentClient() {
+    if (!currentOpenClientId) return;
+
+    const currentName = document.getElementById('editClientName').value;
+    const currentPhone = document.getElementById('editClientPhone').value;
+
+    // Fecha o dossiê atual
+    closeClientDossier();
+
+    // Se o seu sistema usa uma função global para abrir a modal de nova reserva, chamamos ela aqui.
+    // (Ajuste o nome da função abaixo caso a sua de nova reserva tenha outro nome, ex: openNovaReservaModal)
+    if (typeof openNovaReservaModal === 'function') {
+        openNovaReservaModal();
+    } else {
+        // Caso o botão principal da barra superior faça isso, tentamos disparar o clique dele:
+        const btnNovaReservaGlobal = document.querySelector('button[onclick*="Reserva"], button:contains("Nova Reserva")');
+        if (btnNovaReservaGlobal) btnNovaReservaGlobal.click();
+    }
+
+    // Preenche automaticamente nos campos da tela de reserva (ajuste os IDs conforme o seu formulário de reservas)
+    setTimeout(() => {
+        const inputClienteReserva = document.getElementById('clienteNomeReserva') || document.getElementById('nomeCliente') || document.getElementById('reservaCliente');
+        const inputTelefoneReserva = document.getElementById('clienteTelefoneReserva') || document.getElementById('whatsappCliente') || document.getElementById('reservaTelefone');
+
+        if (inputClienteReserva) inputClienteReserva.value = currentName;
+        if (inputTelefoneReserva) inputTelefoneReserva.value = currentPhone;
+    }, 200);
 }
     </script>
 </body>
