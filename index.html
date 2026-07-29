@@ -2582,13 +2582,15 @@ function atualizarAtencaoOperacional(data) {
 
         </div>
 
-        <!-- Rodapé do Modal com o Botão de Atalho -->
-        <div class="px-6 py-3 bg-gray-50 border-t flex justify-between items-center">
-            <button onclick="openNewReservationForCurrentClient()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center gap-1.5">
+        <!-- Rodapé do Modal com os Botões Empilhados -->
+        <div class="px-6 py-4 bg-gray-50 border-t flex flex-col gap-2.5">
+            <button onclick="openNewReservationForCurrentClient()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center justify-center gap-1.5 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Nova Reserva para este Cliente
             </button>
-            <button onclick="saveClientChanges()" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">Salvar Alterações</button>
+            <button onclick="saveClientChanges()" class="w-full bg-blue-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-800 transition shadow-sm">
+                Salvar Alterações
+            </button>
         </div>
 
     </div>
@@ -2711,22 +2713,24 @@ function openNewReservationForCurrentClient() {
     const currentName = document.getElementById('editClientName').value;
     const currentPhone = document.getElementById('editClientPhone').value;
 
+    // Fecha o dossiê
     closeClientDossier();
 
-    if (typeof openNovaReservaModal === 'function') {
-        openNovaReservaModal();
-    } else {
-        const btnNovaReservaGlobal = document.querySelector('button[onclick*="Reserva"], button:contains("Nova Reserva")');
-        if (btnNovaReservaGlobal) btnNovaReservaGlobal.click();
+    // Dispara o clique no botão global de "+ Nova Reserva" que já abre o modal correto do seu sistema
+    const btnNovaReservaGlobal = document.querySelector('button[onclick*="Reserva"]') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Nova Reserva'));
+    
+    if (btnNovaReservaGlobal) {
+        btnNovaReservaGlobal.click();
     }
 
+    // Preenche os dados automaticamente após a abertura do modal
     setTimeout(() => {
         const inputClienteReserva = document.getElementById('clienteNomeReserva') || document.getElementById('nomeCliente') || document.getElementById('reservaCliente');
         const inputTelefoneReserva = document.getElementById('clienteTelefoneReserva') || document.getElementById('whatsappCliente') || document.getElementById('reservaTelefone');
 
         if (inputClienteReserva) inputClienteReserva.value = currentName;
         if (inputTelefoneReserva) inputTelefoneReserva.value = currentPhone;
-    }, 200);
+    }, 250);
 }
 </script>
     </script>
