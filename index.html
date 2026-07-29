@@ -2084,7 +2084,7 @@ async function deletarServico(id) {
                 container.innerHTML += `
                     <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
                         <div>
-                            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
+                            <h3 class="font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition" onclick="openClientDossier('${cliente.id}', '${cliente.nome}', '${cliente.whatsapp || ''}', '${cliente.biografia || ''}')">${cliente.nome}</h3>
                             <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -2534,6 +2534,180 @@ function atualizarAtencaoOperacional(data) {
     }
 }
 
+    <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
+<div id="clientDossierModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        <!-- Cabeçalho do Dossiê -->
+        <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+            <div>
+                <h3 id="dossierClientName" class="text-lg font-bold">Nome do Cliente</h3>
+                <p id="dossierClientPhone" class="text-xs text-blue-200">+55 ...</p>
+            </div>
+            <button onclick="closeClientDossier()" class="text-white hover:text-gray-200 text-xl font-bold px-2">&times;</button>
+        </div>
+
+        <!-- Abas de Navegação -->
+        <div class="flex border-b border-gray-200 bg-gray-50">
+            <button onclick="switchDossierTab('cadastral')" id="tabBtnCadastral" class="flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition">Dados Cadastrais</button>
+            <button onclick="switchDossierTab('timeline')" id="tabBtnTimeline" class="flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition">Linha do Tempo</button>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="p-6 overflow-y-auto flex-1">
+            
+            <!-- Aba 1: Dados Cadastrais -->
+            <div id="dossierTabCadastral" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase">Nome Completo</label>
+                    <input type="text" id="editClientName" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase">WhatsApp</label>
+                    <input type="text" id="editClientPhone" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase">Destino / Observações</label>
+                    <textarea id="editClientBio" rows="3" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800"></textarea>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button onclick="saveClientChanges()" class="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- Aba 2: Linha do Tempo -->
+            <div id="dossierTabTimeline" class="hidden space-y-4">
+                <div id="clientTimelineContent" class="space-y-3">
+                    <!-- Preenchido dinamicamente via JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+let currentOpenClientId = null;
+
+// Abre o dossiê e busca os dados e a linha do tempo
+async function openClientDossier(clientId, clientName, clientPhone, clientBio) {
+    currentOpenClientId = clientId;
+    
+    document.getElementById('dossierClientName').innerText = clientName || 'Cliente';
+    document.getElementById('dossierClientPhone').innerText = clientPhone || '';
+    
+    document.getElementById('editClientName').value = clientName || '';
+    document.getElementById('editClientPhone').value = clientPhone || '';
+    document.getElementById('editClientBio').value = clientBio || '';
+
+    // Abre na aba cadastral por padrão
+    switchDossierTab('cadastral');
+
+    // Mostra o modal
+    document.getElementById('clientDossierModal').classList.remove('hidden');
+
+    // Carregar linha do tempo do cliente
+    await loadClientTimeline(clientId);
+}
+
+function closeClientDossier() {
+    document.getElementById('clientDossierModal').classList.add('hidden');
+    currentOpenClientId = null;
+}
+
+// Alternância de abas do modal
+function switchDossierTab(tabName) {
+    const tabCadastral = document.getElementById('dossierTabCadastral');
+    const tabTimeline = document.getElementById('dossierTabTimeline');
+    const btnCadastral = document.getElementById('tabBtnCadastral');
+    const btnTimeline = document.getElementById('tabBtnTimeline');
+
+    if (tabName === 'cadastral') {
+        tabCadastral.classList.remove('hidden');
+        tabTimeline.classList.add('hidden');
+        btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
+        btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
+    } else {
+        tabTimeline.classList.remove('hidden');
+        tabCadastral.classList.add('hidden');
+        btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
+        btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
+    }
+}
+
+// Carrega as reservas vinculadas a este cliente para formar a linha do tempo
+async function loadClientTimeline(clientId) {
+    const container = document.getElementById('clientTimelineContent');
+    container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Carregando histórico...</p>';
+
+    if (window.isConnectedToSupabase && window.supabaseClient) {
+        try {
+            const { data: reservas, error } = await window.supabaseClient
+                .from('reservas')
+                .select('*')
+                .eq('cliente_id', clientId)
+                .order('dia', { ascending: false });
+
+            if (error) throw error;
+
+            if (!reservas || reservas.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Nenhum atendimento registrado para este cliente.</p>';
+                return;
+            }
+
+            let html = '<div class="border-l-2 border-blue-200 ml-2 space-y-4 pl-4">';
+            reservas.forEach(res => {
+                html += `
+                    <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                        <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || 'Serviço'}</span>
+                            <span class="text-xs text-gray-400">${res.dia} às ${res.hora || ''}</span>
+                        </div>
+                        <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || 'Sem descrição'}</p>
+                        <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
+                            <span>Valor: R$ ${parseFloat(res.valor_total || 0).toFixed(2)}</span>
+                            <span class="capitalize text-emerald-600 font-semibold">${res.status || 'Confirmado'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">Erro ao carregar linha do tempo.</p>';
+        }
+    } else {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Modo offline: Histórico indisponível na simulação local.</p>';
+    }
+}
+
+// Salvar edição cadastral rápida do cliente
+async function saveClientChanges() {
+    if (!currentOpenClientId) return;
+    
+    const newName = document.getElementById('editClientName').value.trim();
+    const newPhone = document.getElementById('editClientPhone').value.trim();
+    const newBio = document.getElementById('editClientBio').value.trim();
+
+    if (window.isConnectedToSupabase && window.supabaseClient) {
+        try {
+            const { error } = await window.supabaseClient
+                .from('clientes')
+                .update({ nome: newName, whatsapp: newPhone, biografia: newBio })
+                .eq('id', currentOpenClientId);
+
+            if (error) throw error;
+
+            showToast("Dados do cliente atualizados com sucesso!");
+            closeClientDossier();
+            if (typeof renderClientes === 'function') renderClientes();
+        } catch (err) {
+            console.error(err);
+            showToast("Erro ao atualizar cliente.");
+        }
+    }
+}
     </script>
 </body>
 </html>
