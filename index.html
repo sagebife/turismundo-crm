@@ -84,6 +84,12 @@ window.isConnectedToSupabase = true;
   <i class="fas fa-fa-plus"></i>+ Novo Orçamento
 </button>
   </div>
+  <!-- Filtros de Status -->
+    <div class="flex items-center space-x-2 mb-4">
+        <button onclick="filtrarOrcamentos('todos')" id="btn-filtro-todos" class="px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition">Todos</button>
+        <button onclick="filtrarOrcamentos('Pendente')" id="btn-filtro-pendente" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Pendentes</button>
+        <button onclick="filtrarOrcamentos('Aprovado')" id="btn-filtro-aprovado" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Aprovados</button>
+    </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <table class="w-full text-left border-collapse">
@@ -553,9 +559,11 @@ window.isConnectedToSupabase = true;
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Resumo dos Serviços / Passeios</label>
-        <textarea id="orc-servicos" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ex: City tour + Show de Tango"></textarea>
-      </div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Selecione os Serviços</label>
+    <div id="lista-servicos-checkbox" class="max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3 space-y-2 bg-gray-50">
+        <!-- Os serviços cadastrados vão aparecer aqui automaticamente -->
+    </div>
+</div>
 
       <div class="flex justify-end gap-3 pt-4 border-t">
         <button type="button" onclick="fecharModalOrcamento()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancelar</button>
@@ -3091,6 +3099,151 @@ async function deletarOrcamento(id) {
         console.error("Erro ao excluir orçamento:", error);
         alert("Erro ao excluir o orçamento. Tente novamente.");
     }
+}
+async function abrirModalOrcamento() {
+    // Tenta limpar os inputs caso eles existam no HTML
+    const inputNome = document.getElementById('orc-nome') || document.getElementById('nome_lead');
+    const inputWhatsapp = document.getElementById('orc-whatsapp') || document.getElementById('whatsapp_lead');
+    const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
+    
+    if (inputNome) inputNome.value = '';
+    if (inputWhatsapp) inputWhatsapp.value = '';
+    if (inputValor) inputValor.value = '0.00';
+
+    const container = document.getElementById('lista-servicos-checkbox');
+    if (!container) return;
+    
+    container.innerHTML = '<p class="text-sm text-gray-500">Carregando serviços...</p>';
+
+    try {
+        // Busca os serviços cadastrados na tabela 'servicos' do Supabase
+        const { data: servicos, error } = await supabaseClient
+            .from('servicos')
+            .select('*');
+
+        if (error) throw error;
+
+        if (!servicos || servicos.length === 0) {
+            container.innerHTML = '<p class="text-sm text-gray-500">Nenhum serviço cadastrado.</p>';
+            return;
+        }
+
+        // Renderiza os checkboxes dinamicamente
+        container.innerHTML = '';
+        servicos.forEach(servico => {
+            const nomeServico = servico.nome || servico.titulo || 'Serviço';
+            const precoServico = servico.preco || servico.valor || 0;
+
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between';
+            div.innerHTML = `
+                <label class="flex items-center text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" value="${precoServico}" data-nome="${nomeServico}" onchange="calcularTotalOrcamento()" class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mr-2">
+                    ${nomeServico}
+                </label>
+                <span class="text-sm font-semibold text-gray-600">R$ ${parseFloat(precoServico).toFixed(2)}</span>
+            `;
+            container.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error('Erro ao carregar serviços:', err);
+        container.innerHTML = '<p class="text-sm text-red-500">Erro ao carregar os serviços.</p>';
+    }
+
+    // Exibe o modal (removendo a classe hidden)
+    const modal = document.getElementById('modal-orcamento');
+    if (modal) modal.classList.remove('hidden');
+}
+function calcularTotalOrcamento() {
+    const checkboxes = document.querySelectorAll('#lista-servicos-checkbox input[type="checkbox"]');
+    let total = 0;
+    let servicosSelecionados = [];
+
+    checkboxes.forEach(cb => {
+        if (cb.checked) {
+            total += parseFloat(cb.value) || 0;
+            servicosSelecionados.push(cb.getAttribute('data-nome'));
+        }
+    });
+
+    // Atualiza o campo de valor total automaticamente (buscando pelos possíveis IDs)
+    const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
+    if (inputValor) {
+        inputValor.value = total.toFixed(2);
+    }
+
+    // Guarda os serviços escolhidos para salvar no banco depois
+    window.servicosEscolhidosParaSalvar = servicosSelecionados.join(', ');
+}
+// Variável global para guardar todos os orçamentos carregados e otimizar o filtro (opcional)
+let orcamentosGlobais = [];
+
+// Função para buscar e filtrar os orçamentos
+async function filtrarOrcamentos(status) {
+    // Atualiza o estilo visual dos botões de filtro
+    ['todos', 'pendente', 'aprovado'].forEach(s => {
+        const btn = document.getElementById(`btn-filtro-${s}`);
+        if (!btn) return;
+        if (s === status.toLowerCase() || (status === 'todos' && s === 'todos')) {
+            btn.className = "px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition";
+        } else {
+            btn.className = "px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition";
+        }
+    });
+
+    try {
+        let query = supabaseClient.from('orcamentos').select('*');
+
+        // Se não for 'todos', filtra no banco pelo status correspondente
+        if (status !== 'todos') {
+            query = query.eq('status', status); // Ajuste 'status' se a coluna no banco tiver outro nome
+        }
+
+        const { data: orcamentos, error } = await query;
+
+        if (error) throw error;
+
+        orcamentosGlobais = orcamentos || [];
+        renderizarTabelaOrcamentos(orcamentosGlobais);
+
+    } catch (err) {
+        console.error('Erro ao filtrar orçamentos:', err);
+    }
+}
+
+function renderizarTabelaOrcamentos(lista) {
+    const tbody = document.getElementById('tabela-orcamentos-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
+        return;
+    }
+
+    lista.forEach(orc => {
+        const tr = document.createElement('tr');
+        const statusAtual = orc.status || 'Pendente';
+        
+        tr.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || orc.cliente || 'Cliente'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.servicos || '-'}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${parseFloat(orc.valor_total || orc.valor || 0).toFixed(2)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusAtual === 'Aprovado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                    ${statusAtual}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                ${statusAtual !== 'Aprovado' ? `<button onclick="alterarStatusOrcamento('${orc.id}', 'Aprovado')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs font-semibold">Aprovar</button>` : ''}
+                <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold">Excluir</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 </script>
     </script>
