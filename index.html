@@ -920,7 +920,7 @@ window.isConnectedToSupabase = true;
             if (dashDrivers) dashDrivers.innerText = drivers.length;
 
             const faturamentoTotal = databaseAgenda.reduce((sum, item) => sum + (Number(item.valorCliente) || 0), 0);
-            if (dashFaturamento) dashFaturamento.innerText = `$ ${faturamentoTotal.toLocaleString()}`;
+            if (dashFaturamento) dashFaturamento.innerText = `R$ ${faturamentoTotal.toLocaleString()}`;
 
             const container = document.getElementById('dashActivitiesContainer');
             if (!container) return;
