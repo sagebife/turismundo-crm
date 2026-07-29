@@ -2936,73 +2936,121 @@ try {
     console.error("Erro inesperado:", err);
 }
 async function aprovarOrcamento(id) {
-  if (!window.supabaseClient) return;
+    try {
+        // 1. Primeiro, busca os dados do orçamento que está sendo aprovado
+        const { data: orcamento, error: erroBusca } = await window.supabaseClient
+            .from('orcamentos')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-  if (!confirm("Deseja aprovar este orçamento e convertê-lo em cliente oficial?")) return;
+        if (erroBusca) {
+            console.error("Erro ao buscar orçamento:", erroBusca);
+            alert("Erro ao buscar dados do orçamento.");
+            return;
+        }
 
-  try {
-    // 1. Buscar os dados do orçamento específico
-    const { data: orcamento, error: errFetch } = await window.supabaseClient
-      .from('orcamentos')
-      .select('*')
-      .eq('id', id)
-      .single();
+        // 2. Insere os dados na tabela de clientes
+        if (orcamento) {
+            const { error: erroCliente } = await window.supabaseClient
+                .from('clientes')
+                .insert([{
+                    nome: orcamento.nome_lead,
+                    whatsapp: orcamento.whatsapp,
+                    servicos: orcamento.servicos_solicitados,
+                    valor: orcamento.valor_total
+                }]);
 
-    if (errFetch || !orcamento) {
-      alert("Erro ao localizar o orçamento.");
-      return;
+            if (erroCliente) {
+                console.error("Erro ao cadastrar cliente:", erroCliente);
+            }
+        }
+
+        // 3. Atualiza o status do orçamento para 'Aprovado'
+        const { error } = await window.supabaseClient
+            .from('orcamentos')
+            .update({ status: 'Aprovado' })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Erro ao aprovar orçamento:", error.message);
+            alert("Erro ao aprovar orçamento.");
+            return;
+        }
+
+        // 4. Recarrega as telas para atualizar os dados visuais
+        carregarOrcamentos();
+        if (typeof renderClientes === 'function') {
+            renderClientes();
+        }
+
+    } catch (err) {
+        console.error("Erro inesperado ao aprovar:", err);
     }
-
-    // 2. Inserir na tabela oficial de clientes/agenda (ajuste o nome da tabela principal se necessário, ex: 'clientes' ou 'agenda')
-    const { error: errCliente } = await window.supabaseClient
-      .from('clientes') // Substitua pelo nome correto da sua tabela de clientes oficial se for diferente
-      .insert([{
-        nome: orcamento.lead_nome,
-        whatsapp: orcamento.lead_whatsapp,
-        observacoes: `Convertido de Orçamento. Serviços: ${orcamento.servicos_resumo} - Valor: R$ ${orcamento.valor_total}`
-      }]);
-
-    if (errCliente) {
-      console.error("Erro ao inserir cliente:", errCliente.message);
-      alert("Erro ao migrar dados para a base de clientes.");
-      return;
-    }
-
-    // 3. Atualizar o status do orçamento para 'Aprovado'
-    await window.supabaseClient
-      .from('orcamentos')
-      .update({ status: 'Aprovado' })
-      .eq('id', id);
-
-    alert("Orçamento aprovado e convertido com sucesso!");
-    carregarOrcamentos(); // Atualiza a listagem
-
-  } catch (err) {
-    console.error("Erro inesperado ao aprovar:", err);
-  }
 }
 }
 async function aprovarOrcamento(id) {
-  if (!window.supabaseClient) return;
+    try {
+        const { data: orcamento, error: erroBusca } = await window.supabaseClient
+            .from('orcamentos')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-  try {
-    const { error } = await window.supabaseClient
-      .from('orcamentos')
-      .update({ status: 'Aprovado' })
-      .eq('id', id);
+        if (erroBusca) {
+            console.error("Erro ao buscar orçamento:", erroBusca);
+            alert("Erro ao buscar dados do orçamento.");
+            return;
+        }
 
-    if (error) {
-      console.error("Erro ao aprovar orçamento:", error.message);
-      alert("Erro ao aprovar orçamento.");
-      return;
+        if (orcamento) {
+            const { error: erroCliente } = await window.supabaseClient
+                .from('clientes')
+                .insert([{
+                    nome: orcamento.nome_lead,
+                    whatsapp: orcamento.whatsapp
+                }]);
+
+            if (erroCliente) {
+                console.error("Erro ao cadastrar cliente:", erroCliente);
+                alert("Erro ao cadastrar cliente: " + erroCliente.message);
+                return;
+            }
+        }
+
+        const { error } = await window.supabaseClient
+            .from('orcamentos')
+            .update({ status: 'Aprovado' })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Erro ao aprovar orçamento:", error.message);
+            alert("Erro ao aprovar orçamento.");
+            return;
+        }
+
+        if (typeof carregarOrcamentos === 'function') {
+            carregarOrcamentos();
+        }
+        if (typeof renderClientes === 'function') {
+            renderClientes();
+        }
+
+        alert("Orçamento aprovado e cliente cadastrado com sucesso!");
+
+    } catch (err) {
+        console.error("Erro inesperado ao aprovar:", err);
     }
-
-    // Recarrega a lista para atualizar o status na tela
-    carregarOrcamentos();
-  } catch (err) {
-    console.error("Erro inesperado ao aprovar:", err);
-  }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof carregarOrcamentos === 'function') {
+        carregarOrcamentos();
+    }
+    if (typeof renderClientes === 'function') {
+        renderClientes();
+    }
+});
 </script>
     </script>
 </body>
