@@ -2825,6 +2825,23 @@ function switchTab(tabName) {
     target.classList.remove('hidden');
   }
 }
+async function deletarOrcamento(id) {
+    if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('orcamentos')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        carregarOrcamentos();
+    } catch (error) {
+        console.error("Erro ao excluir orçamento:", error);
+        alert("Erro ao excluir o orçamento. Tente novamente.");
+    }
+}
 async function carregarOrcamentos() {
   if (!window.supabaseClient) return;
 
@@ -2861,15 +2878,19 @@ async function carregarOrcamentos() {
         <td class="px-6 py-4 text-gray-600">${orc.servicos_solicitados || 'Serviços diversos'}</td>
         <td class="px-6 py-4 font-semibold text-gray-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
         <td class="px-6 py-4">
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-            ${orc.status || 'Pendente'}
-          </span>
-        </td>
-        <td class="px-6 py-4 flex gap-2">
-          <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition shadow-sm" title="Aprovar e Converter em Cliente">
-            Aprovar
-          </button>
-        </td>
+        ${orc.status === 'Aprovado' 
+            ? `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Aprovado</span>`
+            : `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">Pendente</span>`
+        }
+    </td>
+    <td class="px-6 py-4 flex gap-2">
+        ${orc.status !== 'Aprovado' ? `
+            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
+            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+        ` : `
+            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+        `}
+    </td>
       `;
       tbody.appendChild(tr);
     });
@@ -3051,6 +3072,26 @@ document.addEventListener("DOMContentLoaded", () => {
         renderClientes();
     }
 });
+async function deletarOrcamento(id) {
+    if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('orcamentos')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        // Recarrega a lista de orçamentos na tela
+        if (typeof carregarOrcamentos === 'function') {
+            carregarOrcamentos();
+        }
+    } catch (error) {
+        console.error("Erro ao excluir orçamento:", error);
+        alert("Erro ao excluir o orçamento. Tente novamente.");
+    }
+}
 </script>
     </script>
 </body>
