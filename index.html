@@ -572,6 +572,7 @@ window.isConnectedToSupabase = true;
     </form>
   </div>
 </div>
+
         <!-- Modal de Edição de Cliente -->
         <div id="modalBioCliente" class="fixed inset-0 bg-gray-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
             <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl">
@@ -588,6 +589,30 @@ window.isConnectedToSupabase = true;
             </div>
         </div>
 
+        <!-- Modal Pós-Salvamento Personalizado -->
+<div id="modal-pos-salvamento" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Orçamento Salvo com Sucesso!</h3>
+        <p id="modal-pos-subtitulo" class="text-sm text-gray-600 mb-6">O que você deseja fazer agora com a proposta de <strong id="nomeLeadDestaque"></strong>?</p>
+        
+        <div class="flex flex-col gap-3">
+            <button onclick="executarAcaoWhatsApp()" class="w-full py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                💬 Enviar Proposta via WhatsApp
+            </button>
+            <button onclick="executarAcaoPDF()" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                📄 Gerar PDF do Orçamento
+            </button>
+            <button onclick="fecharModalPosSalvamento()" class="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors">
+                Apenas Fechar / Concluir
+            </button>
+        </div>
+    </div>
+</div>
     </main>
 
     <!-- MODAIS GLOBAIS -->
@@ -2929,12 +2954,14 @@ async function salvarOrcamento(event) {
     return;
   }
 
-  const lead_nome = document.getElementById('orc-nome').value;
-const lead_whatsapp = document.getElementById('orc-whatsapp').value;
-const valor_total = parseFloat(document.getElementById('orc-valor').value) || 0;
-const servicos_resumo = document.getElementById('orc-servicos').value;
+  const lead_nome = document.getElementById('orc-nome')?.value || '';
+  const lead_whatsapp = document.getElementById('orc-whatsapp')?.value || '';
+  const valor_total = parseFloat(document.getElementById('orc-valor')?.value) || 0;
+  
+  const elServicos = document.getElementById('orc-servicos');
+  const servicos_resumo = elServicos ? elServicos.value : 'Serviços personalizados';
 
-try {
+  try {
     const { data, error } = await window.supabaseClient
         .from('orcamentos')
         .insert([{
@@ -2951,18 +2978,34 @@ try {
       return;
     }
 
-    fecharModalOrcamento();
+    if (typeof fecharModalOrcamento === 'function') {
+        fecharModalOrcamento();
+    }
     
-    // Limpar o formulário se desejar
     document.getElementById('form-orcamento')?.reset();
 
-    // Atualizar a lista de orçamentos na tela imediatamente
     if (typeof carregarOrcamentos === 'function') {
         carregarOrcamentos();
+    } else if (typeof filtrarOrcamentos === 'function') {
+        filtrarOrcamentos('todos');
     }
 
-} catch (err) {
+    window.orcamentoAtualSalvo = { 
+        nome: lead_nome, 
+        whatsapp: lead_whatsapp, 
+        valor: valor_total, 
+        servicos: servicos_resumo 
+    };
+
+    const spanNome = document.getElementById('nomeLeadDestaque');
+    if (spanNome) spanNome.innerText = lead_nome;
+    
+    const modalElement = document.getElementById('modal-pos-salvamento');
+    if (modalElement) modalElement.classList.remove('hidden');
+
+  } catch (err) {
     console.error("Erro inesperado:", err);
+  }
 }
 async function aprovarOrcamento(id) {
     try {
@@ -3016,7 +3059,6 @@ async function aprovarOrcamento(id) {
     } catch (err) {
         console.error("Erro inesperado ao aprovar:", err);
     }
-}
 }
 async function aprovarOrcamento(id) {
     try {
@@ -3245,6 +3287,7 @@ function renderizarTabelaOrcamentos(lista) {
         tbody.appendChild(tr);
     });
 }
+
 </script>
     </script>
 </body>
