@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <!-- BIBLIOTECA DO SUPABASE OFICIAL -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
     // Inicialização global do Supabase
 const supabaseUrl = 'https://xjjflsdtaruzaekadqoq.supabase.co';
@@ -3288,7 +3290,335 @@ function renderizarTabelaOrcamentos(lista) {
     });
 }
 
+// Fecha o modal
+function fecharModalPosSalvamento() {
+    const modal = document.getElementById('modal-pos-salvamento');
+
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+
+    // Limpa o orçamento salvo da memória
+    window.orcamentoAtualSalvo = null;
+}
+
+
+// Botão WhatsApp
+function executarAcaoWhatsApp() {
+
+    const dados = window.orcamentoAtualSalvo;
+
+    if (!dados) {
+        alert("Nenhum orçamento encontrado.");
+        return;
+    }
+
+    // Feedback visual
+    alert("Em breve a proposta será enviada pelo WhatsApp.");
+
+    // Fecha o modal
+    fecharModalPosSalvamento();
+
+    // Futuramente colocaremos aqui:
+    // gerar PDF
+    // enviar mensagem
+    // atualizar status
+}
+
+
+
+function executarAcaoPDF() {
+
+    const dados = window.orcamentoAtualSalvo;
+
+    if (!dados){
+        alert("Nenhum orçamento encontrado.");
+        return;
+    }
+
+    document.getElementById("pdf-cliente").innerText =
+        dados.nome;
+
+    document.getElementById("pdf-whatsapp").innerText =
+        dados.whatsapp;
+
+    document.getElementById("pdf-servicos").innerText =
+        dados.servicos;
+
+    document.getElementById("pdf-valor").innerText =
+        "R$ " + Number(dados.valor).toFixed(2);
+
+    document.getElementById("pdf-data").innerText =
+        new Date().toLocaleDateString("pt-BR");
+
+    const elemento =
+        document.getElementById("orcamento-pdf");
+
+    elemento.style.display = "block";
+
+    html2pdf()
+        .set({
+
+            margin:10,
+
+            filename:
+            "Proposta_"+dados.nome+".pdf",
+
+            image:{
+                type:'jpeg',
+                quality:1
+            },
+
+            html2canvas:{
+                scale:2
+            },
+
+            jsPDF:{
+                unit:'mm',
+                format:'a4',
+                orientation:'portrait'
+            }
+
+        })
+        .from(elemento)
+        .save()
+        .then(()=>{
+
+            elemento.style.display="none";
+
+            fecharModalPosSalvamento();
+
+        });
+
+}
 </script>
     </script>
+    <div id="orcamento-pdf"
+style="
+width:210mm;
+min-height:297mm;
+background:#f8fafc;
+font-family:Arial,sans-serif;
+padding:0;
+display:none;
+">
+
+    <!-- CABEÇALHO -->
+    <div style="
+    background:linear-gradient(90deg,#059669,#10b981);
+    color:white;
+    padding:35px 45px;">
+
+        <table style="width:100%;">
+            <tr>
+
+                <td>
+                    <h1 style="
+                    margin:0;
+                    font-size:34px;
+                    letter-spacing:2px;">
+                        🌎 TURISMUNDO
+                    </h1>
+
+                    <div style="margin-top:8px;font-size:16px;">
+                        Turismo • Receptivo • Transfers
+                    </div>
+                </td>
+
+                <td style="text-align:right;">
+
+                    <div style="font-size:14px;">
+                        PROPOSTA COMERCIAL
+                    </div>
+
+                    <div style="
+                    margin-top:8px;
+                    font-size:26px;
+                    font-weight:bold;">
+                        Nº 0001
+                    </div>
+
+                </td>
+
+            </tr>
+        </table>
+
+    </div>
+
+
+    <!-- CONTEÚDO -->
+    <div style="padding:40px;">
+
+
+        <!-- CLIENTE -->
+
+        <div style="
+        background:white;
+        border-radius:12px;
+        padding:25px;
+        box-shadow:0 4px 15px rgba(0,0,0,.08);
+        margin-bottom:25px;">
+
+            <h2 style="
+            color:#059669;
+            margin-top:0;">
+                👤 Dados do Cliente
+            </h2>
+
+            <table style="
+            width:100%;
+            line-height:2;">
+
+                <tr>
+
+                    <td width="30%">
+                        <strong>Cliente</strong>
+                    </td>
+
+                    <td id="pdf-cliente"></td>
+
+                </tr>
+
+                <tr>
+
+                    <td>
+                        <strong>WhatsApp</strong>
+                    </td>
+
+                    <td id="pdf-whatsapp"></td>
+
+                </tr>
+
+                <tr>
+
+                    <td>
+                        <strong>Data</strong>
+                    </td>
+
+                    <td id="pdf-data"></td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+
+
+        <!-- SERVIÇOS -->
+
+        <div style="
+        background:white;
+        border-radius:12px;
+        padding:25px;
+        box-shadow:0 4px 15px rgba(0,0,0,.08);
+        margin-bottom:25px;">
+
+            <h2 style="
+            color:#059669;
+            margin-top:0;">
+                📋 Serviços Contratados
+            </h2>
+
+            <div
+            id="pdf-servicos"
+            style="
+            background:#f3f4f6;
+            border-left:6px solid #10b981;
+            padding:18px;
+            border-radius:8px;
+            font-size:16px;
+            line-height:1.8;">
+            </div>
+
+        </div>
+
+
+
+        <!-- TOTAL -->
+
+        <div style="
+        background:#059669;
+        color:white;
+        border-radius:15px;
+        padding:35px;
+        text-align:center;
+        margin-bottom:35px;">
+
+            <div style="
+            font-size:18px;
+            letter-spacing:2px;">
+                VALOR TOTAL
+            </div>
+
+            <div
+            id="pdf-valor"
+            style="
+            font-size:46px;
+            font-weight:bold;
+            margin-top:10px;">
+            </div>
+
+        </div>
+
+
+
+        <!-- OBSERVAÇÕES -->
+
+        <div style="
+        background:white;
+        border-radius:12px;
+        padding:25px;
+        box-shadow:0 4px 15px rgba(0,0,0,.08);">
+
+            <h2 style="
+            color:#059669;
+            margin-top:0;">
+                ℹ Informações
+            </h2>
+
+            <ul style="line-height:2;">
+
+                <li>Esta proposta possui validade de 7 dias.</li>
+
+                <li>Valores sujeitos à disponibilidade dos serviços.</li>
+
+                <li>Dúvidas? Nossa equipe está pronta para atender você.</li>
+
+            </ul>
+
+        </div>
+
+
+
+        <!-- RODAPÉ -->
+
+        <div style="
+        margin-top:70px;
+        text-align:center;
+        color:#777;">
+
+            <h2 style="
+            color:#059669;
+            margin-bottom:5px;">
+                Obrigado pela preferência!
+            </h2>
+
+            <div style="font-size:18px;">
+                Equipe Turismundo
+            </div>
+
+            <div style="
+            margin-top:10px;
+            font-size:13px;">
+                Turismo • Passeios • Transfers • Experiências
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
 </body>
 </html>
