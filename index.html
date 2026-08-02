@@ -10,16 +10,16 @@
     <!-- BIBLIOTECA DO SUPABASE OFICIAL -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
     // Inicialização global do Supabase
-const supabaseUrl = 'https://xjjflsdtaruzaekadqoq.supabase.co';
-const supabaseKey = 'sb_publishable_4w28HISw0UqCywyYMbm-8w_LVHV2ltM';
+    const supabaseUrl = 'https://xjjflsdtaruzaekadqoq.supabase.co';
+    const supabaseKey = 'sb_publishable_4w28HISw0UqCywyYMbm-8w_LVHV2ltM';
 
-// Criação do cliente de forma segura
-window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-window.isConnectedToSupabase = true;
-</script>
+    // Criação do cliente de forma segura
+    window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    window.isConnectedToSupabase = true;
+    </script>
 
     <style>
         body {
@@ -76,47 +76,46 @@ window.isConnectedToSupabase = true;
     <!-- CONTAINER DAS TELAS OPERACIONAIS -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
         <!-- VIEW: ORÇAMENTOS / LEADS -->
-<div id="view-orcamentos" class="view-section hidden max-w-7xl mx-auto p-6">
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Central de Orçamentos / Leads</h1>
-      <p class="text-sm text-gray-600">Gerencie propostas em aberto sem poluir sua base de clientes.</p>
-    </div>
-    <button onclick="abrirModalOrcamento()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium ...">
-  <i class="fas fa-fa-plus"></i>+ Novo Orçamento
-</button>
-  </div>
-  <!-- Filtros de Status -->
-    <div class="flex items-center space-x-2 mb-4">
-        <button onclick="filtrarOrcamentos('todos')" id="btn-filtro-todos" class="px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition">Todos</button>
-        <button onclick="filtrarOrcamentos('Pendente')" id="btn-filtro-pendente" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Pendentes</button>
-        <button onclick="filtrarOrcamentos('Aprovado')" id="btn-filtro-aprovado" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Aprovados</button>
-    </div>
+        <div id="view-orcamentos" class="view-section hidden max-w-7xl mx-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Central de Orçamentos / Leads</h1>
+                    <p class="text-sm text-gray-600">Gerencie propostas em aberto sem poluir sua base de clientes.</p>
+                </div>
+                <button onclick="abrirModalOrcamento()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-1">
+                    <i class="fas fa-plus"></i> Novo Orçamento
+                </button>
+            </div>
+            <!-- Filtros de Status -->
+            <div class="flex items-center space-x-2 mb-4">
+                <button onclick="filtrarOrcamentos('todos')" id="btn-filtro-todos" class="px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition">Todos</button>
+                <button onclick="filtrarOrcamentos('Pendente')" id="btn-filtro-pendente" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Pendentes</button>
+                <button onclick="filtrarOrcamentos('Aprovado')" id="btn-filtro-aprovado" class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Aprovados</button>
+            </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <table class="w-full text-left border-collapse">
-      <thead class="bg-gray-50 text-gray-700 uppercase text-xs border-b border-gray-200">
-        <tr>
-          <th class="px-6 py-4">Lead / Cliente</th>
-          <th class="px-6 py-4">WhatsApp</th>
-          <th class="px-6 py-4">Serviços Solicitados</th>
-          <th class="px-6 py-4">Valor Total</th>
-          <th class="px-6 py-4">Status</th>
-          <th class="px-6 py-4">Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabela-orcamentos-body" class="divide-y divide-gray-200 text-sm">
-        <!-- Preenchido via JavaScript -->
-      </tbody>
-    </table>
-  </div>
-</div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-700 uppercase text-xs border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-4">Lead / Cliente</th>
+                            <th class="px-6 py-4">WhatsApp</th>
+                            <th class="px-6 py-4">Serviços Solicitados</th>
+                            <th class="px-6 py-4">Valor Total</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-orcamentos-body" class="divide-y divide-gray-200 text-sm">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <!-- VIEW: DASHBOARD -->
         <div id="view-dashboard" class="view-section">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <!-- COLUNA ESQUERDA: ALERTAS & MENSAGENS RÁPIDAS -->
                 <!-- COLUNA ESQUERDA: NOTÍCIAS, ALERTAS & MENSAGENS -->
                 <section class="lg:col-span-1 space-y-4">
                     
@@ -142,32 +141,32 @@ window.isConnectedToSupabase = true;
                         </div>
                     </div>
                     <!-- Card de Atalho / Agenda Buenos Aires (Linda) -->
-    <a href="https://linda.buenosaires.gob.ar/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[300px] mt-4 hover:border-purple-300 hover:shadow-md transition-all group">
-        
-        <!-- Topo do Card -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agenda Buenos Aires</span>
-                <span class="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Oficial</span>
-            </div>
-            <span class="text-gray-400 group-hover:text-purple-600 transition-colors">↗</span>
-        </div>
-        
-        <!-- Conteúdo Central / Chamada -->
-        <div class="my-auto text-center py-6">
-            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold group-hover:scale-110 transition-transform">
-                📅
-            </div>
-            <h3 class="text-sm font-bold text-gray-800 mb-1">Explorar Programação da Cidade</h3>
-            <p class="text-xs text-gray-500 px-4">Consulte feiras, muestras, shows e eventos atualizados em tempo real no portal Linda.</p>
-        </div>
-        
-        <!-- Rodapé do Card -->
-        <div class="text-center pt-2 border-t border-gray-50">
-            <span class="text-xs font-semibold text-purple-600 group-hover:underline">Acessar portal externo →</span>
-        </div>
-        
-    </a>
+                    <a href="https://linda.buenosaires.gob.ar/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[300px] mt-4 hover:border-purple-300 hover:shadow-md transition-all group">
+                        
+                        <!-- Topo do Card -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agenda Buenos Aires</span>
+                                <span class="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Oficial</span>
+                            </div>
+                            <span class="text-gray-400 group-hover:text-purple-600 transition-colors">↗</span>
+                        </div>
+                        
+                        <!-- Conteúdo Central / Chamada -->
+                        <div class="my-auto text-center py-6">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold group-hover:scale-110 transition-transform">
+                                📅
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-800 mb-1">Explorar Programação da Cidade</h3>
+                            <p class="text-xs text-gray-500 px-4">Consulte feiras, muestras, shows e eventos atualizados em tempo real no portal Linda.</p>
+                        </div>
+                        
+                        <!-- Rodapé do Card -->
+                        <div class="text-center pt-2 border-t border-gray-50">
+                            <span class="text-xs font-semibold text-purple-600 group-hover:underline">Acessar portal externo →</span>
+                        </div>
+                        
+                    </a>
 
                     <!-- 2. Painel de Atenção / Alertas -->
                     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
@@ -179,9 +178,10 @@ window.isConnectedToSupabase = true;
                         </div>
 
                         <div class="space-y-2">
-                           <div class="space-y-2">
-    <!-- Os alertas reais do Supabase vão entrar aqui automaticamente -->
-</div>
+                            <div class="space-y-2">
+                                <!-- Os alertas reais do Supabase vão entrar aqui automaticamente -->
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 3. Disparo de Mensagens Rápidas -->
@@ -222,9 +222,9 @@ window.isConnectedToSupabase = true;
                             <span class="text-[10px] text-gray-400">Operando</span>
                         </div>
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Mês</p>
-    <p class="text-2xl font-black text-emerald-600" id="dash-faturamento">R$ 0</p>
-</div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Mês</p>
+                            <p class="text-2xl font-black text-emerald-600" id="dash-faturamento">R$ 0</p>
+                        </div>
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Motoristas Parceiros</p>
                             <p class="text-2xl font-black text-gray-900" id="dash-drivers-count">0</p>
@@ -246,18 +246,18 @@ window.isConnectedToSupabase = true;
                         </div>
 
                         <!-- Resultado do Voo -->
-<div id="flightResult" class="hidden p-4 rounded-xl border border-blue-100 bg-blue-50/20 space-y-2">
-    <div class="flex justify-between items-center">
-        <span class="font-extrabold text-blue-900 text-sm" id="resFlightCode">TK15</span>
-        <span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="resFlightStatus">STATUS</span>
-    </div>
-    <div class="grid grid-cols-2 gap-2 text-xs">
-        <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">-</span></p>
-        <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800" id="resFlightScheduled">-</span></p>
-        <p class="text-gray-600">Estimado: <span class="font-bold text-gray-800" id="resFlightEstimated">-</span></p>
-        <p class="text-gray-600">Destino: <span class="font-bold text-gray-800" id="resFlightDestination">-</span></p>
-    </div>
-</div>
+                        <div id="flightResult" class="hidden p-4 rounded-xl border border-blue-100 bg-blue-50/20 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-blue-900 text-sm" id="resFlightCode">TK15</span>
+                                <span class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="resFlightStatus">STATUS</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <p class="text-gray-600">Companhia: <span class="font-bold text-gray-800" id="resFlightCarrier">-</span></p>
+                                <p class="text-gray-600">Previsto: <span class="font-bold text-gray-800" id="resFlightScheduled">-</span></p>
+                                <p class="text-gray-600">Estimado: <span class="font-bold text-gray-800" id="resFlightEstimated">-</span></p>
+                                <p class="text-gray-600">Destino: <span class="font-bold text-gray-800" id="resFlightDestination">-</span></p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Visão Geral Operacional (Resumo do Dia) -->
@@ -378,8 +378,7 @@ window.isConnectedToSupabase = true;
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Moeda</label>
                                 <select id="driverCurrency" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm">
-                                    <option value="
-                                    R$">R$ ($)</option>
+                                    <option value="R$">R$ ($)</option>
                                     <option value="BRL">BRL (R$)</option>
                                     <option value="ARS">ARS ($)</option>
                                 </select>
@@ -952,67 +951,67 @@ window.isConnectedToSupabase = true;
         }
 
         async function switchTab(tabId) {
-    // Força a atualização dos dados do Supabase ao trocar de aba
-    if (typeof loadRealData === 'function') {
-        await loadRealData();
-    }
+            if (typeof loadRealData === 'function') {
+                await loadRealData();
+            }
 
-    document.querySelectorAll('.view-section').forEach(view => {
-        view.classList.add('hidden');
-    });
+            document.querySelectorAll('.view-section').forEach(view => {
+                view.classList.add('hidden');
+            });
 
-    const element = document.getElementById('view-' + tabId);
-    if (element) {
-        element.classList.remove('hidden');
-    }
+            const element = document.getElementById('view-' + tabId);
+            if (element) {
+                element.classList.remove('hidden');
+            }
 
-    const navDash = document.getElementById('nav-dash');
-    const navAgenda = document.getElementById('nav-agenda');
-    const navMoto = document.getElementById('nav-moto');
-    const navFin = document.getElementById('nav-fin');
-    const navServ = document.getElementById('nav-serv');
-    const navClientes = document.getElementById('nav-clientes');
-    const navOrcamentos = document.getElementById('nav-orcamentos');
+            const navDash = document.getElementById('nav-dash');
+            const navAgenda = document.getElementById('nav-agenda');
+            const navMoto = document.getElementById('nav-moto');
+            const navFin = document.getElementById('nav-fin');
+            const navServ = document.getElementById('nav-serv');
+            const navClientes = document.getElementById('nav-clientes');
+            const navOrcamentos = document.getElementById('nav-orcamentos');
 
-if (navOrcamentos) navOrcamentos.className = tabId === 'orcamentos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition-colors";
+            if (navOrcamentos) navOrcamentos.className = tabId === 'orcamentos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "text-blue-200 hover:text-white font-semibold transition-colors";
 
-    if (navDash) navDash.className = tabId === 'dashboard' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
-    if (navAgenda) navAgenda.className = tabId === 'agenda' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
-    if (navMoto) navMoto.className = tabId === 'motoristas' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
-    if (navServ) navServ.className = tabId === 'servicos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
-    if (navFin) navFin.className = tabId === 'financeiro' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
-    if (navClientes) navClientes.className = tabId === 'clientes' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navDash) navDash.className = tabId === 'dashboard' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navAgenda) navAgenda.className = tabId === 'agenda' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navMoto) navMoto.className = tabId === 'motoristas' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navServ) navServ.className = tabId === 'servicos' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navFin) navFin.className = tabId === 'financeiro' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
+            if (navClientes) navClientes.className = tabId === 'clientes' ? "text-white font-bold border-b-2 border-white pb-1 transition" : "";
 
-    if (tabId === 'dashboard') {
-        const hojeObj = new Date();
-        const ano = hojeObj.getFullYear();
-        const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
-        const dia = String(hojeObj.getDate()).padStart(2, '0');
-        selectedDay = `${ano}-${mes}-${dia}`;
-        
-        if (typeof renderDashboard === 'function') {
-            renderDashboard();
+            if (tabId === 'dashboard') {
+                const hojeObj = new Date();
+                const ano = hojeObj.getFullYear();
+                const mes = String(hojeObj.getMonth() + 1).padStart(2, '0');
+                const dia = String(hojeObj.getDate()).padStart(2, '0');
+                selectedDay = `${ano}-${mes}-${dia}`;
+                
+                if (typeof renderDashboard === 'function') {
+                    renderDashboard();
+                }
+            } else if (tabId === 'servicos') {
+                renderServicos();
+            } else if (tabId === 'agenda') {
+                const hoje = new Date();
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                selectedDay = `${ano}-${mes}-${dia}`;
+            } else if (tabId === 'motoristas') {
+                renderDrivers();
+            } else if (tabId === 'financeiro') {
+                renderFinanceiro();
+            } else if (tabId === 'clientes') {
+                renderClientes();
+            } else if (tabId === 'orcamentos') {
+              if (typeof carregarOrcamentos === 'function') {
+                carregarOrcamentos();
+              }
+            }
         }
-    } else if (tabId === 'servicos') {
-        renderServicos();
-    } else if (tabId === 'agenda') {
-        const hoje = new Date();
-        const ano = hoje.getFullYear();
-        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-        const dia = String(hoje.getDate()).padStart(2, '0');
-        selectedDay = `${ano}-${mes}-${dia}`;
-    } else if (tabId === 'motoristas') {
-        renderDrivers();
-    } else if (tabId === 'financeiro') {
-        renderFinanceiro();
-    } else if (tabId === 'clientes') {
-        renderClientes();
-    } else if (tabId === 'orcamentos') {
-      if (typeof carregarOrcamentos === 'function') {
-        carregarOrcamentos();
-      }
-    }
-}
+
         function renderDashboard() {
             const hoje = databaseAgenda.filter(item => {
                 const itemDia = String(item.dia || '').trim();
@@ -1317,178 +1316,156 @@ if (navOrcamentos) navOrcamentos.className = tabId === 'orcamentos' ? "text-whit
                 select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo})</option>`;
             });
         }
-async function renderServicos() {
-    const container = document.getElementById('catalogList');
-    if (!container) return;
 
-    if (!window.supabaseClient) {
-        container.innerHTML = `<p class="text-gray-500">Supabase não conectado.</p>`;
-        return;
-    }
+        async function renderServicos() {
+            const container = document.getElementById('catalogList');
+            if (!container) return;
 
-    // 1. Busca todas as categorias cadastradas
-    const { data: categoriasData, error: catError } = await window.supabaseClient
-        .from('categorias_servicos')
-        .select('nome')
-        .order('nome', { ascending: true });
-
-    if (catError) {
-        console.error('Erro ao carregar categorias:', catError.message);
-    }
-
-    // 2. Busca todos os serviços cadastrados
-    const { data: servicosData, error: servError } = await window.supabaseClient
-        .from('servicos')
-        .select('*')
-        .order('categoria', { ascending: true });
-
-    if (servError) {
-        console.error('Erro ao carregar serviços:', servError.message);
-        container.innerHTML = `<p class="text-red-500">Erro ao carregar os serviços.</p>`;
-        return;
-    }
-
-    // Junta todas as categorias (tanto as da tabela de categorias quanto eventuais avulsas nos serviços)
-    const categoriasSet = new Set();
-    if (categoriasData) categoriasData.forEach(c => categoriasSet.add(c.nome));
-    if (servicosData) servicosData.forEach(s => { if (s.categoria) categoriasSet.add(s.categoria); });
-
-    const listaCategorias = Array.from(categoriasSet);
-
-    if (listaCategorias.length === 0) {
-        container.innerHTML = `<p class="text-gray-500">Nenhuma categoria cadastrada até o momento.</p>`;
-        return;
-    }
-
-    // Agrupa os serviços por categoria
-    const servicosPorCategoria = {};
-    listaCategorias.forEach(cat => { servicosPorCategoria[cat] = []; });
-    
-    if (servicosData) {
-        servicosData.forEach(servico => {
-            const cat = servico.categoria || 'GERAL';
-            if (!servicosPorCategoria[cat]) {
-                servicosPorCategoria[cat] = [];
+            if (!window.supabaseClient) {
+                container.innerHTML = `<p class="text-gray-500">Supabase não conectado.</p>`;
+                return;
             }
-            servicosPorCategoria[cat].push(servico);
-        });
-    }
 
-    // Renderiza os blocos de categoria (mesmo as vazias)
-    container.innerHTML = listaCategorias.map(categoria => {
-        const itens = servicosPorCategoria[categoria] || [];
-        
-        const itensHTML = itens.length > 0 ? itens.map(servico => `
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
-                <div>
-                    <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-blue-500 hover:text-blue-700 p-2 rounded transition" title="Editar Serviço">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+            const { data: categoriasData, error: catError } = await window.supabaseClient
+                .from('categorias_servicos')
+                .select('nome')
+                .order('nome', { ascending: true });
+
+            if (catError) {
+                console.error('Erro ao carregar categorias:', catError.message);
+            }
+
+            const { data: servicosData, error: servError } = await window.supabaseClient
+                .from('servicos')
+                .select('*')
+                .order('categoria', { ascending: true });
+
+            if (servError) {
+                console.error('Erro ao carregar serviços:', servError.message);
+                container.innerHTML = `<p class="text-red-500">Erro ao carregar os serviços.</p>`;
+                return;
+            }
+
+            const categoriasSet = new Set();
+            if (categoriasData) categoriasData.forEach(c => categoriasSet.add(c.nome));
+            if (servicosData) servicosData.forEach(s => { if (s.categoria) categoriasSet.add(s.categoria); });
+
+            const listaCategorias = Array.from(categoriasSet);
+
+            if (listaCategorias.length === 0) {
+                container.innerHTML = `<p class="text-gray-500">Nenhuma categoria cadastrada até o momento.</p>`;
+                return;
+            }
+
+            const servicosPorCategoria = {};
+            listaCategorias.forEach(cat => { servicosPorCategoria[cat] = []; });
+            
+            if (servicosData) {
+                servicosData.forEach(servico => {
+                    const cat = servico.categoria || 'GERAL';
+                    if (!servicosPorCategoria[cat]) {
+                        servicosPorCategoria[cat] = [];
+                    }
+                    servicosPorCategoria[cat].push(servico);
+                });
+            }
+
+            container.innerHTML = listaCategorias.map(categoria => {
+                const itens = servicosPorCategoria[categoria] || [];
+                
+                const itensHTML = itens.length > 0 ? itens.map(servico => `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-blue-500 hover:text-blue-700 p-2 rounded transition" title="Editar Serviço">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `).join('') : `<p class="text-gray-400 text-sm italic py-2">Nenhum serviço cadastrado nesta categoria ainda.</p>`;
+                `).join('') : `<p class="text-gray-400 text-sm italic py-2">Nenhum serviço cadastrado nesta categoria ainda.</p>`;
 
-        return `
-            <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-                <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
-                    <h3 class="text-lg font-extrabold text-blue-900 uppercase tracking-wide">${categoria}</h3>
-                    <div class="flex items-center gap-2">
-                        <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            Editar Categoria
-                        </button>
-                        <button onclick="deletarCategoria('${categoria}')" class="text-red-600 hover:text-red-800 text-xs font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            Excluir Categoria
-                        </button>
+                return `
+                    <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
+                            <h3 class="text-lg font-extrabold text-blue-900 uppercase tracking-wide">${categoria}</h3>
+                            <div class="flex items-center gap-2">
+                                <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Editar Categoria
+                                </button>
+                                <button onclick="deletarCategoria('${categoria}')" class="text-red-600 hover:text-red-800 text-xs font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Excluir Categoria
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            ${itensHTML}
+                        </div>
                     </div>
-                </div>
-                <div class="flex flex-col gap-2">
-                    ${itensHTML}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+                `;
+            }).join('');
+        }
 
-// Função para editar o serviço
-async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
-    const novoNome = prompt("Editar nome do serviço:", nomeAtual);
-    if (novoNome === null) return; // Se cancelar
+        async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
+            const novoNome = prompt("Editar nome do serviço:", nomeAtual);
+            if (novoNome === null) return;
 
-    const novoPrecoStr = prompt("Editar valor (R$):", precoAtual);
-    if (novoPrecoStr === null) return;
+            const novoPrecoStr = prompt("Editar valor (R$):", precoAtual);
+            if (novoPrecoStr === null) return;
 
-    const novoPreco = parseFloat(novoPrecoStr);
-    if (isNaN(novoPreco)) {
-        alert("Por favor, insira um valor numérico válido para o preço.");
-        return;
-    }
+            const novoPreco = parseFloat(novoPrecoStr);
+            if (isNaN(novoPreco)) {
+                alert("Por favor, insira um valor numérico válido para o preço.");
+                return;
+            }
 
-    const novaCategoria = prompt("Editar categoria:", categoriaAtual);
-    if (novaCategoria === null) return;
+            const novaCategoria = prompt("Editar categoria:", categoriaAtual);
+            if (novaCategoria === null) return;
 
-    const { error } = await window.supabaseClient
-        .from('servicos')
-        .update({ 
-            nome: novoNome, 
-            preco: novoPreco, 
-            categoria: novaCategoria 
-        })
-        .eq('id', id);
+            const { error } = await window.supabaseClient
+                .from('servicos')
+                .update({ 
+                    nome: novoNome, 
+                    preco: novoPreco, 
+                    categoria: novaCategoria 
+                })
+                .eq('id', id);
 
-    if (error) {
-        alert("Erro ao atualizar o serviço: " + error.message);
-    } else {
-        renderServicos();
-    }
-}
+            if (error) {
+                alert("Erro ao atualizar o serviço: " + error.message);
+            } else {
+                renderServicos();
+            }
+        }
 
-// Função para deletar o serviço
-async function deletarServico(id) {
-    if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+        async function deletarServico(id) {
+            if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
 
-    const { error } = await window.supabaseClient
-        .from('servicos')
-        .delete()
-        .eq('id', id);
+            const { error } = await window.supabaseClient
+                .from('servicos')
+                .delete()
+                .eq('id', id);
 
-    if (error) {
-        alert("Erro ao excluir o serviço: " + error.message);
-    } else {
-        renderServicos();
-    }
-}
+            if (error) {
+                alert("Erro ao excluir o serviço: " + error.message);
+            } else {
+                renderServicos();
+            }
+        }
 
-// Função auxiliar para deletar o serviço do Supabase
-async function deletarServico(id) {
-    if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
-
-    const { error } = await window.supabaseClient
-        .from('servicos')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        alert("Erro ao excluir o serviço: " + error.message);
-    } else {
-        // Atualiza a listagem na tela automaticamente após excluir
-        renderServicos();
-    }
-}
         function renderFinanceiro() {
             const tableBody = document.getElementById('financeTableBody');
             if(!tableBody) return;
@@ -1795,90 +1772,88 @@ async function deletarServico(id) {
             renderDrivers(filtered);
         }
 
- async function simulateFlightSearch() {
-    const query = document.getElementById('flightInput').value.trim().toUpperCase();
-    const resultBox = document.getElementById('flightResult');
+        async function simulateFlightSearch() {
+            const query = document.getElementById('flightInput').value.trim().toUpperCase();
+            const resultBox = document.getElementById('flightResult');
 
-    if (!query) {
-        showToast("Por favor, digite o número do voo.");
-        return;
-    }
+            if (!query) {
+                showToast("Por favor, digite o número do voo.");
+                return;
+            }
 
-    try {
-        showToast("Consultando voo em tempo real...");
+            try {
+                showToast("Consultando voo em tempo real...");
 
-        const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
-            body: { flight_iata: query }
-        });
-        
-        console.log("Retorno da Edge Function verificar-voos:", { data, error });
+                const { data, error } = await window.supabaseClient.functions.invoke('verificar-voos', {
+                    body: { flight_iata: query }
+                });
+                
+                if (error || !data) {
+                    throw new Error("Não foi possível obter dados da Edge Function.");
+                }
 
-        if (error || !data) {
-            throw new Error("Não foi possível obter dados da Edge Function.");
+                function formatarHoraLocal(utcString) {
+                    if (!utcString) return "--:--";
+                    const dataUtc = new Date(utcString);
+                    if (isNaN(dataUtc.getTime())) return utcString;
+
+                    return dataUtc.toLocaleTimeString('pt-BR', { 
+                        timeZone: 'America/Argentina/Buenos_Aires', 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                }
+
+                let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
+                let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
+
+                document.getElementById('resFlightCode').innerText = query;
+                document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
+                document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
+                document.getElementById('resFlightCarrier').innerText = data.airline || "Aerolineas Argentinas";
+                
+                document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
+                
+                const campoEstimado = document.getElementById('resFlightEstimated');
+                campoEstimado.innerText = horarioEstimadoLocal;
+
+                const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || (query.toUpperCase().startsWith("AR") ? "Aeroparque / Ezeiza (BUE)" : "Buenos Aires");
+                const campoDestino = document.getElementById('resFlightDestination');
+                if (campoDestino) {
+                    campoDestino.innerText = destinoFinal;
+                }
+
+                if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
+                    campoEstimado.className = "font-bold text-red-600";
+                    document.getElementById('resFlightStatus').innerText = "ATRASADO";
+                    document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
+                    
+                    atualizarAtencaoOperacional(data);
+                } else {
+                    campoEstimado.className = "font-bold text-gray-800";
+                }
+
+                resultBox.classList.remove('hidden');
+                showToast("Consulta realizada com sucesso!");
+
+            } catch (err) {
+                console.error("Erro na busca:", err);
+                
+                document.getElementById('resFlightCode').innerText = query;
+                document.getElementById('resFlightStatus').innerText = "NÃO ENCONTRADO";
+                document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+                document.getElementById('resFlightCarrier').innerText = "Verifique o código digitado";
+                document.getElementById('resFlightScheduled').innerText = "--:--";
+                document.getElementById('resFlightEstimated').innerText = "Sem dados para este voo hoje";
+                document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
+                document.getElementById('resFlightDestination').innerText = "-";
+
+                resultBox.classList.remove('hidden');
+                showToast("Erro ao buscar dados na API.");
+            }
         }
 
-        // Função auxiliar para converter UTC para o fuso horário de Buenos Aires (-03:00)
-        function formatarHoraLocal(utcString) {
-            if (!utcString) return "--:--";
-            const dataUtc = new Date(utcString);
-            if (isNaN(dataUtc.getTime())) return utcString;
-
-            return dataUtc.toLocaleTimeString('pt-BR', { 
-                timeZone: 'America/Argentina/Buenos_Aires', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: false 
-            });
-        }
-
-        let horarioPrevistoLocal = formatarHoraLocal(data.scheduled || data.dep_time || data.arr_time);
-        let horarioEstimadoLocal = formatarHoraLocal(data.estimated || data.arr_estimated || data.scheduled);
-
-        document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = data.status || "CONSULTAR";
-        document.getElementById('resFlightStatus').className = "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
-        document.getElementById('resFlightCarrier').innerText = data.airline || "Aerolineas Argentinas";
-        
-        document.getElementById('resFlightScheduled').innerText = horarioPrevistoLocal;
-        
-        const campoEstimado = document.getElementById('resFlightEstimated');
-        campoEstimado.innerText = horarioEstimadoLocal;
-
-        const destinoFinal = data.arrival?.airport || data.arrival?.iata || data.arrival?.city || data.destination || data.arr_iata || (query.toUpperCase().startsWith("AR") ? "Aeroparque / Ezeiza (BUE)" : "Buenos Aires");
-        const campoDestino = document.getElementById('resFlightDestination');
-        if (campoDestino) {
-            campoDestino.innerText = destinoFinal;
-        }
-
-        if (horarioEstimadoLocal !== horarioPrevistoLocal && horarioEstimadoLocal !== "--:--") {
-            campoEstimado.className = "font-bold text-red-600";
-            document.getElementById('resFlightStatus').innerText = "ATRASADO";
-            document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
-            
-            atualizarAtencaoOperacional(data);
-        } else {
-            campoEstimado.className = "font-bold text-gray-800";
-        }
-
-        resultBox.classList.remove('hidden');
-        showToast("Consulta realizada com sucesso!");
-
-    } catch (err) {
-        console.error("Erro na busca:", err);
-        
-        document.getElementById('resFlightCode').innerText = query;
-        document.getElementById('resFlightStatus').innerText = "NÃO ENCONTRADO";
-        document.getElementById('resFlightStatus').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-        document.getElementById('resFlightCarrier').innerText = "Verifique o código digitado";
-        document.getElementById('resFlightScheduled').innerText = "--:--";
-        document.getElementById('resFlightEstimated').innerText = "Sem dados para este voo hoje";
-        document.getElementById('resFlightEstimated').className = "font-bold text-red-600";
-        document.getElementById('resFlightDestination').innerText = "-";
-
-        resultBox.classList.remove('hidden');
-        showToast("Erro ao buscar dados na API.");
-    }
-}
         const templates = {
             welcome: {
                 title: "👋 Boas-vindas Buenos Aires",
@@ -1994,12 +1969,6 @@ async function deletarServico(id) {
             }
         }
 
-        function carregarReservasDia(dataStr) {
-            window.selectedDay = dataStr;
-            gerarDiasAgenda(); 
-            renderAgenda();    
-        }
-
         function openConfirmModal(title, text) {
             document.getElementById('confirmTitle').innerText = title;
             document.getElementById('confirmText').innerText = text;
@@ -2035,22 +2004,6 @@ async function deletarServico(id) {
             document.execCommand("copy");
             document.body.removeChild(tempInput);
             showToast("Chave Pix copiada!");
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMessage');
-            if (!toast || !msgEl) return;
-
-            msgEl.innerText = message;
-            
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 2500);
         }
 
         async function addCategoria() {
@@ -2169,44 +2122,6 @@ async function deletarServico(id) {
             }
         }
 
-        async function renderClientes() {
-            const container = document.getElementById('clientesList');
-            if (!container) return;
-            
-            if (!window.supabaseClient) {
-                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Modo Simulação: Sem conexão com banco de clientes.</p>`;
-                return;
-            }
-
-            const { data, error } = await window.supabaseClient
-                .from('clientes')
-                .select('*')
-                .order('nome', { ascending: true });
-
-            if (error) {
-                console.error("Erro ao buscar dados no Supabase:", error);
-                return;
-            }
-
-            container.innerHTML = '';
-
-            data.forEach(cliente => {
-                container.innerHTML += `
-    <div onclick="openClientDossier('${cliente.id}', '${cliente.nome}', '${cliente.whatsapp || ''}', '${cliente.bio || ''}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between cursor-pointer">
-        <div>
-            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
-            <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
-        </div>
-        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition text-xs">
-                Deletar
-            </button>
-        </div>
-    </div>
-`;
-            });
-        }
-
         async function filtrarClientesTempoReal() {
             const termo = document.getElementById('searchClientInput').value.trim();
             const container = document.getElementById('clientesList');
@@ -2316,1309 +2231,809 @@ async function deletarServico(id) {
             }
         }
 
-        // Eventos e inicialização pós DOM
-        document.addEventListener('DOMContentLoaded', function() {
-            initSupabase();
-            switchTab('dashboard');
-            gerarDiasAgenda();
+        async function editarCategoria(nomeAntigo) {
+            const novoNome = prompt(`Digite o novo nome para a categoria "${nomeAntigo}":`, nomeAntigo);
+            if (!novoNome || novoNome.trim() === '' || novoNome === nomeAntigo) return;
+            const nomeNovoUpper = novoNome.toUpperCase();
 
-            const servicoSelect = document.getElementById('servicoSelectReserva');
-            if (servicoSelect) {
-                servicoSelect.addEventListener('change', function() {
-                    const optionSelecionada = this.options[this.selectedIndex];
-                    const preco = optionSelecionada.getAttribute('data-preco');
-                    const campoCobrança = document.getElementById('modalValueTotal'); 
-                    
-                    if (campoCobrança && preco) {
-                        campoCobrança.value = preco;
-                    }
-                });
+            await window.supabaseClient
+                .from('categorias_servicos')
+                .update({ nome: nomeNovoUpper })
+                .eq('nome', nomeAntigo);
+
+            const { error } = await window.supabaseClient
+                .from('servicos')
+                .update({ categoria: nomeNovoUpper })
+                .eq('categoria', nomeAntigo);
+
+            if (error) {
+                alert('Erro ao atualizar categoria: ' + error.message);
+            } else {
+                renderServicos();
             }
-
-            const modalClientInput = document.getElementById('modalClient');
-            if (modalClientInput) {
-                modalClientInput.addEventListener('blur', async function() {
-                    const nomeDigitado = this.value.trim();
-                    if (!nomeDigitado || !window.supabaseClient) return;
-
-                    const { data } = await window.supabaseClient
-                        .from('clientes')
-                        .select('whatsapp')
-                        .ilike('nome', `%${nomeDigitado}%`)
-                        .maybeSingle();
-
-                    if (data && data.whatsapp) {
-                        document.getElementById('modalPhone').value = data.whatsapp;
-                    }
-                });
-            }
-
-            const elementoTituloHoje = document.getElementById('tituloAtividadesHoje');
-            if (elementoTituloHoje) {
-                const dataFormatada = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                elementoTituloHoje.innerText = `Próximas Atividades de Hoje (${dataFormatada})`;
-            }
-        });
-       async function editarCategoria(nomeAntigo) {
-    const novoNome = prompt(`Digite o novo nome para a categoria "${nomeAntigo}":`, nomeAntigo);
-    if (!novoNome || novoNome.trim() === '' || novoNome === nomeAntigo) return;
-    const nomeNovoUpper = novoNome.toUpperCase();
-
-    // Atualiza na tabela de categorias
-    await window.supabaseClient
-        .from('categorias_servicos')
-        .update({ nome: nomeNovoUpper })
-        .eq('nome', nomeAntigo);
-
-    // Atualiza nos serviços vinculados
-    const { error } = await window.supabaseClient
-        .from('servicos')
-        .update({ categoria: nomeNovoUpper })
-        .eq('categoria', nomeAntigo);
-
-    if (error) {
-        alert('Erro ao atualizar categoria: ' + error.message);
-    } else {
-        renderServicos();
-        if (typeof carregarCategoriasSelect === 'function') carregarCategoriasSelect();
-    }
-}
-
-async function deletarCategoria(categoriaNome) {
-    if (!confirm(`Tem certeza que deseja excluir a categoria "${categoriaNome}" e todos os seus serviços vinculados?`)) return;
-
-    // Deleta da tabela de categorias
-    await window.supabaseClient
-        .from('categorias_servicos')
-        .delete()
-        .eq('nome', categoriaNome);
-
-    // Deleta os serviços vinculados a esta categoria específica
-    const { error } = await window.supabaseClient
-        .from('servicos')
-        .delete()
-        .eq('categoria', categoriaNome); // <--- Esse filtro é essencial!
-
-    if (error) {
-        alert('Erro ao excluir categoria: ' + error.message);
-    } else {
-        renderServicos();
-        if (typeof carregarCategoriasSelect === 'function') carregarCategoriasSelect();
-    }
-}
-// Lista de notícias que vão rodar no painel
-    const bairesNoticias = [
-        {
-            cat: "Trânsito / Alerta",
-            color: "text-blue-900",
-            time: "Há 15 min",
-            text: "Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco."
-        },
-        {
-            cat: "Turismo & Agenda",
-            color: "text-emerald-600",
-            time: "Hoje",
-            text: "Festival de Tango em San Telmo com apresentações gratuitas ao ar livre às 18h."
-        },
-        {
-            cat: "Clima / Aeroporto",
-            color: "text-amber-600",
-            time: "Agora",
-            text: "Aeroparque (AEP) operando normalmente com visibilidade perfeita para pousos."
-        },
-        {
-            cat: "Cultura & Lazer",
-            color: "text-purple-600",
-            time: "Dica do Dia",
-            text: "Feira de San Telmo movimentada neste domingo com artesanato e antiques."
         }
-    ];
 
-    let noticiaAtualIndex = 0;
+        async function deletarCategoria(categoriaNome) {
+            if (!confirm(`Tem certeza que deseja excluir a categoria "${categoriaNome}" e todos os seus serviços vinculados?`)) return;
 
-    function iniciarTickerNoticias() {
-        const card = document.getElementById('tickerNewsCard');
-        const catEl = document.getElementById('tickerCategory');
-        const timeEl = document.getElementById('tickerTime');
-        const textEl = document.getElementById('tickerText');
+            await window.supabaseClient
+                .from('categorias_servicos')
+                .delete()
+                .eq('nome', categoriaNome);
 
-        if (!card) return;
+            const { error } = await window.supabaseClient
+                .from('servicos')
+                .delete()
+                .eq('categoria', categoriaNome);
 
-        // Efeito de fade out / subida
-        card.classList.remove('opacity-100', 'translate-y-0');
-        card.classList.add('opacity-0', '-translate-y-2');
-
-        setTimeout(() => {
-            noticiaAtualIndex = (noticiaAtualIndex + 1) % bairesNoticias.length;
-            const item = bairesNoticias[noticiaAtualIndex];
-
-            catEl.innerText = item.cat;
-            catEl.className = `text-[10px] font-extrabold uppercase ${item.color}`;
-            timeEl.innerText = item.time;
-            textEl.innerText = item.text;
-
-            // Efeito de fade in / descida
-            card.classList.remove('opacity-0', '-translate-y-2');
-            card.classList.add('opacity-100', 'translate-y-0');
-        }, 400); // tempo da animação de troca
-    }
-
-    // Dispara a troca a cada 5 segundos
-    setInterval(iniciarTickerNoticias, 5000);
-  function carregarEventosCidade() {
-    // Lista local de notícias e avisos em tempo real focada no receptivo de Buenos Aires
-    const bairesNoticias = [
-        { cat: "Turismo BA", color: "text-emerald-700", time: "Ao Vivo", text: "Aeroparque (AEP) operando normalmente com fluxo intenso de voos do Brasil." },
-        { cat: "Câmbio & Dicas", color: "text-blue-900", time: "Atualizado", text: "Cotação do Peso Argentino e dicas de mobilidade para transfers em Puerto Madero." },
-        { cat: "Agenda Cultural", color: "text-amber-700", time: "Hoje", text: "Casas de tango em San Telmo com alta procura e reservas abertas para turistas." }
-    ];
-
-    const txtElement = document.getElementById("tickerText");
-    const catElement = document.getElementById("tickerCategory");
-    
-    if (txtElement && bairesNoticias.length > 0) {
-        let indexAtual = 0;
-        
-        function rodarTicker() {
-            txtElement.innerText = bairesNoticias[indexAtual].text;
-            if (catElement) catElement.innerText = bairesNoticias[indexAtual].cat;
-            indexAtual = (indexAtual + 1) % bairesNoticias.length;
+            if (error) {
+                alert('Erro ao excluir categoria: ' + error.message);
+            } else {
+                renderServicos();
+            }
         }
-        
-        rodarTicker();
-        setInterval(rodarTicker, 6000);
-    }
-}
 
-carregarEventosCidade();
-carregarEventosCidade();
+        const bairesNoticias = [
+            {
+                cat: "Trânsito / Alerta",
+                color: "text-blue-900",
+                time: "Há 15 min",
+                text: "Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco."
+            },
+            {
+                cat: "Turismo & Agenda",
+                color: "text-emerald-600",
+                time: "Hoje",
+                text: "Festival de Tango em San Telmo com apresentações gratuitas ao ar livre às 18h."
+            },
+            {
+                cat: "Clima / Aeroporto",
+                color: "text-amber-600",
+                time: "Agora",
+                text: "Aeroparque (AEP) operando normalmente com visibilidade perfeita para pousos."
+            },
+            {
+                cat: "Cultura & Lazer",
+                color: "text-purple-600",
+                time: "Dica do Dia",
+                text: "Feira de San Telmo movimentada neste domingo com artesanato e antiques."
+            }
+        ];
 
-// Cole o código dos alertas operacionais aqui dentro do script
-async function carregarAtencaoOperacional() {
-    const container = document.querySelector('.space-y-2'); 
-    if (!container) return;
+        let noticiaAtualIndex = 0;
 
-    const { data: alertas, error } = await supabaseClient
-        .from('operational_alerts')
-        .select('*')
-        .eq('resolved', false)
-        .order('created_at', { ascending: false });
+        function iniciarTickerNoticias() {
+            const card = document.getElementById('tickerNewsCard');
+            const catEl = document.getElementById('tickerCategory');
+            const timeEl = document.getElementById('tickerTime');
+            const textEl = document.getElementById('tickerText');
 
-    if (error) {
-        console.error('Erro ao buscar alertas:', error);
-        return;
-    }
+            if (!card) return;
 
-    const contadorBadge = document.querySelector('h2 + span');
-    if (contadorBadge) contadorBadge.textContent = `${alertas.length} Alertas`;
+            card.classList.remove('opacity-100', 'translate-y-0');
+            card.classList.add('opacity-0', '-translate-y-2');
 
-    container.innerHTML = '';
+            setTimeout(() => {
+                noticiaAtualIndex = (noticiaAtualIndex + 1) % bairesNoticias.length;
+                const item = bairesNoticias[noticiaAtualIndex];
 
-    if (alertas.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-400 p-2">Nenhum alerta operacional no momento.</p>`;
-        return;
-    }
+                catEl.innerText = item.cat;
+                catEl.className = `text-[10px] font-extrabold uppercase ${item.color}`;
+                timeEl.innerText = item.time;
+                textEl.innerText = item.text;
 
-    alertas.forEach(alerta => {
-        let cardHtml = '';
+                card.classList.remove('opacity-0', '-translate-y-2');
+                card.classList.add('opacity-100', 'translate-y-0');
+            }, 400);
+        }
 
-        if (alerta.type === 'flight') {
-            cardHtml = `
-                <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
-                    <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
+        setInterval(iniciarTickerNoticias, 5000);
+
+        async function carregarAtencaoOperacional() {
+            const container = document.querySelector('.space-y-2'); 
+            if (!container) return;
+
+            const { data: alertas, error } = await supabaseClient
+                .from('operational_alerts')
+                .select('*')
+                .eq('resolved', false)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Erro ao buscar alertas:', error);
+                return;
+            }
+
+            const contadorBadge = document.querySelector('h2 + span');
+            if (contadorBadge) contadorBadge.textContent = `${alertas.length} Alertas`;
+
+            container.innerHTML = '';
+
+            if (alertas.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 p-2">Nenhum alerta operacional no momento.</p>`;
+                return;
+            }
+
+            alertas.forEach(alerta => {
+                let cardHtml = '';
+
+                if (alerta.type === 'flight') {
+                    cardHtml = `
+                        <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
+                            <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                                <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                                <button onclick="sendQuickWhatsApp('${alerta.action_data.phone}', '${alerta.action_data.driver}', '${alerta.action_data.flight}', '${alerta.action_data.time}')" class="text-[10px] text-red-600 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                                    <i class="fab fa-whatsapp"></i> Avisar Motorista ${alerta.action_data.driver}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (alerta.type === 'payment') {
+                    cardHtml = `
+                        <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
+                            <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                                <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                                <button onclick="sendPaymentCobranca('${alerta.action_data.phone}', '${alerta.action_data.client}', '${alerta.action_data.amount}')" class="text-[10px] text-amber-700 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                                    <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        if (typeof supabaseClient !== 'undefined') {
+            supabaseClient
+                .channel('public:operational_alerts')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'operational_alerts' }, () => {
+                    carregarAtencaoOperacional();
+                })
+                .subscribe();
+        }
+
+        function atualizarAtencaoOperacional(data) {
+            const horarioPrevisto = data.scheduled || data.dep_time || data.arr_time || "--:--";
+            let horarioEstimado = data.estimated || data.arr_estimated || horarioPrevisto;
+            let minutosDeAtraso = data.delay || 0;
+
+            if (data.flight_iata === "AR1461") {
+                horarioEstimado = "12:02";
+                minutosDeAtraso = 52;
+            }
+
+            if (minutosDeAtraso > 15 || data.flight_iata === "AR1461") {
+                const campoEstimado = document.getElementById('resFlightEstimated');
+                if (campoEstimado) {
+                    campoEstimado.innerText = horarioEstimado;
+                    campoEstimado.className = "font-bold text-red-600";
+                }
+
+                const containerAlertas = document.querySelector('.bg-red-50')?.parentNode || document.getElementById('painel-atencao-operacional');
+                
+                if (containerAlertas) {
+                    const alertaHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 rounded shadow-sm mt-2">
+                            <p class="text-xs font-bold text-red-700">⚠️ Voo Atrasado: ${data.flight_iata || 'AR1461'}</p>
+                            <p class="text-xs text-gray-600">Previsto: ${horarioPrevisto} | Novo Horário: ${horarioEstimado}</p>
+                            <a href="https://wa.me/?text=Olá,%20notamos%20um%20atraso%20no%20seu%20voo%20(${data.flight_iata}).%20Estamos%20ajustando%20o%20transfer!" 
+                               target="_blank" 
+                               class="text-xs text-red-600 font-semibold underline mt-1 inline-block">
+                                📱 Avisar Cliente / Motorista via WhatsApp
+                            </a>
+                        </div>
+                    `;
+                    containerAlertas.insertAdjacentHTML('afterbegin', alertaHTML);
+                }
+            }
+        }
+    </script>
+
+    <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
+    <div id="clientDossierModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+                <div>
+                    <h3 id="dossierClientName" class="text-lg font-bold">Nome do Cliente</h3>
+                    <p id="dossierClientPhone" class="text-xs text-blue-200">+55 ...</p>
+                </div>
+                <button onclick="closeClientDossier()" class="text-white hover:text-gray-200 text-xl font-bold px-2">&times;</button>
+            </div>
+
+            <div class="flex border-b border-gray-200 bg-gray-50">
+                <button onclick="switchDossierTab('cadastral')" id="tabBtnCadastral" class="flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition">Dados Cadastrais</button>
+                <button onclick="switchDossierTab('timeline')" id="tabBtnTimeline" class="flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition">Linha do Tempo</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="dossierTabCadastral" class="space-y-4">
                     <div>
-                        <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
-                        <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
-                        <button onclick="sendQuickWhatsApp('${alerta.action_data.phone}', '${alerta.action_data.driver}', '${alerta.action_data.flight}', '${alerta.action_data.time}')" class="text-[10px] text-red-600 font-bold mt-1.5 flex items-center gap-1 hover:underline">
-                            <i class="fab fa-whatsapp"></i> Avisar Motorista ${alerta.action_data.driver}
-                        </button>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">Nome Completo</label>
+                        <input type="text" id="editClientName" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">WhatsApp</label>
+                        <input type="text" id="editClientPhone" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase">Destino / Observações</label>
+                        <textarea id="editClientBio" rows="3" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800"></textarea>
                     </div>
                 </div>
-            `;
-        } else if (alerta.type === 'payment') {
-            cardHtml = `
-                <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
-                    <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
-                    <div>
-                        <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
-                        <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
-                        <button onclick="sendPaymentCobranca('${alerta.action_data.phone}', '${alerta.action_data.client}', '${alerta.action_data.amount}')" class="text-[10px] text-amber-700 font-bold mt-1.5 flex items-center gap-1 hover:underline">
-                            <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
-                        </button>
-                    </div>
+
+                <div id="dossierTabTimeline" class="hidden space-y-4">
+                    <div id="clientTimelineContent" class="space-y-3"></div>
                 </div>
-            `;
-        }
-        container.insertAdjacentHTML('beforeend', cardHtml);
-    });
-}
+            </div>
 
-if (typeof supabaseClient !== 'undefined') {
-    supabaseClient
-        .channel('public:operational_alerts')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'operational_alerts' }, () => {
-            carregarAtencaoOperacional();
-        })
-        .subscribe();
-}
-
-document.addEventListener('DOMContentLoaded', carregarAtencaoOperacional);
-// Exemplo de função ao receber os dados do voo na tela
-function atualizarPainelVoo(dadosVoo) {
-  // Extrai o objeto interno caso venha encapsulado pelo Supabase
-  const voo = dadosVoo.data || dadosVoo;
-
-  // Atualiza os campos do card no painel de voos
-  document.getElementById('status-voo').innerText = voo.flight_status || 'Consultar';
-  document.getElementById('previsto-voo').innerText = voo.departure_time || '--:--';
-  document.getElementById('estimado-voo').innerText = voo.arrival_time || '--:--';
-
-    // Captura o container de Atenção Operacional
-    const containerAtencao = document.querySelector('.atencao-operacional-list'); // Ajuste para a sua classe/ID real
-    
-    if (dadosVoo.isDelayed) {
-        // Cria ou atualiza o card de alerta de atraso
-        const alertaHTML = `
-            <div id="alerta-voo-${dadosVoo.flightNumber}" class="alerta-card-atraso" style="border-left: 4px solid #e74c3c; background: #fdf3f2; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
-                <div style="font-weight: bold; color: #c0392b; font-size: 13px;">
-                    ⚠️ Voo ${dadosVoo.flightNumber} Atrasado
-                </div>
-                <div style="font-size: 12px; color: #555; margin-top: 2px;">
-                    Previsto: ${dadosVoo.scheduled} | Estimado: ${dadosVoo.estimated} (${dadosVoo.delayMinutes} min de atraso). Verifique o motorista.
-                </div>
-                <button onclick="notificarMotoristaVoo('${dadosVoo.flightNumber}')" style="margin-top: 6px; background: #25d366; color: #fff; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer;">
-                    💬 Avisar Motorista via WhatsApp
+            <div class="px-6 py-4 bg-gray-50 border-t flex flex-col gap-2.5">
+                <button onclick="openNewReservationForCurrentClient()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Nova Reserva para este Cliente
+                </button>
+                <button onclick="saveClientChanges()" class="w-full bg-blue-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-800 transition shadow-sm">
+                    Salvar Alterações
                 </button>
             </div>
-        `;
-        
-        // Evita duplicar se já existir, ou adiciona na lista
-        const alertaExistente = document.getElementById(`alerta-voo-${dadosVoo.flightNumber}`);
-        if (alertaExistente) {
-            alertaExistente.innerHTML = alertaHTML;
-        } else {
-            containerAtencao.insertAdjacentHTML('afterbegin', alertaHTML);
-        }
-    }
-}
-// Função que cuida de avisar quando o voo está atrasado (Posicionada no escopo global)
-function atualizarAtencaoOperacional(data) {
-    const horarioPrevisto = data.scheduled || data.dep_time || data.arr_time || "--:--";
-    let horarioEstimado = data.estimated || data.arr_estimated || horarioPrevisto;
-    let minutosDeAtraso = data.delay || 0;
-
-    // Força o atraso e o horário correto (12:02) para o voo de teste AR1461
-    if (data.flight_iata === "AR1461") {
-        horarioEstimado = "12:02";
-        minutosDeAtraso = 52;
-    }
-
-    // Se houver atraso real ou for o voo de teste, injeta o alerta
-    if (minutosDeAtraso > 15 || data.flight_iata === "AR1461") {
-        const campoEstimado = document.getElementById('resFlightEstimated');
-        if (campoEstimado) {
-            campoEstimado.innerText = horarioEstimado;
-            campoEstimado.className = "font-bold text-red-600";
-        }
-
-        // Procura a seção de Atenção Operacional na tela
-        const containerAlertas = document.querySelector('.bg-red-50')?.parentNode || document.getElementById('painel-atencao-operacional');
-        
-        if (containerAlertas) {
-            const alertaHTML = `
-                <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 rounded shadow-sm mt-2">
-                    <p class="text-xs font-bold text-red-700">⚠️ Voo Atrasado: ${data.flight_iata || 'AR1461'}</p>
-                    <p class="text-xs text-gray-600">Previsto: ${horarioPrevisto} | Novo Horário: ${horarioEstimado}</p>
-                    <a href="https://wa.me/?text=Olá,%20notamos%20um%20atraso%20no%20seu%20voo%20(${data.flight_iata}).%20Estamos%20ajustando%20o%20transfer!" 
-                       target="_blank" 
-                       class="text-xs text-red-600 font-semibold underline mt-1 inline-block">
-                        📱 Avisar Cliente / Motorista via WhatsApp
-                    </a>
-                </div>
-            `;
-            containerAlertas.insertAdjacentHTML('afterbegin', alertaHTML);
-        }
-    }
-}
-</script> <!-- Fechou o script aqui para o HTML rodar livremente -->
-
-<!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE (FORA DE QUALQUER SCRIPT) -->
-<div id="clientDossierModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        
-        <!-- Cabeçalho do Dossiê -->
-        <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
-            <div>
-                <h3 id="dossierClientName" class="text-lg font-bold">Nome do Cliente</h3>
-                <p id="dossierClientPhone" class="text-xs text-blue-200">+55 ...</p>
-            </div>
-            <button onclick="closeClientDossier()" class="text-white hover:text-gray-200 text-xl font-bold px-2">&times;</button>
-        </div>
-
-        <!-- Abas de Navegação -->
-        <div class="flex border-b border-gray-200 bg-gray-50">
-            <button onclick="switchDossierTab('cadastral')" id="tabBtnCadastral" class="flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition">Dados Cadastrais</button>
-            <button onclick="switchDossierTab('timeline')" id="tabBtnTimeline" class="flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition">Linha do Tempo</button>
-        </div>
-
-        <!-- Conteúdo das Abas -->
-        <div class="p-6 overflow-y-auto flex-1">
-            
-            <!-- Aba 1: Dados Cadastrais -->
-            <div id="dossierTabCadastral" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase">Nome Completo</label>
-                    <input type="text" id="editClientName" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase">WhatsApp</label>
-                    <input type="text" id="editClientPhone" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800" />
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase">Destino / Observações</label>
-                    <textarea id="editClientBio" rows="3" class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800"></textarea>
-                </div>
-            </div>
-
-            <!-- Aba 2: Linha do Tempo -->
-            <div id="dossierTabTimeline" class="hidden space-y-4">
-                <div id="clientTimelineContent" class="space-y-3">
-                    <!-- Preenchido dinamicamente via JS -->
-                </div>
-            </div>
 
         </div>
-
-        <!-- Rodapé do Modal com os Botões Empilhados -->
-        <div class="px-6 py-4 bg-gray-50 border-t flex flex-col gap-2.5">
-            <button onclick="openNewReservationForCurrentClient()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-500 transition flex items-center justify-center gap-1.5 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Nova Reserva para este Cliente
-            </button>
-            <button onclick="saveClientChanges()" class="w-full bg-blue-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-800 transition shadow-sm">
-                Salvar Alterações
-            </button>
-        </div>
-
     </div>
-</div>
 
-<!-- BLOCO DE SCRIPT ÚNICO PARA O DOSSIÊ -->
-<script>
-let currentOpenClientId = null;
+    <!-- BLOCO DE SCRIPT ÚNICO PARA O DOSSIÊ E ORÇAMENTOS -->
+    <script>
+        let currentOpenClientId = null;
 
-async function openClientDossier(clientId, clientName, clientPhone, clientBio) {
-    currentOpenClientId = clientId;
-    document.getElementById('dossierClientName').innerText = clientName || 'Cliente';
-    document.getElementById('dossierClientPhone').innerText = clientPhone || '';
-    document.getElementById('editClientName').value = clientName || '';
-    document.getElementById('editClientPhone').value = clientPhone || '';
-    document.getElementById('editClientBio').value = clientBio || '';
+        async function openClientDossier(clientId, clientName, clientPhone, clientBio) {
+            currentOpenClientId = clientId;
+            document.getElementById('dossierClientName').innerText = clientName || 'Cliente';
+            document.getElementById('dossierClientPhone').innerText = clientPhone || '';
+            document.getElementById('editClientName').value = clientName || '';
+            document.getElementById('editClientPhone').value = clientPhone || '';
+            document.getElementById('editClientBio').value = clientBio || '';
 
-    switchDossierTab('cadastral');
-    document.getElementById('clientDossierModal').classList.remove('hidden');
-    await loadClientTimeline(clientId);
-}
-
-function closeClientDossier() {
-    document.getElementById('clientDossierModal').classList.add('hidden');
-    currentOpenClientId = null;
-}
-
-function switchDossierTab(tabName) {
-    const tabCadastral = document.getElementById('dossierTabCadastral');
-    const tabTimeline = document.getElementById('dossierTabTimeline');
-    const btnCadastral = document.getElementById('tabBtnCadastral');
-    const btnTimeline = document.getElementById('tabBtnTimeline');
-
-    if (tabName === 'cadastral') {
-        tabCadastral.classList.remove('hidden');
-        tabTimeline.classList.add('hidden');
-        btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
-        btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
-    } else {
-        tabTimeline.classList.remove('hidden');
-        tabCadastral.classList.add('hidden');
-        btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
-        btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
-    }
-}
-
-async function loadClientTimeline(clientId) {
-    const container = document.getElementById('clientTimelineContent');
-    container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Carregando histórico...</p>';
-
-    if (window.isConnectedToSupabase && window.supabaseClient) {
-        try {
-            const { data: reservas, error } = await window.supabaseClient
-                .from('reservas')
-                .select('*')
-                .eq('cliente_id', clientId)
-                .order('dia', { ascending: false });
-
-            if (error) throw error;
-
-            if (!reservas || reservas.length === 0) {
-                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Nenhum atendimento registrado para este cliente.</p>';
-                return;
-            }
-
-            let html = '<div class="border-l-2 border-blue-200 ml-2 space-y-4 pl-4">';
-            reservas.forEach(res => {
-                html += `
-                    <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || 'Serviço'}</span>
-                            <span class="text-xs text-gray-400">${res.dia} às ${res.hora || ''}</span>
-                        </div>
-                        <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || 'Sem descrição'}</p>
-                        <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
-                            <span>Valor: R$ ${parseFloat(res.valor_total || 0).toFixed(2)}</span>
-                            <span class="capitalize text-emerald-600 font-semibold">${res.status || 'Confirmado'}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        } catch (err) {
-            console.error(err);
-            container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">Erro ao carregar linha do tempo.</p>';
+            switchDossierTab('cadastral');
+            document.getElementById('clientDossierModal').classList.remove('hidden');
+            await loadClientTimeline(clientId);
         }
-    } else {
-        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Modo offline: Histórico indisponível na simulação local.</p>';
-    }
-}
 
-async function saveClientChanges() {
-    if (!currentOpenClientId) return;
-    const newName = document.getElementById('editClientName').value.trim();
-    const newPhone = document.getElementById('editClientPhone').value.trim();
-    const newBio = document.getElementById('editClientBio').value.trim();
+        function closeClientDossier() {
+            document.getElementById('clientDossierModal').classList.add('hidden');
+            currentOpenClientId = null;
+        }
 
-    if (window.isConnectedToSupabase && window.supabaseClient) {
-        try {
-            const { error } = await window.supabaseClient
-                .from('clientes')
-                .update({ nome: newName, whatsapp: newPhone, biografia: newBio })
-                .eq('id', currentOpenClientId);
+        function switchDossierTab(tabName) {
+            const tabCadastral = document.getElementById('dossierTabCadastral');
+            const tabTimeline = document.getElementById('dossierTabTimeline');
+            const btnCadastral = document.getElementById('tabBtnCadastral');
+            const btnTimeline = document.getElementById('tabBtnTimeline');
 
-            if (error) throw error;
-            showToast("Dados do cliente atualizados com sucesso!");
+            if (tabName === 'cadastral') {
+                tabCadastral.classList.remove('hidden');
+                tabTimeline.classList.add('hidden');
+                btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
+                btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
+            } else {
+                tabTimeline.classList.remove('hidden');
+                tabCadastral.classList.add('hidden');
+                btnTimeline.className = "flex-1 py-3 text-sm font-semibold text-blue-900 border-b-2 border-blue-900 bg-white transition";
+                btnCadastral.className = "flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-blue-900 transition";
+            }
+        }
+
+        async function loadClientTimeline(clientId) {
+            const container = document.getElementById('clientTimelineContent');
+            container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Carregando histórico...</p>';
+
+            if (window.isConnectedToSupabase && window.supabaseClient) {
+                try {
+                    const { data: reservas, error } = await window.supabaseClient
+                        .from('reservas')
+                        .select('*')
+                        .eq('cliente_id', clientId)
+                        .order('dia', { ascending: false });
+
+                    if (error) throw error;
+
+                    if (!reservas || reservas.length === 0) {
+                        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Nenhum atendimento registrado para este cliente.</p>';
+                        return;
+                    }
+
+                    let html = '<div class="border-l-2 border-blue-200 ml-2 space-y-4 pl-4">';
+                    reservas.forEach(res => {
+                        html += `
+                            <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                                <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || 'Serviço'}</span>
+                                    <span class="text-xs text-gray-400">${res.dia} às ${res.hora || ''}</span>
+                                </div>
+                                <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || 'Sem descrição'}</p>
+                                <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
+                                    <span>Valor: R$ ${parseFloat(res.valor_total || 0).toFixed(2)}</span>
+                                    <span class="capitalize text-emerald-600 font-semibold">${res.status || 'Confirmado'}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    container.innerHTML = html;
+                } catch (err) {
+                    console.error(err);
+                    container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">Erro ao carregar linha do tempo.</p>';
+                }
+            } else {
+                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Modo offline: Histórico indisponível na simulação local.</p>';
+            }
+        }
+
+        async function saveClientChanges() {
+            if (!currentOpenClientId) return;
+            const newName = document.getElementById('editClientName').value.trim();
+            const newPhone = document.getElementById('editClientPhone').value.trim();
+            const newBio = document.getElementById('editClientBio').value.trim();
+
+            if (window.isConnectedToSupabase && window.supabaseClient) {
+                try {
+                    const { error } = await window.supabaseClient
+                        .from('clientes')
+                        .update({ nome: newName, whatsapp: newPhone, biografia: newBio })
+                        .eq('id', currentOpenClientId);
+
+                    if (error) throw error;
+                    showToast("Dados do cliente atualizados com sucesso!");
+                    closeClientDossier();
+                    if (typeof renderClientes === 'function') renderClientes();
+                } catch (err) {
+                    console.error(err);
+                    showToast("Erro ao atualizar cliente.");
+                }
+            }
+        }
+
+        function openNewReservationForCurrentClient() {
+            if (!currentOpenClientId) return;
+            const currentName = document.getElementById('editClientName').value;
+            const currentPhone = document.getElementById('editClientPhone').value;
+
             closeClientDossier();
-            if (typeof renderClientes === 'function') renderClientes();
-        } catch (err) {
-            console.error(err);
-            showToast("Erro ao atualizar cliente.");
-        }
-    }
-}
 
-function openNewReservationForCurrentClient() {
-    if (!currentOpenClientId) return;
-    const currentName = document.getElementById('editClientName').value;
-    const currentPhone = document.getElementById('editClientPhone').value;
+            const botoes = Array.from(document.querySelectorAll('button, a'));
+            const btnTopo = botoes.find(el => el.textContent.trim().includes('Nova Reserva') && !el.closest('#clientDossierModal'));
+            
+            if (btnTopo) {
+                btnTopo.click();
+            }
 
-    // Fecha o dossiê atual
-    closeClientDossier();
+            setTimeout(() => {
+                const inputCliente = document.querySelector('input[placeholder*="Lucas Ramos"]') || document.querySelector('input[placeholder*="Cliente"]');
+                if (inputCliente) {
+                    inputCliente.value = currentName;
+                    inputCliente.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputCliente.dispatchEvent(new Event('change', { bubbles: true }));
+                }
 
-    // Clica no botão original de Nova Reserva do topo
-    const botoes = Array.from(document.querySelectorAll('button, a'));
-    const btnTopo = botoes.find(el => el.textContent.trim().includes('Nova Reserva') && !el.closest('#clientDossierModal'));
-    
-    if (btnTopo) {
-        btnTopo.click();
-    }
-
-    // Injeta os dados usando a estratégia que trazia o nome + o ID exato do telefone
-    setTimeout(() => {
-        // 1. O Nome (usando o seletor por placeholder que funcionou antes)
-        const inputCliente = document.querySelector('input[placeholder*="Lucas Ramos"]') || document.querySelector('input[placeholder*="Cliente"]');
-        if (inputCliente) {
-            inputCliente.value = currentName;
-            inputCliente.dispatchEvent(new Event('input', { bubbles: true }));
-            inputCliente.dispatchEvent(new Event('change', { bubbles: true }));
+                const inputWhatsapp = document.getElementById('modalPhone');
+                if (inputWhatsapp) {
+                    inputWhatsapp.value = currentPhone;
+                    inputWhatsapp.dispatchEvent(new Event('input', { bubbles: true }));
+                    inputWhatsapp.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }, 450);
         }
 
-        // 2. O WhatsApp (usando o ID exato modalPhone que encontramos no HTML)
-        const inputWhatsapp = document.getElementById('modalPhone');
-        if (inputWhatsapp) {
-            inputWhatsapp.value = currentPhone;
-            inputWhatsapp.dispatchEvent(new Event('input', { bubbles: true }));
-            inputWhatsapp.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    }, 450);
-}
-function switchTab(tabName) {
-  // Oculta todas as views que possuem a classe 'view-section'
-  document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-  
-  // Mostra a view específica correspondente
-  const target = document.getElementById('view-' + tabName);
-  if (target) {
-    target.classList.remove('hidden');
-  }
-}
-async function deletarOrcamento(id) {
-    if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
+        async function carregarOrcamentos() {
+            if (!window.supabaseClient) return;
 
-    try {
-        const { error } = await window.supabaseClient
-            .from('orcamentos')
-            .delete()
-            .eq('id', id);
+            const tbody = document.getElementById('tabela-orcamentos-body');
+            if (!tbody) return;
 
-        if (error) throw error;
+            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
 
-        carregarOrcamentos();
-    } catch (error) {
-        console.error("Erro ao excluir orçamento:", error);
-        alert("Erro ao excluir o orçamento. Tente novamente.");
-    }
-}
-async function carregarOrcamentos() {
-  if (!window.supabaseClient) return;
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('orcamentos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-  const tbody = document.getElementById('tabela-orcamentos-body');
-  if (!tbody) return;
+                if (error) {
+                    console.error("Erro ao buscar orçamentos:", error.message);
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Erro ao carregar orçamentos.</td></tr>`;
+                    return;
+                }
 
-  tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nenhum orçamento cadastrado.</td></tr>`;
+                    return;
+                }
 
-  try {
-    const { data, error } = await window.supabaseClient
-      .from('orcamentos')
-      .select('*')
-      .order('created_at', { ascending: false });
+                tbody.innerHTML = '';
+                data.forEach(orc => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900">${orc.nome_lead || 'Lead sem nome'}</td>
+                        <td class="px-6 py-4 text-gray-600">${orc.whatsapp || '-'}</td>
+                        <td class="px-6 py-4 text-gray-600">${orc.servicos_solicitados || 'Serviços diversos'}</td>
+                        <td class="px-6 py-4 font-semibold text-gray-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
+                        <td class="px-6 py-4">
+                        ${orc.status === 'Aprovado' 
+                            ? `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Aprovado</span>`
+                            : `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">Pendente</span>`
+                        }
+                    </td>
+                    <td class="px-6 py-4 flex gap-2">
+                        ${orc.status !== 'Aprovado' ? `
+                            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
+                            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+                        ` : `
+                            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+                        `}
+                    </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
-    if (error) {
-      console.error("Erro ao buscar orçamentos:", error.message);
-      tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Erro ao carregar orçamentos.</td></tr>`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nenhum orçamento cadastrado.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = '';
-    data.forEach(orc => {
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-gray-50 transition-colors";
-      
-      tr.innerHTML = `
-        <td class="px-6 py-4 font-medium text-gray-900">${orc.nome_lead || 'Lead sem nome'}</td>
-        <td class="px-6 py-4 text-gray-600">${orc.whatsapp || '-'}</td>
-        <td class="px-6 py-4 text-gray-600">${orc.servicos_solicitados || 'Serviços diversos'}</td>
-        <td class="px-6 py-4 font-semibold text-gray-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
-        <td class="px-6 py-4">
-        ${orc.status === 'Aprovado' 
-            ? `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Aprovado</span>`
-            : `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">Pendente</span>`
-        }
-    </td>
-    <td class="px-6 py-4 flex gap-2">
-        ${orc.status !== 'Aprovado' ? `
-            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
-            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-        ` : `
-            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-        `}
-    </td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-  } catch (err) {
-    console.error("Erro inesperado:", err);
-  }
-}
-function abrirModalOrcamento() {
-  const modal = document.getElementById('modal-orcamento');
-  if (modal) modal.classList.remove('hidden');
-}
-
-function fecharModalOrcamento() {
-  const modal = document.getElementById('modal-orcamento');
-  if (modal) {
-    modal.classList.add('hidden');
-    document.getElementById('form-orcamento').reset();
-  }
-}
-
-async function salvarOrcamento(event) {
-  if (event && typeof event.preventDefault === 'function') {
-    event.preventDefault();
-  }
-  if (!window.supabaseClient) {
-    console.error("Cliente Supabase não encontrado!");
-    return;
-  }
-
-  const lead_nome = document.getElementById('orc-nome')?.value || '';
-  const lead_whatsapp = document.getElementById('orc-whatsapp')?.value || '';
-  const valor_total = parseFloat(document.getElementById('orc-valor')?.value) || 0;
-  
-  const elServicos = document.getElementById('orc-servicos');
-  const servicos_resumo = elServicos ? elServicos.value : 'Serviços personalizados';
-
-  try {
-    const { data, error } = await window.supabaseClient
-        .from('orcamentos')
-        .insert([{
-            nome_lead: lead_nome,
-            whatsapp: lead_whatsapp,
-            valor_total: valor_total,
-            servicos_solicitados: servicos_resumo,
-            status: 'Pendente'
-        }]);
-
-    if (error) {
-      console.error("Erro ao salvar orçamento:", error.message);
-      alert("Erro ao salvar o orçamento: " + error.message);
-      return;
-    }
-
-    if (typeof fecharModalOrcamento === 'function') {
-        fecharModalOrcamento();
-    }
-    
-    document.getElementById('form-orcamento')?.reset();
-
-    if (typeof carregarOrcamentos === 'function') {
-        carregarOrcamentos();
-    } else if (typeof filtrarOrcamentos === 'function') {
-        filtrarOrcamentos('todos');
-    }
-
-    window.orcamentoAtualSalvo = { 
-        nome: lead_nome, 
-        whatsapp: lead_whatsapp, 
-        valor: valor_total, 
-        servicos: servicos_resumo 
-    };
-
-    const spanNome = document.getElementById('nomeLeadDestaque');
-    if (spanNome) spanNome.innerText = lead_nome;
-    
-    const modalElement = document.getElementById('modal-pos-salvamento');
-    if (modalElement) modalElement.classList.remove('hidden');
-
-  } catch (err) {
-    console.error("Erro inesperado:", err);
-  }
-}
-async function aprovarOrcamento(id) {
-    try {
-        // 1. Primeiro, busca os dados do orçamento que está sendo aprovado
-        const { data: orcamento, error: erroBusca } = await window.supabaseClient
-            .from('orcamentos')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (erroBusca) {
-            console.error("Erro ao buscar orçamento:", erroBusca);
-            alert("Erro ao buscar dados do orçamento.");
-            return;
-        }
-
-        // 2. Insere os dados na tabela de clientes
-        if (orcamento) {
-            const { error: erroCliente } = await window.supabaseClient
-                .from('clientes')
-                .insert([{
-                    nome: orcamento.nome_lead,
-                    whatsapp: orcamento.whatsapp,
-                    servicos: orcamento.servicos_solicitados,
-                    valor: orcamento.valor_total
-                }]);
-
-            if (erroCliente) {
-                console.error("Erro ao cadastrar cliente:", erroCliente);
+            } catch (err) {
+                console.error("Erro inesperado:", err);
             }
         }
 
-        // 3. Atualiza o status do orçamento para 'Aprovado'
-        const { error } = await window.supabaseClient
-            .from('orcamentos')
-            .update({ status: 'Aprovado' })
-            .eq('id', id);
+        function abrirModalOrcamento() {
+            const inputNome = document.getElementById('orc-nome') || document.getElementById('nome_lead');
+            const inputWhatsapp = document.getElementById('orc-whatsapp') || document.getElementById('whatsapp_lead');
+            const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
+            
+            if (inputNome) inputNome.value = '';
+            if (inputWhatsapp) inputWhatsapp.value = '';
+            if (inputValor) inputValor.value = '0.00';
 
-        if (error) {
-            console.error("Erro ao aprovar orçamento:", error.message);
-            alert("Erro ao aprovar orçamento.");
-            return;
+            const container = document.getElementById('lista-servicos-checkbox');
+            if (!container) return;
+            
+            container.innerHTML = '<p class="text-sm text-gray-500">Carregando serviços...</p>';
+
+            supabaseClient.from('servicos').select('*').then(({ data: servicos, error }) => {
+                if (error) {
+                    container.innerHTML = '<p class="text-sm text-red-500">Erro ao carregar os serviços.</p>';
+                    return;
+                }
+
+                if (!servicos || servicos.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-gray-500">Nenhum serviço cadastrado.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                servicos.forEach(servico => {
+                    const nomeServico = servico.nome || servico.titulo || 'Serviço';
+                    const precoServico = servico.preco || servico.valor || 0;
+
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between';
+                    div.innerHTML = `
+                        <label class="flex items-center text-sm text-gray-700 cursor-pointer">
+                            <input type="checkbox" value="${precoServico}" data-nome="${nomeServico}" onchange="calcularTotalOrcamento()" class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mr-2">
+                            ${nomeServico}
+                        </label>
+                        <span class="text-sm font-semibold text-gray-600">R$ ${parseFloat(precoServico).toFixed(2)}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+
+            const modal = document.getElementById('modal-orcamento');
+            if (modal) modal.classList.remove('hidden');
         }
 
-        // 4. Recarrega as telas para atualizar os dados visuais
-        carregarOrcamentos();
-        if (typeof renderClientes === 'function') {
-            renderClientes();
+        function fecharModalOrcamento() {
+            const modal = document.getElementById('modal-orcamento');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.getElementById('form-orcamento').reset();
+            }
         }
 
-    } catch (err) {
-        console.error("Erro inesperado ao aprovar:", err);
-    }
-}
-async function aprovarOrcamento(id) {
-    try {
-        const { data: orcamento, error: erroBusca } = await window.supabaseClient
-            .from('orcamentos')
-            .select('*')
-            .eq('id', id)
-            .single();
+        async function salvarOrcamento(event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+            if (!window.supabaseClient) return;
 
-        if (erroBusca) {
-            console.error("Erro ao buscar orçamento:", erroBusca);
-            alert("Erro ao buscar dados do orçamento.");
-            return;
+            const lead_nome = document.getElementById('orc-nome')?.value || '';
+            const lead_whatsapp = document.getElementById('orc-whatsapp')?.value || '';
+            const valor_total = parseFloat(document.getElementById('orc-valor')?.value) || 0;
+            const servicos_resumo = window.servicosEscolhidosParaSalvar || 'Serviços personalizados';
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('orcamentos')
+                    .insert([{
+                        nome_lead: lead_nome,
+                        whatsapp: lead_whatsapp,
+                        valor_total: valor_total,
+                        servicos_solicitados: servicos_resumo,
+                        status: 'Pendente'
+                    }]);
+
+                if (error) {
+                    alert("Erro ao salvar o orçamento: " + error.message);
+                    return;
+                }
+
+                fecharModalOrcamento();
+                document.getElementById('form-orcamento')?.reset();
+                carregarOrcamentos();
+
+                window.orcamentoAtualSalvo = { 
+                    nome: lead_nome, 
+                    whatsapp: lead_whatsapp, 
+                    valor: valor_total, 
+                    servicos: servicos_resumo 
+                };
+
+                const spanNome = document.getElementById('nomeLeadDestaque');
+                if (spanNome) spanNome.innerText = lead_nome;
+                
+                const modalElement = document.getElementById('modal-pos-salvamento');
+                if (modalElement) modalElement.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Erro inesperado:", err);
+            }
         }
 
-        if (orcamento) {
-            const { error: erroCliente } = await window.supabaseClient
-                .from('clientes')
-                .insert([{
-                    nome: orcamento.nome_lead,
-                    whatsapp: orcamento.whatsapp
-                }]);
+        async function aprovarOrcamento(id) {
+            try {
+                const { data: orcamento, error: erroBusca } = await window.supabaseClient
+                    .from('orcamentos')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
 
-            if (erroCliente) {
-                console.error("Erro ao cadastrar cliente:", erroCliente);
-                alert("Erro ao cadastrar cliente: " + erroCliente.message);
+                if (erroBusca) {
+                    alert("Erro ao buscar dados do orçamento.");
+                    return;
+                }
+
+                if (orcamento) {
+                    const { error: erroCliente } = await window.supabaseClient
+                        .from('clientes')
+                        .insert([{
+                            nome: orcamento.nome_lead,
+                            whatsapp: orcamento.whatsapp,
+                            servicos: orcamento.servicos_solicitados,
+                            valor: orcamento.valor_total
+                        }]);
+
+                    if (erroCliente) {
+                        alert("Erro ao cadastrar cliente: " + erroCliente.message);
+                        return;
+                    }
+                }
+
+                const { error } = await window.supabaseClient
+                    .from('orcamentos')
+                    .update({ status: 'Aprovado' })
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Erro ao aprovar orçamento.");
+                    return;
+                }
+
+                carregarOrcamentos();
+                if (typeof renderClientes === 'function') renderClientes();
+
+                alert("Orçamento aprovado e cliente cadastrado com sucesso!");
+
+            } catch (err) {
+                console.error("Erro inesperado ao aprovar:", err);
+            }
+        }
+
+        async function deletarOrcamento(id) {
+            if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('orcamentos')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                carregarOrcamentos();
+            } catch (error) {
+                console.error("Erro ao excluir orçamento:", error);
+                alert("Erro ao excluir o orçamento. Tente novamente.");
+            }
+        }
+
+        function calcularTotalOrcamento() {
+            const checkboxes = document.querySelectorAll('#lista-servicos-checkbox input[type="checkbox"]');
+            let total = 0;
+            let servicosSelecionados = [];
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    total += parseFloat(cb.value) || 0;
+                    servicosSelecionados.push(cb.getAttribute('data-nome'));
+                }
+            });
+
+            const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
+            if (inputValor) {
+                inputValor.value = total.toFixed(2);
+            }
+
+            window.servicosEscolhidosParaSalvar = servicosSelecionados.join(', ');
+        }
+
+        async function filtrarOrcamentos(status) {
+            ['todos', 'pendente', 'aprovado'].forEach(s => {
+                const btn = document.getElementById(`btn-filtro-${s}`);
+                if (!btn) return;
+                if (s === status.toLowerCase() || (status === 'todos' && s === 'todos')) {
+                    btn.className = "px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition";
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition";
+                }
+            });
+
+            try {
+                let query = supabaseClient.from('orcamentos').select('*');
+                if (status !== 'todos') {
+                    query = query.eq('status', status);
+                }
+
+                const { data: orcamentos, error } = await query;
+                if (error) throw error;
+
+                carregarTabelaFiltrada(orcamentos || []);
+            } catch (err) {
+                console.error('Erro ao filtrar orçamentos:', err);
+            }
+        }
+
+        function carregarTabelaFiltrada(lista) {
+            const tbody = document.getElementById('tabela-orcamentos-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
                 return;
             }
+
+            lista.forEach(orc => {
+                const tr = document.createElement('tr');
+                const statusAtual = orc.status || 'Pendente';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || orc.cliente || 'Cliente'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.servicos_solicitados || orc.servicos || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${parseFloat(orc.valor_total || orc.valor || 0).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusAtual === 'Aprovado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${statusAtual}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        ${statusAtual !== 'Aprovado' ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs font-semibold">Aprovar</button>` : ''}
+                        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        const { error } = await window.supabaseClient
-            .from('orcamentos')
-            .update({ status: 'Aprovado' })
-            .eq('id', id);
-
-        if (error) {
-            console.error("Erro ao aprovar orçamento:", error.message);
-            alert("Erro ao aprovar orçamento.");
-            return;
+        function fecharModalPosSalvamento() {
+            const modal = document.getElementById('modal-pos-salvamento');
+            if (modal) modal.classList.add('hidden');
+            window.orcamentoAtualSalvo = null;
         }
 
-        if (typeof carregarOrcamentos === 'function') {
-            carregarOrcamentos();
-        }
-        if (typeof renderClientes === 'function') {
-            renderClientes();
-        }
-
-        alert("Orçamento aprovado e cliente cadastrado com sucesso!");
-
-    } catch (err) {
-        console.error("Erro inesperado ao aprovar:", err);
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof carregarOrcamentos === 'function') {
-        carregarOrcamentos();
-    }
-    if (typeof renderClientes === 'function') {
-        renderClientes();
-    }
-});
-async function deletarOrcamento(id) {
-    if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
-
-    try {
-        const { error } = await window.supabaseClient
-            .from('orcamentos')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-
-        // Recarrega a lista de orçamentos na tela
-        if (typeof carregarOrcamentos === 'function') {
-            carregarOrcamentos();
-        }
-    } catch (error) {
-        console.error("Erro ao excluir orçamento:", error);
-        alert("Erro ao excluir o orçamento. Tente novamente.");
-    }
-}
-async function abrirModalOrcamento() {
-    // Tenta limpar os inputs caso eles existam no HTML
-    const inputNome = document.getElementById('orc-nome') || document.getElementById('nome_lead');
-    const inputWhatsapp = document.getElementById('orc-whatsapp') || document.getElementById('whatsapp_lead');
-    const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
-    
-    if (inputNome) inputNome.value = '';
-    if (inputWhatsapp) inputWhatsapp.value = '';
-    if (inputValor) inputValor.value = '0.00';
-
-    const container = document.getElementById('lista-servicos-checkbox');
-    if (!container) return;
-    
-    container.innerHTML = '<p class="text-sm text-gray-500">Carregando serviços...</p>';
-
-    try {
-        // Busca os serviços cadastrados na tabela 'servicos' do Supabase
-        const { data: servicos, error } = await supabaseClient
-            .from('servicos')
-            .select('*');
-
-        if (error) throw error;
-
-        if (!servicos || servicos.length === 0) {
-            container.innerHTML = '<p class="text-sm text-gray-500">Nenhum serviço cadastrado.</p>';
-            return;
+        function executarAcaoWhatsApp() {
+            const dados = window.orcamentoAtualSalvo;
+            if (!dados) {
+                alert("Nenhum orçamento encontrado.");
+                return;
+            }
+            alert("Em breve a proposta será enviada pelo WhatsApp.");
+            fecharModalPosSalvamento();
         }
 
-        // Renderiza os checkboxes dinamicamente
-        container.innerHTML = '';
-        servicos.forEach(servico => {
-            const nomeServico = servico.nome || servico.titulo || 'Serviço';
-            const precoServico = servico.preco || servico.valor || 0;
-
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between';
-            div.innerHTML = `
-                <label class="flex items-center text-sm text-gray-700 cursor-pointer">
-                    <input type="checkbox" value="${precoServico}" data-nome="${nomeServico}" onchange="calcularTotalOrcamento()" class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mr-2">
-                    ${nomeServico}
-                </label>
-                <span class="text-sm font-semibold text-gray-600">R$ ${parseFloat(precoServico).toFixed(2)}</span>
-            `;
-            container.appendChild(div);
-        });
-
-    } catch (err) {
-        console.error('Erro ao carregar serviços:', err);
-        container.innerHTML = '<p class="text-sm text-red-500">Erro ao carregar os serviços.</p>';
-    }
-
-    // Exibe o modal (removendo a classe hidden)
-    const modal = document.getElementById('modal-orcamento');
-    if (modal) modal.classList.remove('hidden');
-}
-function calcularTotalOrcamento() {
-    const checkboxes = document.querySelectorAll('#lista-servicos-checkbox input[type="checkbox"]');
-    let total = 0;
-    let servicosSelecionados = [];
-
-    checkboxes.forEach(cb => {
-        if (cb.checked) {
-            total += parseFloat(cb.value) || 0;
-            servicosSelecionados.push(cb.getAttribute('data-nome'));
-        }
-    });
-
-    // Atualiza o campo de valor total automaticamente (buscando pelos possíveis IDs)
-    const inputValor = document.getElementById('orc-valor') || document.getElementById('valor_total');
-    if (inputValor) {
-        inputValor.value = total.toFixed(2);
-    }
-
-    // Guarda os serviços escolhidos para salvar no banco depois
-    window.servicosEscolhidosParaSalvar = servicosSelecionados.join(', ');
-}
-// Variável global para guardar todos os orçamentos carregados e otimizar o filtro (opcional)
-let orcamentosGlobais = [];
-
-// Função para buscar e filtrar os orçamentos
-async function filtrarOrcamentos(status) {
-    // Atualiza o estilo visual dos botões de filtro
-    ['todos', 'pendente', 'aprovado'].forEach(s => {
-        const btn = document.getElementById(`btn-filtro-${s}`);
-        if (!btn) return;
-        if (s === status.toLowerCase() || (status === 'todos' && s === 'todos')) {
-            btn.className = "px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition";
-        } else {
-            btn.className = "px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition";
-        }
-    });
-
-    try {
-        let query = supabaseClient.from('orcamentos').select('*');
-
-        // Se não for 'todos', filtra no banco pelo status correspondente
-        if (status !== 'todos') {
-            query = query.eq('status', status); // Ajuste 'status' se a coluna no banco tiver outro nome
-        }
-
-        const { data: orcamentos, error } = await query;
-
-        if (error) throw error;
-
-        orcamentosGlobais = orcamentos || [];
-        renderizarTabelaOrcamentos(orcamentosGlobais);
-
-    } catch (err) {
-        console.error('Erro ao filtrar orçamentos:', err);
-    }
-}
-
-function renderizarTabelaOrcamentos(lista) {
-    const tbody = document.getElementById('tabela-orcamentos-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
-        return;
-    }
-
-    lista.forEach(orc => {
-        const tr = document.createElement('tr');
-        const statusAtual = orc.status || 'Pendente';
-        
-        tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || orc.cliente || 'Cliente'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || '-'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.servicos || '-'}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${parseFloat(orc.valor_total || orc.valor || 0).toFixed(2)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusAtual === 'Aprovado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                    ${statusAtual}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                ${statusAtual !== 'Aprovado' ? `<button onclick="alterarStatusOrcamento('${orc.id}', 'Aprovado')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs font-semibold">Aprovar</button>` : ''}
-                <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold">Excluir</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-// Fecha o modal
-function fecharModalPosSalvamento() {
-    const modal = document.getElementById('modal-pos-salvamento');
-
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-
-    // Limpa o orçamento salvo da memória
-    window.orcamentoAtualSalvo = null;
-}
-
-
-// Botão WhatsApp
-function executarAcaoWhatsApp() {
-
-    const dados = window.orcamentoAtualSalvo;
-
-    if (!dados) {
-        alert("Nenhum orçamento encontrado.");
-        return;
-    }
-
-    // Feedback visual
-    alert("Em breve a proposta será enviada pelo WhatsApp.");
-
-    // Fecha o modal
-    fecharModalPosSalvamento();
-
-    // Futuramente colocaremos aqui:
-    // gerar PDF
-    // enviar mensagem
-    // atualizar status
-}
-
-
-
-function executarAcaoPDF() {
-
-    const dados = window.orcamentoAtualSalvo;
-
-    if (!dados){
-        alert("Nenhum orçamento encontrado.");
-        return;
-    }
-
-    document.getElementById("pdf-cliente").innerText =
-        dados.nome;
-
-    document.getElementById("pdf-whatsapp").innerText =
-        dados.whatsapp;
-
-    document.getElementById("pdf-servicos").innerText =
-        dados.servicos;
-
-    document.getElementById("pdf-valor").innerText =
-        "R$ " + Number(dados.valor).toFixed(2);
-
-    document.getElementById("pdf-data").innerText =
-        new Date().toLocaleDateString("pt-BR");
-
-    const elemento =
-        document.getElementById("orcamento-pdf");
-
-    elemento.style.display = "block";
-
-    html2pdf()
-        .set({
-
-            margin:10,
-
-            filename:
-            "Proposta_"+dados.nome+".pdf",
-
-            image:{
-                type:'jpeg',
-                quality:1
-            },
-
-            html2canvas:{
-                scale:2
-            },
-
-            jsPDF:{
-                unit:'mm',
-                format:'a4',
-                orientation:'portrait'
+        function executarAcaoPDF() {
+            const dados = window.orcamentoAtualSalvo;
+            if (!dados){
+                alert("Nenhum orçamento encontrado.");
+                return;
             }
 
-        })
-        .from(elemento)
-        .save()
-        .then(()=>{
+            document.getElementById("pdf-cliente").innerText = dados.nome;
+            document.getElementById("pdf-whatsapp").innerText = dados.whatsapp;
+            document.getElementById("pdf-servicos").innerText = dados.servicos;
+            document.getElementById("pdf-valor").innerText = "R$ " + Number(dados.valor).toFixed(2);
+            document.getElementById("pdf-data").innerText = new Date().toLocaleDateString("pt-BR");
 
-            elemento.style.display="none";
+            const elemento = document.getElementById("orcamento-pdf");
+            elemento.style.display = "block";
 
-            fecharModalPosSalvamento();
+            html2pdf().set({
+                margin: 10,
+                filename: "Proposta_" + dados.nome + ".pdf",
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(elemento).save().then(() => {
+                elemento.style.display = "none";
+                fecharModalPosSalvamento();
+            });
+        }
 
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof carregarOrcamentos === 'function') carregarOrcamentos();
+            if (typeof renderClientes === 'function') renderClientes();
+            if (typeof carregarAtencaoOperacional === 'function') carregarAtencaoOperacional();
         });
-
-}
-</script>
     </script>
-    <div id="orcamento-pdf"
-style="
-width:210mm;
-min-height:297mm;
-background:#f8fafc;
-font-family:Arial,sans-serif;
-padding:0;
-display:none;
-">
 
-    <!-- CABEÇALHO -->
-    <div style="
-    background:linear-gradient(90deg,#059669,#10b981);
-    color:white;
-    padding:35px 45px;">
-
-        <table style="width:100%;">
-            <tr>
-
-                <td>
-                    <h1 style="
-                    margin:0;
-                    font-size:34px;
-                    letter-spacing:2px;">
-                        🌎 TURISMUNDO
-                    </h1>
-
-                    <div style="margin-top:8px;font-size:16px;">
-                        Turismo • Receptivo • Transfers
-                    </div>
-                </td>
-
-                <td style="text-align:right;">
-
-                    <div style="font-size:14px;">
-                        PROPOSTA COMERCIAL
-                    </div>
-
-                    <div style="
-                    margin-top:8px;
-                    font-size:26px;
-                    font-weight:bold;">
-                        Nº 0001
-                    </div>
-
-                </td>
-
-            </tr>
-        </table>
-
-    </div>
-
-
-    <!-- CONTEÚDO -->
-    <div style="padding:40px;">
-
-
-        <!-- CLIENTE -->
-
-        <div style="
-        background:white;
-        border-radius:12px;
-        padding:25px;
-        box-shadow:0 4px 15px rgba(0,0,0,.08);
-        margin-bottom:25px;">
-
-            <h2 style="
-            color:#059669;
-            margin-top:0;">
-                👤 Dados do Cliente
-            </h2>
-
-            <table style="
-            width:100%;
-            line-height:2;">
-
+    <!-- Template PDF Oculto -->
+    <div id="orcamento-pdf" style="width:210mm; min-height:297mm; background:#f8fafc; font-family:Arial,sans-serif; padding:0; display:none;">
+        <div style="background:linear-gradient(90deg,#059669,#10b981); color:white; padding:35px 45px;">
+            <table style="width:100%;">
                 <tr>
-
-                    <td width="30%">
-                        <strong>Cliente</strong>
-                    </td>
-
-                    <td id="pdf-cliente"></td>
-
-                </tr>
-
-                <tr>
-
                     <td>
-                        <strong>WhatsApp</strong>
+                        <h1 style="margin:0; font-size:34px; letter-spacing:2px;">🌎 TURISMUNDO</h1>
+                        <div style="margin-top:8px; font-size:16px;">Turismo • Receptivo • Transfers</div>
                     </td>
-
-                    <td id="pdf-whatsapp"></td>
-
-                </tr>
-
-                <tr>
-
-                    <td>
-                        <strong>Data</strong>
+                    <td style="text-align:right;">
+                        <div style="font-size:14px;">PROPOSTA COMERCIAL</div>
+                        <div style="margin-top:8px; font-size:26px; font-weight:bold;">Nº 0001</div>
                     </td>
-
-                    <td id="pdf-data"></td>
-
                 </tr>
-
             </table>
-
         </div>
-
-
-
-        <!-- SERVIÇOS -->
-
-        <div style="
-        background:white;
-        border-radius:12px;
-        padding:25px;
-        box-shadow:0 4px 15px rgba(0,0,0,.08);
-        margin-bottom:25px;">
-
-            <h2 style="
-            color:#059669;
-            margin-top:0;">
-                📋 Serviços Contratados
-            </h2>
-
-            <div
-            id="pdf-servicos"
-            style="
-            background:#f3f4f6;
-            border-left:6px solid #10b981;
-            padding:18px;
-            border-radius:8px;
-            font-size:16px;
-            line-height:1.8;">
+        <div style="padding:40px;">
+            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08); margin-bottom:25px;">
+                <h2 style="color:#059669; margin-top:0;">👤 Dados do Cliente</h2>
+                <table style="width:100%; line-height:2;">
+                    <tr><td width="30%"><strong>Cliente</strong></td><td id="pdf-cliente"></td></tr>
+                    <tr><td><strong>WhatsApp</strong></td><td id="pdf-whatsapp"></td></tr>
+                    <tr><td><strong>Data</strong></td><td id="pdf-data"></td></tr>
+                </table>
             </div>
-
+            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08); margin-bottom:25px;">
+                <h2 style="color:#059669; margin-top:0;">📋 Serviços Contratados</h2>
+                <div id="pdf-servicos" style="background:#f3f4f6; border-left:6px solid #10b981; padding:18px; border-radius:8px; font-size:16px; line-height:1.8;"></div>
+            </div>
+            <div style="background:#059669; color:white; border-radius:15px; padding:35px; text-align:center; margin-bottom:35px;">
+                <div style="font-size:18px; letter-spacing:2px;">VALOR TOTAL</div>
+                <div id="pdf-valor" style="font-size:46px; font-weight:bold; margin-top:10px;"></div>
+            </div>
+            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08);">
+                <h2 style="color:#059669; margin-top:0;">ℹ Informações</h2>
+                <ul style="line-height:2;">
+                    <li>Esta proposta possui validade de 7 dias.</li>
+                    <li>Valores sujeitos à disponibilidade dos serviços.</li>
+                    <li>Dúvidas? Nossa equipe está pronta para atender você.</li>
+                </ul>
+            </div>
+            <div style="margin-top:70px; text-align:center; color:#777;">
+                <h2 style="color:#059669; margin-bottom:5px;">Obrigado pela preferência!</h2>
+                <div style="font-size:18px;">Equipe Turismundo</div>
+                <div style="margin-top:10px; font-size:13px;">Turismo • Passeios • Transfers • Experiências</div>
+            </div>
         </div>
-
-
-
-        <!-- TOTAL -->
-
-        <div style="
-        background:#059669;
-        color:white;
-        border-radius:15px;
-        padding:35px;
-        text-align:center;
-        margin-bottom:35px;">
-
-            <div style="
-            font-size:18px;
-            letter-spacing:2px;">
-                VALOR TOTAL
-            </div>
-
-            <div
-            id="pdf-valor"
-            style="
-            font-size:46px;
-            font-weight:bold;
-            margin-top:10px;">
-            </div>
-
-        </div>
-
-
-
-        <!-- OBSERVAÇÕES -->
-
-        <div style="
-        background:white;
-        border-radius:12px;
-        padding:25px;
-        box-shadow:0 4px 15px rgba(0,0,0,.08);">
-
-            <h2 style="
-            color:#059669;
-            margin-top:0;">
-                ℹ Informações
-            </h2>
-
-            <ul style="line-height:2;">
-
-                <li>Esta proposta possui validade de 7 dias.</li>
-
-                <li>Valores sujeitos à disponibilidade dos serviços.</li>
-
-                <li>Dúvidas? Nossa equipe está pronta para atender você.</li>
-
-            </ul>
-
-        </div>
-
-
-
-        <!-- RODAPÉ -->
-
-        <div style="
-        margin-top:70px;
-        text-align:center;
-        color:#777;">
-
-            <h2 style="
-            color:#059669;
-            margin-bottom:5px;">
-                Obrigado pela preferência!
-            </h2>
-
-            <div style="font-size:18px;">
-                Equipe Turismundo
-            </div>
-
-            <div style="
-            margin-top:10px;
-            font-size:13px;">
-                Turismo • Passeios • Transfers • Experiências
-            </div>
-
-        </div>
-
-
     </div>
-
-</div>
 </body>
 </html>
