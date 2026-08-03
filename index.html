@@ -117,94 +117,75 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- COLUNA ESQUERDA: NOTÍCIAS, ALERTAS & MENSAGENS -->
-                <section class="lg:col-span-1 space-y-4">
-                    
-                    <!-- 1. BUENOS AIRES AO VIVO (Agora no Topo) -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <span>🇦🇷</span> Buenos Aires ao Vivo
-                            </h3>
-                            <span class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span> Rotativo
-                            </span>
-                        </div>
+    <section class="lg:col-span-1 space-y-4">
+        
+        <!-- 1. BUENOS AIRES AO VIVO & LINK DA CIDADE -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🇦🇷</span> Buenos Aires ao Vivo
+                </h3>
+                <span class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span> Rotativo
+                </span>
+            </div>
 
-                        <div class="relative overflow-hidden h-[64px] flex items-center">
-                            <div id="tickerNewsCard" class="w-full p-2.5 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-0.5 transition-all duration-500 opacity-100 transform translate-y-0">
-                                <div class="flex justify-between items-center">
-                                    <span id="tickerCategory" class="text-[9px] font-extrabold text-blue-900 uppercase">Trânsito / Alerta</span>
-                                    <span id="tickerTime" class="text-[9px] text-gray-400">Há 15 min</span>
-                                </div>
-                                <p id="tickerText" class="text-xs text-gray-700 leading-tight">Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco.</p>
-                            </div>
-                        </div>
+            <div class="relative overflow-hidden h-[60px] flex items-center">
+                <div id="tickerNewsCard" class="w-full p-2.5 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-0.5 transition-all duration-500 opacity-100 transform translate-y-0">
+                    <div class="flex justify-between items-center">
+                        <span id="tickerCategory" class="text-[9px] font-extrabold text-blue-900 uppercase">Trânsito / Alerta</span>
+                        <span id="tickerTime" class="text-[9px] text-gray-400">Há 15 min</span>
                     </div>
-                    <!-- Card de Atalho / Agenda Buenos Aires (Linda) -->
-                    <a href="https://linda.buenosaires.gob.ar/" target="_blank" rel="noopener noreferrer" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[300px] mt-4 hover:border-purple-300 hover:shadow-md transition-all group">
-                        
-                        <!-- Topo do Card -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agenda Buenos Aires</span>
-                                <span class="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Oficial</span>
-                            </div>
-                            <span class="text-gray-400 group-hover:text-purple-600 transition-colors">↗</span>
-                        </div>
-                        
-                        <!-- Conteúdo Central / Chamada -->
-                        <div class="my-auto text-center py-6">
-                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold group-hover:scale-110 transition-transform">
-                                📅
-                            </div>
-                            <h3 class="text-sm font-bold text-gray-800 mb-1">Explorar Programação da Cidade</h3>
-                            <p class="text-xs text-gray-500 px-4">Consulte feiras, muestras, shows e eventos atualizados em tempo real no portal Linda.</p>
-                        </div>
-                        
-                        <!-- Rodapé do Card -->
-                        <div class="text-center pt-2 border-t border-gray-50">
-                            <span class="text-xs font-semibold text-purple-600 group-hover:underline">Acessar portal externo →</span>
-                        </div>
-                        
-                    </a>
+                    <p id="tickerText" class="text-xs text-gray-700 leading-tight">Avenida 9 de Julho com interrupções parciais devido a evento cultural no Obelisco.</p>
+                </div>
+            </div>
 
-                    <!-- 2. Painel de Atenção / Alertas -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fas fa-exclamation-triangle text-amber-500 animate-bounce"></i> Atenção Operacional
-                            </h2>
-                            <span class="bg-red-50 text-red-600 font-bold text-[10px] px-2 py-0.5 rounded-full">2 Alertas</span>
-                        </div>
+            <!-- Link Rápido para a Agenda Oficial da Cidade -->
+            <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs">
+                <span class="text-gray-500 font-medium">📅 Programação da Cidade:</span>
+                <a href="https://linda.buenosaires.gob.ar/" target="_blank" rel="noopener noreferrer" class="text-purple-600 font-bold hover:underline flex items-center gap-1">
+                    Ver Agenda Oficial ↗
+                </a>
+            </div>
+        </div>
 
-                        <div class="space-y-2">
-                            <div class="space-y-2">
-                                <!-- Os alertas reais do Supabase vão entrar aqui automaticamente -->
-                            </div>
-                        </div>
-                    </div>
+        <!-- 2. Painel de Atenção / Alertas -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-exclamation-triangle text-amber-500 animate-bounce"></i> Atenção Operacional
+                </h2>
+                <span class="bg-red-50 text-red-600 font-bold text-[10px] px-2 py-0.5 rounded-full">2 Alertas</span>
+            </div>
 
-                    <!-- 3. Disparo de Mensagens Rápidas -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                            <i class="fas fa-comment-alt text-blue-900"></i> Central de Mensagens Rápidas
-                        </h3>
-                        <div class="space-y-1.5">
-                            <button onclick="openMessageTemplate('welcome')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
-                                <span>👋 Boas-vindas Buenos Aires</span>
-                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
-                            </button>
-                            <button onclick="openMessageTemplate('driver')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
-                                <span>🚐 Enviar Dados do Motorista</span>
-                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
-                            </button>
-                            <button onclick="openMessageTemplate('checkout')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
-                                <span>🛫 Instruções de Retorno (Out)</span>
-                                <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
-                            </button>
-                        </div>
-                    </div>
-                </section>
+            <div class="space-y-2">
+                <div class="space-y-2">
+                    <!-- Os alertas reais do Supabase vão entrar aqui automaticamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Disparo de Mensagens Rápidas -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <i class="fas fa-comment-alt text-blue-900"></i> Central de Mensagens Rápidas
+            </h3>
+            <div class="space-y-1.5">
+                <button onclick="openMessageTemplate('welcome')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                    <span>👋 Boas-vindas Buenos Aires</span>
+                    <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
+                </button>
+                <button onclick="openMessageTemplate('driver')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                    <span>🚐 Enviar Dados do Motorista</span>
+                    <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
+                </button>
+                <button onclick="openMessageTemplate('checkout')" class="w-full p-2.5 bg-gray-50 hover:bg-blue-50/50 rounded-xl border border-gray-150 transition text-left flex items-center justify-between text-xs font-semibold">
+                    <span>🛫 Instruções de Retorno (Out)</span>
+                    <i class="fas fa-chevron-right text-gray-400 text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </section>
 
                 <!-- COLUNA CENTRAL E DIREITA: MÉTRICAS & OPERAÇÃO -->
                 <section class="lg:col-span-2 space-y-6">
