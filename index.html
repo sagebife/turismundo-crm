@@ -822,64 +822,79 @@
         let isConnectedToSupabase = false;
 
         async function initSupabase() {
-    // Usa o localStorage se existir, senão usa diretamente as chaves fixas do código
-    const savedUrl = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
-    const savedKey = localStorage.getItem('supabase_key') || 'sb_publishable_4w28HISw0UqCwyvYMbm-8w_LVHV2ltM';
+    const defaultUrl = 'https://xjjflsdtaruzaekadqoq.supabase.co';
+    const defaultKey = 'sb_publishable_4w28HISw0UqCwyvYMbm-8w_LVHV2ltM';
 
-            const statusBtn = document.getElementById('db-status-btn');
-            const statusText = document.getElementById('db-status-text');
-            const dbIcon = document.getElementById('db-icon');
+    if (!localStorage.getItem('supabase_url')) {
+        localStorage.setItem('supabase_url', defaultUrl);
+    }
+    if (!localStorage.getItem('supabase_key')) {
+        localStorage.setItem('supabase_key', defaultKey);
+    }
 
-            if (savedUrl && savedKey) {
-                try {
-                    window.supabaseClient = supabase.createClient(savedUrl, savedKey);
-                    
-                    const { error } = await window.supabaseClient
-                        .from('motoristas')
-                        .select('*')
-                        .limit(1);
+    const savedUrl = localStorage.getItem('supabase_url');
+    const savedKey = localStorage.getItem('supabase_key');
 
-                    if (error) {
-                        throw error;
-                    }
+    const statusBtn = document.getElementById('db-status-btn');
+    const statusText = document.getElementById('db-status-text');
+    const dbIcon = document.getElementById('db-icon');
 
-                    window.isConnectedToSupabase = true;
+    if (savedUrl && savedKey) {
+        try {
+            window.supabaseClient = supabase.createClient(savedUrl, savedKey);
+            
+            const { error } = await window.supabaseClient
+                .from('motoristas')
+                .select('*')
+                .limit(1);
 
-                    if (statusBtn) {
-                        statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-emerald-500/30 bg-emerald-500/10 text-emerald-600";
-                        statusText.innerText = "Supabase Conectado";
-                        dbIcon.className = "fas fa-cloud text-emerald-500 animate-pulse";
-                    }
-                    loadRealData();
-                } catch (e) {
-                    console.error("Falha ao inicializar ou conectar ao cliente Supabase", e);
-                    window.isConnectedToSupabase = false;
-                    switchToSimulationMode();
-                }
-            } else {
-                switchToSimulationMode();
+            if (error) {
+                throw error;
             }
-        }
 
-        function switchToSimulationMode() {
-            window.isConnectedToSupabase = false;
-            const statusBtn = document.getElementById('db-status-btn');
-            const statusText = document.getElementById('db-status-text');
-            const dbIcon = document.getElementById('db-icon');
+            window.isConnectedToSupabase = true;
+
             if (statusBtn) {
-                statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-dashed border-blue-400 text-blue-200 hover:border-white hover:text-white";
-                statusText.innerText = "Modo Simulação";
-                dbIcon.className = "fas fa-database text-blue-200";
+                statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-emerald-500/30 bg-emerald-500/10 text-emerald-600";
+                statusText.innerText = "Supabase Conectado";
+                dbIcon.className = "fas fa-cloud text-emerald-500 animate-pulse";
             }
-            renderDashboard();
-            renderAgenda();
-            renderDrivers();
-            renderFinanceiro();
-            renderServicos();
-            updateDriverDropdowns();
-            gerarDiasAgenda();
+            loadRealData();
+        } catch (e) {
+            console.error("Falha ao inicializar ou conectar ao cliente Supabase", e);
+            window.isConnectedToSupabase = false;
+            switchToSimulationMode();
         }
+    } else {
+        switchToSimulationMode();
+    }
+}
 
+function switchToSimulationMode() {
+    window.isConnectedToSupabase = false;
+    const statusBtn = document.getElementById('db-status-btn');
+    const statusText = document.getElementById('db-status-text');
+    const dbIcon = document.getElementById('db-icon');
+    if (statusBtn) {
+        statusBtn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-dashed border-blue-400 text-blue-200 hover:border-white hover:text-white";
+        statusText.innerText = "Modo Simulação";
+        dbIcon.className = "fas fa-database text-blue-200";
+    }
+    renderDashboard();
+    renderAgenda();
+    renderDrivers();
+    renderFinanceiro();
+    renderServicos();
+    updateDriverDropdowns();
+    gerarDiasAgenda();
+}
+
+// Inicializa automaticamente ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initSupabase === 'function') {
+        initSupabase();
+    }
+});
         async function loadRealData() {
             if (!window.isConnectedToSupabase || !window.supabaseClient) return;
 
@@ -3336,7 +3351,14 @@ function resetarSenhaFinanceiro() {
 function abrirAbaFinanceiroReal() {
     switchTab('financeiro');
 }
-    </script>
+
+// Cole aqui:
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initSupabase === 'function') {
+        initSupabase();
+    }
+});
+</script>
 
     <!-- Template PDF Oculto -->
     <div id="orcamento-pdf" style="width:210mm; min-height:297mm; background:#f8fafc; font-family:Arial,sans-serif; padding:0; display:none;">
