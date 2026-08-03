@@ -61,7 +61,7 @@
                 <button onclick="switchTab('agenda')" id="nav-agenda" class="text-blue-200 hover:text-white font-semibold transition">Agenda</button>
                 <button onclick="switchTab('motoristas')" id="nav-moto" class="text-blue-200 hover:text-white font-semibold transition">Motoristas</button>
                 <button onclick="switchTab('servicos')" id="nav-serv" class="text-blue-200 hover:text-white font-semibold transition">Serviços</button>
-                <button onclick="switchTab('financeiro')" id="nav-fin" class="text-blue-200 hover:text-white font-semibold transition">Financeiro</button>
+                <button onclick="protegerFinanceiro(event)" id="nav-fin" class="text-blue-200 hover:text-white font-semibold transition">Financeiro</button>
                 <button onclick="switchTab('clientes')" id="nav-clientes" class="text-blue-200 hover:text-white font-semibold transition">Clientes</button>
                 <button onclick="switchTab('orcamentos')" id="nav-orcamentos" class="text-blue-200 hover:text-white font-semibold transition-colors">Orçamentos</button>
             </div>
@@ -192,25 +192,38 @@
                     
                     <!-- Cards de Indicadores -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Chegadas Hoje</p>
+                        <!-- Chegadas Hoje (Tornado Clicável) -->
+                        <div onclick="filtrarDashboardPor('chegada')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-400 cursor-pointer transition group">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-blue-900 transition">Chegadas Hoje</p>
                             <p class="text-2xl font-black text-blue-900" id="dash-chegadas-hoje">0</p>
                             <span class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-circle text-[6px] mr-1"></i>Conectado</span>
                         </div>
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Passeios Hoje</p>
+                        
+                        <!-- Passeios Hoje (Tornado Clicável) -->
+                        <div onclick="filtrarDashboardPor('passeio')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-orange-400 cursor-pointer transition group">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-orange-600 transition">Passeios Hoje</p>
                             <p class="text-2xl font-black text-orange-600" id="dash-passeios-hoje">0</p>
                             <span class="text-[10px] text-gray-400">Operando</span>
                         </div>
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Faturamento Mês</p>
-                            <p class="text-2xl font-black text-emerald-600" id="dash-faturamento">R$ 0</p>
-                        </div>
+                        
+                        
+                        
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1">Motoristas Parceiros</p>
                             <p class="text-2xl font-black text-gray-900" id="dash-drivers-count">0</p>
                             <span class="text-[10px] text-blue-700 font-semibold">Ativos</span>
                         </div>
+                        <!-- Faturamento Mês com Privacidade -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+    <div class="flex items-center justify-between mb-1">
+        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none">Faturamento Mês</p>
+        <button onclick="toggleFaturamento()" class="text-gray-400 hover:text-blue-900 transition focus:outline-none" title="Ocultar/Revelar Faturamento">
+            <i id="eyeIcon" class="fas fa-eye-slash text-xs"></i>
+        </button>
+    </div>
+    <p class="text-2xl font-black text-emerald-600" id="faturamentoValor">R$ •••••</p>
+    <span class="text-[10px] text-gray-400">Privado</span>
+</div>
                     </div>
 
                     <!-- Rastreador de Voo Rápido -->
@@ -288,7 +301,7 @@
             <!-- Linha do Tempo -->
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider" id="tituloDiaSelecionado">Agenda: Terça-feira, 14 de Julho</h3>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider" id="tituloDiaSelecionado"></h3>
                     <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded-full flex items-center gap-1">
                         <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Atualizado agora
                     </span>
@@ -809,8 +822,9 @@
         let isConnectedToSupabase = false;
 
         async function initSupabase() {
-            const savedUrl = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
-            const savedKey = localStorage.getItem('supabase_key') || 'sb_publishable_4w28HiSW0UqCywyYMbm-8w_LVHV2ltM';
+    // Usa o localStorage se existir, senão usa diretamente as chaves fixas do código
+    const savedUrl = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
+    const savedKey = localStorage.getItem('supabase_key') || 'sb_publishable_4w28HISw0UqCwyvYMbm-8w_LVHV2ltM';
 
             const statusBtn = document.getElementById('db-status-btn');
             const statusText = document.getElementById('db-status-text');
@@ -994,9 +1008,13 @@
         }
 
         function renderDashboard() {
+            // Filtra as reservas da data selecionada (comparando de forma flexível)
             const hoje = databaseAgenda.filter(item => {
                 const itemDia = String(item.dia || '').trim();
-                return itemDia === String(selectedDay) || itemDia === String(new Date(selectedDay).getDate());
+                const selDia = String(selectedDay).trim();
+                const diaApenas = selDia.split('-')[2]; // Pega só o número do dia (ex: "02" vira "2")
+                
+                return itemDia === selDia || itemDia === String(Number(diaApenas)) || itemDia === diaApenas;
             });
             
             const dashChegadas = document.getElementById('dash-chegadas-hoje');
@@ -1004,11 +1022,18 @@
             const dashDrivers = document.getElementById('dash-drivers-count');
             const dashFaturamento = document.getElementById('dash-faturamento');
 
-            if (dashChegadas) dashChegadas.innerText = hoje.filter(item => item.tipo === 'transfer').length;
-            if (dashPasseios) dashPasseios.innerText = hoje.filter(item => item.tipo === 'passeio').length;
+            const chegadasCount = hoje.filter(item => {
+                const tipo = String(item.tipo || '').toLowerCase();
+                const loc = String(item.localizacao || item.local || '').toLowerCase();
+                return tipo.includes('transfer') || tipo.includes('chegada') || tipo.includes('translado') || 
+                       loc.includes('eze') || loc.includes('aep') || loc.includes('aeroporto') || loc.includes('ezeiza');
+            }).length;
+
+            if (dashChegadas) dashChegadas.innerText = chegadasCount;
+            if (dashPasseios) dashPasseios.innerText = hoje.filter(item => String(item.tipo || '').toLowerCase().includes('passeio') || String(item.tipo || '').toLowerCase().includes('tango')).length;
             if (dashDrivers) dashDrivers.innerText = drivers.length;
 
-            const faturamentoTotal = databaseAgenda.reduce((sum, item) => sum + (Number(item.valorCliente) || 0), 0);
+            const faturamentoTotal = databaseAgenda.reduce((sum, item) => sum + (Number(item.valorCliente || item.valor_total) || 0), 0);
             if (dashFaturamento) dashFaturamento.innerText = `R$ ${faturamentoTotal.toLocaleString()}`;
 
             const container = document.getElementById('dashActivitiesContainer');
@@ -1022,12 +1047,15 @@
 
             hoje.forEach(item => {
                 let badge = '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-                if (item.status === 'concluido') badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+                const statusStr = String(item.status || '').toLowerCase();
+                if (statusStr.includes('concluido') || statusStr.includes('executado')) {
+                    badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+                }
 
                 container.innerHTML += `
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between text-xs">
+                    <div onclick="openClientDossier('${item.cliente_id || ''}', '${item.cliente || 'Cliente'}', '${item.telefone || ''}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
                         <div>
-                            <p class="font-bold text-gray-900">${item.hora || '--:--'} - ${item.cliente || 'Cliente'}</p>
+                            <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || '--:--'} - ${item.cliente || 'Cliente'}</p>
                             <p class="text-[11px] text-gray-600">${item.localizacao || ''}</p>
                         </div>
                         ${badge}
@@ -1035,95 +1063,141 @@
                 `;
             });
         }
-
         async function renderAgenda() {
-            const container = document.getElementById('timelineContainer');
-            if (!container) return;
-            container.innerHTML = '<div class="text-center py-8 text-gray-500">Carregando agenda...</div>';
+    const titleEl = document.getElementById('tituloDiaSelecionado');
+    if (titleEl && selectedDay) {
+        const [ano, mes, dia] = selectedDay.split('-');
+        const dataObj = new Date(ano, mes - 1, dia);
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        const dataFormatada = dataObj.toLocaleDateString('pt-BR', options);
+        const dataFormatadaCapitalizada = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
+        titleEl.innerText = `Agenda: ${dataFormatadaCapitalizada}`;
+    }
 
-            try {
-                let list = [];
-                if (window.isConnectedToSupabase && window.supabaseClient) {
-                    let { data, error } = await window.supabaseClient.from('reservas').select('*');
-                    if (error) throw error;
-                    list = data || [];
-                } else {
-                    list = [...databaseAgenda];
-                }
+    const container = document.getElementById('timelineContainer');
+    if (!container) return;
+    container.innerHTML = '<div class="text-center py-8 text-gray-500">Carregando agenda...</div>';
 
-                list = list.filter(item => {
-                    const dataItem = String(item.dia || item.date || item.data || '').trim();
-                    return dataItem === String(selectedDay);
-                });
-
-                if (selectedCategory && selectedCategory !== 'todos') {
-                    list = list.filter(item => (item.tipo || item.category) === selectedCategory);
-                }
-
-                list.sort((a, b) => String(a.hora || '').localeCompare(String(b.hora || '')));
-
-                const countTodos = document.getElementById('count-todos');
-                const countTransfers = document.getElementById('count-transfers');
-                const countPasseios = document.getElementById('count-passeios');
-
-                if (countTodos) countTodos.innerText = list.length;
-                if (countTransfers) countTransfers.innerText = list.filter(i => (i.tipo || i.category) === 'transfer').length;
-                if (countPasseios) countPasseios.innerText = list.filter(i => (i.tipo || i.category) === 'passeio').length;
-
-                if (list.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                            <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este dia (${selectedDay}).</p>
-                            <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
-                        </div>`;
-                    return;
-                }
-
-                container.innerHTML = list.map(item => {
-                    let statusBadge = '<span class="bg-gray-50 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>';
-                    let borderStatusColor = 'border-l-4 border-gray-300';
-
-                    const status = String(item.status || '').toLowerCase();
-                    if (status.includes('concluido')) {
-                        statusBadge = '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Concluído</span>';
-                        borderStatusColor = 'border-l-4 border-emerald-500';
-                    } else if (status.includes('andamento')) {
-                        statusBadge = '<span class="bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Em Andamento</span>';
-                        borderStatusColor = 'border-l-4 border-sky-500';
-                    } else if (status.includes('atrasado')) {
-                        statusBadge = '<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>';
-                        borderStatusColor = 'border-l-4 border-red-500';
-                    } else if (status.includes('confirmado')) {
-                        statusBadge = '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-                        borderStatusColor = 'border-l-4 border-blue-900';
-                    }
-
-                    return `
-                        <div class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3">
-                            <div class="flex items-start gap-3">
-                                <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
-                                    <span class="block text-sm font-black text-gray-900">${item.hora || '--:--'}</span>
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || 'Serviço'}</span>
-                                </div>
-                                <div class="space-y-1 flex-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <h4 class="font-extrabold text-gray-800 text-sm leading-none">${item.cliente || item.nome || 'Cliente'}</h4>
-                                        ${statusBadge}
-                                    </div>
-                                    <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
-                                        <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || 'Local não informado'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>`;
-                }).join('');
-
-            } catch (err) {
-                console.error("Erro ao renderizar agenda:", err);
-                container.innerHTML = '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
-            }
+    try {
+        let list = [];
+        if (window.isConnectedToSupabase && window.supabaseClient) {
+            let { data, error } = await window.supabaseClient
+                .from('reservas')
+                .select(`
+                    *,
+                    clientes (
+                        nome
+                    )
+                `);
+            if (error) throw error;
+            
+            // Mapeia os dados para garantir que a propriedade 'cliente' receba o nome vindo da tabela relacionada
+            list = (data || []).map(item => ({
+                ...item,
+                cliente: item.cliente || item.nome || (item.clientes ? item.clientes.nome : null)
+            }));
+        } else {
+            list = [...databaseAgenda];
         }
 
+        // 1. Filtra apenas pelo dia selecionado
+        let dayList = list.filter(item => {
+            const dataItem = String(item.dia || item.date || item.data || '').trim();
+            return dataItem === String(selectedDay);
+        });
+
+        // 2. Calcula os contadores com base na lista do dia inteiro
+        const totalTransfers = dayList.filter(i => {
+            const t = String(i.tipo || i.category || '').toLowerCase();
+            return t.includes('transfer') || t.includes('translado');
+        }).length;
+
+        const totalPasseios = dayList.filter(i => {
+            const t = String(i.tipo || i.category || '').toLowerCase();
+            return t.includes('passeio') || t.includes('tango') || t.includes('tour') || t.includes('show');
+        }).length;
+
+        const countTodos = document.getElementById('count-todos');
+        const countTransfers = document.getElementById('count-transfers');
+        const countPasseios = document.getElementById('count-passeios');
+
+        if (countTodos) countTodos.innerText = dayList.length;
+        if (countTransfers) countTransfers.innerText = totalTransfers;
+        if (countPasseios) countPasseios.innerText = totalPasseios;
+
+        // 3. Aplica o filtro de categoria para exibição na timeline
+        let displayList = dayList;
+        if (selectedCategory && selectedCategory !== 'todos') {
+            displayList = dayList.filter(item => {
+                const t = String(item.tipo || item.category || '').toLowerCase();
+                if (selectedCategory === 'transfer') {
+                    return t.includes('transfer') || t.includes('translado');
+                } else if (selectedCategory === 'passeio') {
+                    return t.includes('passeio') || t.includes('tango') || t.includes('tour') || t.includes('show');
+                }
+                return t === selectedCategory;
+            });
+        }
+
+        displayList.sort((a, b) => String(a.hora || '').localeCompare(String(b.hora || '')));
+
+        if (displayList.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${selectedDay}).</p>
+                    <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = displayList.map(item => {
+            let statusBadge = '<span class="bg-gray-50 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>';
+            let borderStatusColor = 'border-l-4 border-gray-300';
+
+            const status = String(item.status || '').toLowerCase();
+            if (status.includes('concluido')) {
+                statusBadge = '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Concluído</span>';
+                borderStatusColor = 'border-l-4 border-emerald-500';
+            } else if (status.includes('andamento')) {
+                statusBadge = '<span class="bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Em Andamento</span>';
+                borderStatusColor = 'border-l-4 border-sky-500';
+            } else if (status.includes('atrasado')) {
+                statusBadge = '<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>';
+                borderStatusColor = 'border-l-4 border-red-500';
+            } else if (status.includes('confirmado')) {
+                statusBadge = '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+                borderStatusColor = 'border-l-4 border-blue-900';
+            }
+
+            const nomeClienteFinal = item.cliente || item.nome || (item.clientes ? item.clientes.nome : null) || 'Cliente';
+
+            return `
+            <div onclick="openClientDossier('${item.cliente_id || ''}', '${nomeClienteFinal}', '${item.telefone || ''}', '')" class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
+                <div class="flex items-start gap-3">
+                    <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
+                        <span class="block text-sm font-black text-gray-900">${item.hora || '--:--'}</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || 'Serviço'}</span>
+                    </div>
+                    <div class="space-y-1 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors">
+                                ${nomeClienteFinal}
+                            </h4>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
+                            <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || 'Local não informado'}
+                        </p>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+    } catch (err) {
+        console.error("Erro ao renderizar agenda:", err);
+        container.innerHTML = '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
+    }
+}
         function renderDrivers(dataToRender = drivers) {
             const container = document.getElementById('driversList');
             if (!container) return;
@@ -1399,7 +1473,53 @@
                 `;
             }).join('');
         }
+        async function renderClientes() {
+            const container = document.getElementById('clientesList');
+            if (!container) return;
 
+            if (!window.supabaseClient || !window.isConnectedToSupabase) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Modo simulação: Lista de clientes indisponível.</p>`;
+                return;
+            }
+
+            container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Carregando clientes...</p>`;
+
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .order('nome', { ascending: true });
+
+                if (error) throw error;
+
+                container.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Nenhum cliente cadastrado.</p>`;
+                    return;
+                }
+
+                data.forEach(cliente => {
+                    container.innerHTML += `
+                        <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ''}', '${cliente.whatsapp || ''}', '${cliente.biografia || ''}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || 'Cliente sem nome'}</h3>
+                                <p class="text-sm text-gray-500">${cliente.whatsapp || 'Sem WhatsApp'}</p>
+                                ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic">${cliente.biografia}</p>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                                <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+                                    Deletar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Erro ao renderizar clientes:", err);
+                container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar clientes do banco.</p>`;
+            }
+        }
         async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
             const novoNome = prompt("Editar nome do serviço:", nomeAtual);
             if (novoNome === null) return;
@@ -1556,7 +1676,7 @@
             const valMotorista = parseFloat(document.getElementById('modalValueDriver').value) || 0;
 
             if (!clientName || !clientPhone) {
-                showToast("Preencha o nome e o WhatsApp do cliente.");
+                alert("Preencha o nome e o WhatsApp do cliente.");
                 return;
             }
 
@@ -1577,7 +1697,6 @@
                             .insert([{ 
                                 nome: clientName, 
                                 whatsapp: clientPhone, 
-                                Destino: 'Brasil', 
                                 biografia: '' 
                             }])
                             .select();
@@ -1601,7 +1720,7 @@
 
                     if (resErr) throw resErr;
                     
-                    showToast("Cliente atualizado e reserva agendada com sucesso!");
+                    alert("Cliente atualizado e reserva agendada com sucesso!");
                     
                     document.getElementById('modalClient').value = '';
                     document.getElementById('modalPhone').value = '';
@@ -1620,7 +1739,7 @@
 
                 } catch (err) {
                     console.error(err);
-                    showToast("Erro ao processar reserva integrada.");
+                    alert("Erro ao processar reserva integrada: " + (err.message || err));
                 }
             } else {
                 const newEvent = {
@@ -1647,11 +1766,10 @@
 
                 renderAgenda();
                 renderDashboard();
-                showToast("Reserva e cliente simulados com sucesso!");
+                alert("Reserva e cliente simulados com sucesso!");
                 closeQuickAddModal();
             }
         }
-
         function openDbSettingsModal() {
             const modal = document.getElementById('dbSettingsModal');
             document.getElementById('dbUrlInput').value = localStorage.getItem('supabase_url') || 'https://xjjflsdtaruzaekadqoq.supabase.co';
@@ -2472,6 +2590,28 @@
 
         async function openClientDossier(clientId, clientName, clientPhone, clientBio) {
             currentOpenClientId = clientId;
+
+            // Se o ID veio vazio ou nulo, tenta buscar o ID correto no Supabase pelo nome ou WhatsApp
+            if ((!currentOpenClientId || currentOpenClientId === 'undefined' || currentOpenClientId === 'null') && window.supabaseClient) {
+                try {
+                    let query = window.supabaseClient.from('clientes').select('id, nome, whatsapp, biografia');
+                    if (clientPhone) {
+                        query = query.eq('whatsapp', clientPhone);
+                    } else if (clientName) {
+                        query = query.eq('nome', clientName);
+                    }
+                    const { data: foundClient } = await query.maybeSingle();
+                    if (foundClient) {
+                        currentOpenClientId = foundClient.id;
+                        clientName = foundClient.nome || clientName;
+                        clientPhone = foundClient.whatsapp || clientPhone;
+                        clientBio = foundClient.biografia || clientBio;
+                    }
+                } catch (e) {
+                    console.error("Erro ao buscar ID do cliente:", e);
+                }
+            }
+
             document.getElementById('dossierClientName').innerText = clientName || 'Cliente';
             document.getElementById('dossierClientPhone').innerText = clientPhone || '';
             document.getElementById('editClientName').value = clientName || '';
@@ -2480,7 +2620,8 @@
 
             switchDossierTab('cadastral');
             document.getElementById('clientDossierModal').classList.remove('hidden');
-            await loadClientTimeline(clientId);
+            
+            await loadClientTimeline(currentOpenClientId);
         }
 
         function closeClientDossier() {
@@ -2507,9 +2648,15 @@
             }
         }
 
-        async function loadClientTimeline(clientId) {
+       async function loadClientTimeline(clientId) {
             const container = document.getElementById('clientTimelineContent');
+            if (!container) return;
             container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Carregando histórico...</p>';
+
+            if (!clientId || clientId === 'undefined' || clientId === 'null') {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">Nenhum ID de cliente vinculado a esta reserva.</p>';
+                return;
+            }
 
             if (window.isConnectedToSupabase && window.supabaseClient) {
                 try {
@@ -2533,7 +2680,7 @@
                                 <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
                                 <div class="flex justify-between items-start">
                                     <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || 'Serviço'}</span>
-                                    <span class="text-xs text-gray-400">${res.dia} às ${res.hora || ''}</span>
+                                    <span class="text-xs text-gray-400">Dia ${res.dia} às ${res.hora || ''}</span>
                                 </div>
                                 <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || 'Sem descrição'}</p>
                                 <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
@@ -2553,7 +2700,6 @@
                 container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Modo offline: Histórico indisponível na simulação local.</p>';
             }
         }
-
         async function saveClientChanges() {
             if (!currentOpenClientId) return;
             const newName = document.getElementById('editClientName').value.trim();
@@ -2966,6 +3112,230 @@
             if (typeof renderClientes === 'function') renderClientes();
             if (typeof carregarAtencaoOperacional === 'function') carregarAtencaoOperacional();
         });
+        let faturamentoOculto = true;
+const valorRealFaturamento = "R$ 4.310"; // No futuro, você pode puxar isso dinamicamente do banco de dados
+
+function toggleFaturamento() {
+    const elValor = document.getElementById('faturamentoValor');
+    const elIcon = document.getElementById('eyeIcon');
+    
+    faturamentoOculto = !faturamentoOculto;
+    
+    if (faturamentoOculto) {
+        elValor.innerText = "R$ •••••";
+        elIcon.classList.remove('fa-eye');
+        elIcon.classList.add('fa-eye-slash');
+    } else {
+        elValor.innerText = valorRealFaturamento;
+        elIcon.classList.remove('fa-eye-slash');
+        elIcon.classList.add('fa-eye');
+    }
+}
+let filtroDashboardAtual = 'todos';
+
+// Variável de controle e função única do Modal para os cards do Dashboard
+let filtroDashboardAtivo = null;
+
+function filtrarDashboardPor(tipo) {
+    const modal = document.getElementById('modalFiltroDashboard');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalIcone = document.getElementById('modalIconeTitulo');
+    const conteudoLista = document.getElementById('modalConteudoLista');
+
+    if (!modal) return;
+    conteudoLista.innerHTML = '';
+
+    if (tipo === 'chegada') {
+        modalTitulo.innerText = 'Chegadas e Voos de Hoje';
+        modalIcone.className = 'fas fa-plane-arrival text-blue-400 text-lg';
+    } else if (tipo === 'passeio') {
+        modalTitulo.innerText = 'Passeios e Reservas de Hoje';
+        modalIcone.className = 'fas fa-map-marked-alt text-orange-400 text-lg';
+    }
+
+    // Alvo direto: pega cada linha/card individual de serviço dentro da lista
+    const cardsIndividuais = document.querySelectorAll("#\\-prximas-atividades-de-hoje-container > div > div, .bg-white.p-4.rounded-xl, .bg-white.rounded-2xl");
+    let encontrados = 0;
+
+    cardsIndividuais.forEach(card => {
+        if (card.closest('#modalFiltroDashboard') || card.querySelector('form') || card.innerText.includes('PRÓXIMAS ATIVIDADES')) return;
+
+        const texto = card.innerText.toLowerCase();
+        const temHorario = /\d{2}:\d{2}/.test(texto);
+        const ehServico = (texto.includes('confirmado') || texto.includes('pendente')) && temHorario;
+
+        if (ehServico) {
+            const isChegada = texto.includes('eze') || texto.includes('aep') || texto.includes('aeroporto') || texto.includes('voo') || texto.includes('cap x eze');
+            const isPasseio = texto.includes('menu') || texto.includes('platea') || texto.includes('tango') || texto.includes('delta') || texto.includes('tour');
+
+            let atendeFiltro = false;
+            if (tipo === 'chegada' && isChegada && !isPasseio) {
+                atendeFiltro = true;
+            } else if (tipo === 'passeio' && isPasseio && !isChegada) {
+                atendeFiltro = true;
+            }
+
+            if (atendeFiltro) {
+                encontrados++;
+                const clone = card.cloneNode(true);
+                clone.style.display = "block";
+                clone.className = "bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3";
+                conteudoLista.appendChild(clone);
+            }
+        }
+    });
+
+    if (encontrados === 0) {
+        conteudoLista.innerHTML = `
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-info-circle text-2xl mb-2"></i>
+                <p class="text-sm font-medium">Nenhum registro encontrado para esta categoria.</p>
+            </div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+function fecharModalFiltro() {
+    const modal = document.getElementById('modalFiltroDashboard');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+// Função principal chamada ao clicar na aba Financeiro
+let acaoSenhaCallback = null; // Controla se estamos acessando ou resetando
+
+// 1. Chamado ao clicar no botão "Financeiro" do menu
+function protegerFinanceiro(event) {
+    if (event) event.preventDefault();
+
+    const senhaSalva = localStorage.getItem('turismundo_senha_financeiro');
+
+    if (!senhaSalva) {
+        // Primeiro acesso: Criação de senha
+        abrirModalSenha("Criar Senha do Financeiro", "Crie uma senha de acesso:", () => {
+            const novaSenha = document.getElementById('input-senha-modal').value;
+            if (!novaSenha || novaSenha.trim() === "") {
+                alert("A senha não pode ser vazia.");
+                return;
+            }
+            localStorage.setItem('turismundo_senha_financeiro', novaSenha);
+            alert("Senha criada com sucesso!");
+            abrirAbaFinanceiroReal();
+        });
+    } else {
+        // Acesso normal: Digitar senha
+        abrirModalSenha("Acesso ao Financeiro", "Digite a sua senha:", () => {
+            const senhaInformada = document.getElementById('input-senha-modal').value;
+            if (senhaInformada === senhaSalva) {
+                abrirAbaFinanceiroReal();
+            } else {
+                alert("Senha incorreta!");
+            }
+        });
+    }
+}
+
+// 2. Função para Resetar/Alterar a Senha
+function resetarSenhaFinanceiro() {
+    const senhaSalva = localStorage.getItem('turismundo_senha_financeiro');
+
+    if (!senhaSalva) {
+        alert("Não há senha cadastrada ainda.");
+        return;
+    }
+
+    // Valida primeiro a senha atual usando o modal
+    abrirModalSenha("Alterar Senha", "Digite a senha ATUAL:", () => {
+        const senhaAtual = document.getElementById('input-senha-modal').value;
+        
+        if (senhaAtual === senhaSalva) {
+            // Se acertou a atual, pede a nova senha logo em seguida
+            setTimeout(() => {
+                abrirModalSenha("Nova Senha", "Digite a NOVA senha:", () => {
+                    const novaSenha = document.getElementById('input-senha-modal').value;
+                    if (!novaSenha || novaSenha.trim() === "") {
+                        alert("A nova senha não pode ser vazia.");
+                        return;
+                    }
+                    localStorage.setItem('turismundo_senha_financeiro', novaSenha);
+                    alert("Senha alterada com sucesso!");
+                });
+            }, 300);
+        } else {
+            alert("Senha atual incorreta!");
+        }
+    });
+}
+
+// Funções de controle visual do Modal
+function abrirModalSenha(titulo, subtitulo, callback) {
+    document.getElementById('titulo-modal-senha').innerText = titulo;
+    document.getElementById('subtitulo-modal-senha').innerText = subtitulo;
+    document.getElementById('input-senha-modal').value = "";
+    document.getElementById('modal-senha-financeiro').classList.remove('hidden');
+    document.getElementById('input-senha-modal').focus();
+    acaoSenhaCallback = callback;
+}
+
+function fecharModalSenha() {
+    document.getElementById('modal-senha-financeiro').classList.add('hidden');
+    acaoSenhaCallback = null;
+}
+
+function confirmarSenhaModal() {
+    if (typeof acaoSenhaCallback === 'function') {
+        const callbackTemp = acaoSenhaCallback;
+        fecharModalSenha();
+        callbackTemp();
+    }
+}
+
+function abrirAbaFinanceiroReal() {
+    switchTab('financeiro');
+}
+
+// Função que realmente abre a aba financeiro (ajustada para o padrão de abas do seu sistema)
+function abrirAbaFinanceiroReal() {
+    // Se o seu sistema usa uma função global de troca de abas (ex: switchTab ou openTab), chame-a aqui.
+    // Ou altere a classe 'hidden' manualmente caso o seu código faça isso:
+    
+    // Exemplo padrão de navegação por abas:
+    const linkFinanceiro = document.querySelector('[data-tab="financeiro"]') || document.getElementById('btn-financeiro');
+    if (typeof switchTab === 'function') {
+        switchTab('financeiro');
+    } else {
+        // Fallback genérico caso precise mostrar a seção manualmente
+        console.log("Acesso ao financeiro permitido");
+    }
+}
+
+// Função para Alterar/Resetar a Senha (pode ser ligada a um botão de configurações)
+function resetarSenhaFinanceiro() {
+    const senhaAtual = prompt("Para alterar a senha, digite a senha ATUAL:");
+    const senhaSalva = localStorage.getItem('turismundo_senha_financeiro');
+
+    if (senhaAtual === senhaSalva) {
+        const novaSenha = prompt("Digite a NOVA senha:");
+        if (!novaSenha || novaSenha.trim() === "") {
+            alert("A nova senha não pode ser vazia.");
+            return;
+        }
+        const confirmacao = prompt("Confirme a NOVA senha:");
+        if (novaSenha !== confirmacao) {
+            alert("As senhas não coincidem.");
+            return;
+        }
+
+        localStorage.setItem('turismundo_senha_financeiro', novaSenha);
+        alert("Senha alterada com sucesso!");
+    } else if (senhaAtual !== null) {
+        alert("Senha atual incorreta. Alteração cancelada.");
+    }
+}
+function abrirAbaFinanceiroReal() {
+    switchTab('financeiro');
+}
     </script>
 
     <!-- Template PDF Oculto -->
@@ -3016,5 +3386,47 @@
             </div>
         </div>
     </div>
+    <!-- Modal de Visualização Dedicada (Chegadas / Passeios) -->
+<div id="modalFiltroDashboard" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform transition-all">
+        <!-- Cabeçalho do Modal -->
+        <div class="bg-blue-900 px-6 py-4 flex items-center justify-between text-white">
+            <div class="flex items-center space-x-2">
+                <i id="modalIconeTitulo" class="fas fa-filter text-lg"></i>
+                <h3 id="modalTitulo" class="font-bold text-lg">Serviços Filtrados</h3>
+            </div>
+            <button onclick="fecharModalFiltro()" class="text-white/80 hover:text-white transition focus:outline-none">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Corpo do Modal (Onde os itens filtrados aparecem) -->
+        <div class="p-6 max-h-[60vh] overflow-y-auto space-y-3" id="modalConteudoLista">
+            <!-- Os cards dos serviços filtrados serão injetados aqui dinamicamente -->
+        </div>
+
+        <!-- Rodapé do Modal -->
+        <div class="bg-gray-50 px-6 py-3 flex justify-end border-t border-gray-100">
+            <button onclick="fecharModalFiltro()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Modal de Senha do Financeiro -->
+<div id="modal-senha-financeiro" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-6 rounded-xl shadow-xl w-80">
+        <h3 id="titulo-modal-senha" class="text-lg font-bold mb-4 text-gray-800">Acesso ao Financeiro</h3>
+        <p id="subtitulo-modal-senha" class="text-sm text-gray-600 mb-3">Digite a senha:</p>
+        
+        <!-- Campo com type="password" para mostrar asteriscos -->
+        <input type="password" id="input-senha-modal" class="w-full border rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Sua senha">
+        
+        <div class="flex justify-end gap-2">
+            <button onclick="fecharModalSenha()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300">Cancelar</button>
+            <button onclick="confirmarSenhaModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Confirmar</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
