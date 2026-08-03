@@ -423,36 +423,39 @@
             </div>
         </div>
 
-        <div id="view-servicos" class="view-section hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-xl font-bold text-blue-900 mb-6">Cadastrar novo serviço</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <!-- Cadastro de Categoria -->
-                    <div class="p-4 bg-gray-50 rounded-xl border">
-                        <h3 class="font-bold text-sm mb-3">1. Criar Categoria (ex: Translado)</h3>
-                        <input type="text" id="catName" placeholder="Nome da Categoria" class="w-full p-2 rounded-lg border mb-2">
-                        <button onclick="addCategoria()" class="w-full py-2 bg-blue-900 text-white rounded-lg text-sm font-bold">Criar Categoria</button>
-                    </div>
-                    
-                    <!-- Cadastro de Item -->
-                    <div class="p-4 bg-gray-50 rounded-xl border">
-                        <h3 class="font-bold text-sm mb-3">2. Adicionar Rota e Preço</h3>
-                        <select id="catSelect" class="w-full p-2 rounded-lg border mb-2">
-                            <option>Selecione uma categoria...</option>
-                        </select>
-                        <input type="text" id="nomeItemInput" placeholder="Rota (ex: Centro x Aeroparque)" class="w-full p-2 rounded-lg border mb-2">
-                        <input type="number" id="precoInput" placeholder="Valor (R$)" class="w-full p-2 rounded-lg border mb-2">
-                        <button onclick="addItem()" class="w-full py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold">Adicionar Serviço</button>
-                    </div>
-                </div>
+      <div id="view-servicos" class="view-section hidden flex flex-col h-[calc(100vh-120px)] overflow-hidden">
+    
+    <!-- PARTE DE CIMA: Estática -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0 mb-3">
+        <h2 class="text-lg font-bold text-blue-900 mb-3">Cadastrar novo serviço</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Cadastro de Categoria -->
+            <div class="p-3 bg-gray-50 rounded-xl border">
+                <h3 class="font-bold text-xs text-gray-700 mb-2">1. Criar Categoria (ex: Translado)</h3>
+                <input type="text" id="catName" placeholder="Nome da Categoria" class="w-full p-1.5 text-sm rounded-lg border mb-2">
+                <button onclick="addCategoria()" class="w-full py-1.5 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition">Criar Categoria</button>
+            </div>
 
-                <div id="catalogList" class="space-y-4">
-                    <!-- A lista organizada aparecerá aqui -->
-                </div>
+            <!-- Cadastro de Item -->
+            <div class="p-3 bg-gray-50 rounded-xl border">
+                <h3 class="font-bold text-xs text-gray-700 mb-2">2. Adicionar Rota e Preço</h3>
+                <select id="catSelect" class="w-full p-1.5 text-sm rounded-lg border mb-2">
+                    <option>Selecione uma categoria...</option>
+                </select>
+                <input type="text" id="nomeItemInput" placeholder="Rota (ex: Centro x Aeroparque)" class="w-full p-1.5 text-sm rounded-lg border mb-2">
+                <input type="number" id="precoInput" placeholder="Valor (R$)" class="w-full p-1.5 text-sm rounded-lg border mb-2">
+                <button onclick="addItem()" class="w-full py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 transition">Adicionar Serviço</button>
             </div>
         </div>
+    </div>
 
+    <!-- PARTE DE BAIXO: Rolagem com a mesma largura simétrica -->
+    <div id="catalogList" class="flex-1 overflow-y-auto space-y-3 pr-2 w-full">
+        <!-- A lista organizada aparecerá aqui -->
+    </div>
+
+</div>
         <!-- VIEW: FINANCEIRO -->
         <div id="view-financeiro" class="view-section hidden space-y-6">
             <!-- Cards de Métricas Financeiras -->
@@ -1402,13 +1405,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 .order('nome', { ascending: true });
 
             if (catError) {
-                console.error('Erro ao carregar categorias:', catError.message);
-            }
+        console.error('Erro ao carregar categorias:', catError.message);
+    }
 
-            const { data: servicosData, error: servError } = await window.supabaseClient
-                .from('servicos')
-                .select('*')
-                .order('categoria', { ascending: true });
+    // <-- COLE O BLOCO AQUI -->
+    const catSelect = document.getElementById('catSelect');
+    if (catSelect) {
+        catSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+        if (categoriasData) {
+            categoriasData.forEach(c => {
+                catSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+            });
+        }
+    }
+
+    const { data: servicosData, error: servError } = await window.supabaseClient
+        .from('servicos')
+        .select('*')
+        .order('categoria', { ascending: true });
 
             if (servError) {
                 console.error('Erro ao carregar serviços:', servError.message);
@@ -1469,7 +1483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `
                     <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
                         <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
-                            <h3 class="text-lg font-extrabold text-blue-900 uppercase tracking-wide">${categoria}</h3>
+                            <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wide">${categoria}</h3>
                             <div class="flex items-center gap-2">
                                 <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -2143,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (select) select.innerHTML += `<option value="${nome}">${nome}</option>`;
             if (catalog) catalog.innerHTML += `<div class="p-4 border rounded-xl" id="cat_${nome}">
-                <h3 class="font-bold text-blue-900 border-b pb-2 mb-2">${nome}</h3>
+                <h3 class="text-sm font-bold text-blue-900 border-b pb-2 mb-2">${nome}</h3>
                 <div class="space-y-1"></div>
             </div>`;
             
