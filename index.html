@@ -194,7 +194,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <!-- Chegadas Hoje (Tornado Clicável) -->
                         <div onclick="filtrarDashboardPor('chegada')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-400 cursor-pointer transition group">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-blue-900 transition">Chegadas Hoje</p>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-blue-900 transition">Chegadas e PartHoje</p>
                             <p class="text-2xl font-black text-blue-900" id="dash-chegadas-hoje">0</p>
                             <span class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-circle text-[6px] mr-1"></i>Conectado</span>
                         </div>
@@ -3109,31 +3109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function executarAcaoPDF() {
-            const dados = window.orcamentoAtualSalvo;
-            if (!dados){
-                alert("Nenhum orçamento encontrado.");
-                return;
-            }
-
-            document.getElementById("pdf-cliente").innerText = dados.nome;
-            document.getElementById("pdf-whatsapp").innerText = dados.whatsapp;
-            document.getElementById("pdf-servicos").innerText = dados.servicos;
-            document.getElementById("pdf-valor").innerText = "R$ " + Number(dados.valor).toFixed(2);
-            document.getElementById("pdf-data").innerText = new Date().toLocaleDateString("pt-BR");
-
-            const elemento = document.getElementById("orcamento-pdf");
-            elemento.style.display = "block";
-
-            html2pdf().set({
-                margin: 10,
-                filename: "Proposta_" + dados.nome + ".pdf",
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(elemento).save().then(() => {
-                elemento.style.display = "none";
-                fecharModalPosSalvamento();
-            });
+            gerarPDFOrcamento();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -3372,97 +3348,217 @@ document.addEventListener('DOMContentLoaded', () => {
         initSupabase();
     }
 });
+// Função para popular o template oculto e gerar o PDF perfeitamente ajustado
+function gerarPDFOrcamento() {
+    const dados = window.orcamentoAtualSalvo;
+    
+    // Se não houver dados salvos globalmente, tenta pegar dos inputs da tela atual
+    const cliente = dados?.nome || document.getElementById('input-cliente-nome')?.value || document.getElementById('orc-nome')?.value || 'CLIENTE';
+    const whatsapp = dados?.whatsapp || document.getElementById('input-cliente-whatsapp')?.value || document.getElementById('orc-whatsapp')?.value || '';
+    const servicos = dados?.servicos || window.servicosEscolhidosParaSalvar || 'Serviços personalizados';
+    const valor = dados?.valor || document.getElementById('input-valor-total')?.value || document.getElementById('orc-valor')?.value || '0.00';
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+    // Injeta os dados nos IDs do template PDF oculto
+    document.getElementById("pdf-cliente").innerText = cliente.toUpperCase();
+    document.getElementById("pdf-whatsapp").innerText = whatsapp;
+    document.getElementById("pdf-servicos").innerText = servicos;
+    document.getElementById("pdf-valor").innerText = "R$ " + Number(valor).toFixed(2);
+    document.getElementById("pdf-data").innerText = dataAtual;
+
+    const elemento = document.getElementById("orcamento-pdf");
+    if (!elemento) return;
+
+    // Torna o template visível temporariamente para o motor capturar
+    elemento.style.display = "block";
+
+    // Configuração estrita para A4 sem quebras de página indesejadas
+    html2pdf().set({
+        margin: 0,
+        filename: "Proposta_" + cliente.replace(/\s+/g, '_') + ".pdf",
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            letterRendering: true
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(elemento).save().then(() => {
+        // Oculta o template novamente após o download
+        elemento.style.display = "none";
+        if (typeof fecharModalPosSalvamento === 'function') {
+            fecharModalPosSalvamento();
+        }
+    });
+}
+// Função para Enviar via WhatsApp mantendo a formatação limpa
+function enviarOrcamentoWhatsApp() {
+    const cliente = document.getElementById('input-cliente-nome')?.value || 'Cliente';
+    const whatsappInput = document.getElementById('input-cliente-whatsapp')?.value || '';
+    const valorTotal = document.getElementById('input-valor-total')?.value || '0.00';
+
+    // Limpa o número do WhatsApp (deixa apenas dígitos)
+    let numeroLimpo = whatsappInput.replace(/\D/g, '');
+    if (!numeroLimpo.startsWith('55') && numeroLimpo.length >= 10) {
+        numeroLimpo = '55' + numeroLink; // Ajuste DDI/DDD se necessário
+    }
+
+    // Monta a mensagem idêntica ao padrão que você usava no Python
+    let textoMsg = `Olá, *${cliente.toUpperCase()}*! Segue o resumo do seu orçamento da *TurismundoArg* 🇦🇷✈️:\n\n`;
+    textoMsg += `*Valor Total Geral: R$ ${valorTotal}*\n\nValidade: 7 dias.\nQualquer dúvida estamos à disposição!`;
+
+    const url = `https://web.whatsapp.com/send?phone=${numeroLimpo}&text=${encodeURIComponent(textoMsg)}`;
+    window.open(url, '_blank');
+}
+<script>
+    // Sobrescreve preventivamente qualquer função antiga para evitar conflitos
+    window.gerarPDF = function() { gerarPDFOrcamento(); };
+    window.imprimirPDF = function() { gerarPDFOrcamento(); };
+    window.executarAcaoPDF = function() { gerarPDFOrcamento(); };
+</script>
 </script>
 
-    <!-- Template PDF Oculto -->
-    <div id="orcamento-pdf" style="width:210mm; min-height:297mm; background:#f8fafc; font-family:Arial,sans-serif; padding:0; display:none;">
-        <div style="background:linear-gradient(90deg,#059669,#10b981); color:white; padding:35px 45px;">
-            <table style="width:100%;">
-                <tr>
-                    <td>
-                        <h1 style="margin:0; font-size:34px; letter-spacing:2px;">🌎 TURISMUNDO</h1>
-                        <div style="margin-top:8px; font-size:16px;">Turismo • Receptivo • Transfers</div>
-                    </td>
-                    <td style="text-align:right;">
-                        <div style="font-size:14px;">PROPOSTA COMERCIAL</div>
-                        <div style="margin-top:8px; font-size:26px; font-weight:bold;">Nº 0001</div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div style="padding:40px;">
-            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08); margin-bottom:25px;">
-                <h2 style="color:#059669; margin-top:0;">👤 Dados do Cliente</h2>
-                <table style="width:100%; line-height:2;">
-                    <tr><td width="30%"><strong>Cliente</strong></td><td id="pdf-cliente"></td></tr>
-                    <tr><td><strong>WhatsApp</strong></td><td id="pdf-whatsapp"></td></tr>
-                    <tr><td><strong>Data</strong></td><td id="pdf-data"></td></tr>
+   <div id="orcamento-pdf" style="width:210mm; height:297mm; max-height:297mm; background:#ffffff; font-family:Arial,sans-serif; color:#333; padding:0; display:none; box-sizing:border-box; position:relative; overflow:hidden;">
+    
+    <!-- Marca d'Água Centralizada -->
+    <div style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.06; z-index:0; pointer-events:none; background-image:url('https://raw.githubusercontent.com/sagebife/turismundo-crm/main/logo.png'); background-repeat:no-repeat; background-position:center center; background-size:700px auto;"></div>
+
+    <!-- Conteúdo Geral -->
+    <div style="position:relative; z-index:1; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+        
+        <div>
+            <!-- Cabeçalho Escuro / Executivo -->
+            <div style="background:#1e293b; color:white; padding:30px 40px;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td>
+                            <div style="font-size:24px; font-weight:bold; letter-spacing:1px; color:#34d399;">TURISMUNDO</div>
+                            <div style="font-size:12px; color:#94a3b8; margin-top:4px;">Receptivo Oficial em Buenos Aires</div>
+                        </td>
+                        <td style="text-align:right;">
+                            <div style="background:#0f172a; padding:8px 16px; border-radius:6px; display:inline-block; border:1px solid #334155;">
+                                <div style="font-size:9px; color:#94a3b8; text-transform:uppercase;">Proposta</div>
+                                <div style="font-size:16px; font-weight:bold; color:#fff;" id="pdf-num">Nº 0001</div>
+                            </div>
+                        </td>
+                    </tr>
                 </table>
             </div>
-            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08); margin-bottom:25px;">
-                <h2 style="color:#059669; margin-top:0;">📋 Serviços Contratados</h2>
-                <div id="pdf-servicos" style="background:#f3f4f6; border-left:6px solid #10b981; padding:18px; border-radius:8px; font-size:16px; line-height:1.8;"></div>
+
+            <!-- Conteúdo central -->
+            <div style="padding:30px 40px;">
+                <!-- Grid de Cliente -->
+                <table style="width:100%; margin-bottom:20px; border-collapse:collapse;">
+                    <tr>
+                        <td style="background:#f1f5f9; padding:16px; border-radius:8px; width:100%;">
+                            <div style="font-size:11px; font-weight:bold; color:#475569; text-transform:uppercase; margin-bottom:6px;">Informações do Cliente</div>
+                            <table style="width:100%; font-size:13px; line-height:1.5;">
+                                <tr><td width="15%" style="color:#64748b;">Nome:</td><td id="pdf-cliente" style="font-weight:bold; color:#0f172a;"></td></tr>
+                                <tr style="height:4px;"><td colspan="2"></td></tr>
+                                <tr><td style="color:#64748b;">WhatsApp:</td><td id="pdf-whatsapp" style="color:#334155;"></td></tr>
+                                <tr style="height:4px;"><td colspan="2"></td></tr>
+                                <tr><td style="color:#64748b;">Emissão:</td><td id="pdf-data" style="color:#334155;"></td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Serviços -->
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:12px; font-weight:bold; color:#1e293b; text-transform:uppercase; margin-bottom:8px;">Detalhamento dos Serviços</div>
+                    <div id="pdf-servicos" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-size:13px; line-height:1.6; color:#334155; min-height:80px;"></div>
+                </div>
+
+                <!-- Total -->
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td style="background:#10b981; color:white; padding:16px 24px; border-radius:8px; text-align:right;">
+                            <span style="font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-right:15px;">Valor Total:</span>
+                            <span id="pdf-valor" style="font-size:26px; font-weight:bold;"></span>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <div style="background:#059669; color:white; border-radius:15px; padding:35px; text-align:center; margin-bottom:35px;">
-                <div style="font-size:18px; letter-spacing:2px;">VALOR TOTAL</div>
-                <div id="pdf-valor" style="font-size:46px; font-weight:bold; margin-top:10px;"></div>
-            </div>
-            <div style="background:white; border-radius:12px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.08);">
-                <h2 style="color:#059669; margin-top:0;">ℹ Informações</h2>
-                <ul style="line-height:2;">
-                    <li>Esta proposta possui validade de 7 dias.</li>
-                    <li>Valores sujeitos à disponibilidade dos serviços.</li>
-                    <li>Dúvidas? Nossa equipe está pronta para atender você.</li>
-                </ul>
-            </div>
-            <div style="margin-top:70px; text-align:center; color:#777;">
-                <h2 style="color:#059669; margin-bottom:5px;">Obrigado pela preferência!</h2>
-                <div style="font-size:18px;">Equipe Turismundo</div>
-                <div style="margin-top:10px; font-size:13px;">Turismo • Passeios • Transfers • Experiências</div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal de Visualização Dedicada (Chegadas / Passeios) -->
-<div id="modalFiltroDashboard" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform transition-all">
-        <!-- Cabeçalho do Modal -->
-        <div class="bg-blue-900 px-6 py-4 flex items-center justify-between text-white">
-            <div class="flex items-center space-x-2">
-                <i id="modalIconeTitulo" class="fas fa-filter text-lg"></i>
-                <h3 id="modalTitulo" class="font-bold text-lg">Serviços Filtrados</h3>
-            </div>
-            <button onclick="fecharModalFiltro()" class="text-white/80 hover:text-white transition focus:outline-none">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <!-- Corpo do Modal (Onde os itens filtrados aparecem) -->
-        <div class="p-6 max-h-[60vh] overflow-y-auto space-y-3" id="modalConteudoLista">
-            <!-- Os cards dos serviços filtrados serão injetados aqui dinamicamente -->
         </div>
 
-        <!-- Rodapé do Modal -->
-        <div class="bg-gray-50 px-6 py-3 flex justify-end border-t border-gray-100">
-            <button onclick="fecharModalFiltro()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition">
-                Fechar
-            </button>
+        <!-- Rodapé fixo na parte inferior da página -->
+        <div style="padding:0 40px 30px 40px;">
+            <div style="font-size:11px; color:#64748b; line-height:1.5; border-top:1px solid #e2e8f0; padding-top:15px;">
+                <p style="margin:0 0 5px 0;">• Orçamento válido por 7 dias. Lugares sujeitos à confirmação de disponibilidade.</p>
+                <p style="margin:0;">• Dúvidas? Entre em contato com a nossa central de atendimento.</p>
+            </div>
         </div>
+
     </div>
 </div>
-<!-- Modal de Senha do Financeiro -->
-<div id="modal-senha-financeiro" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-xl shadow-xl w-80">
-        <h3 id="titulo-modal-senha" class="text-lg font-bold mb-4 text-gray-800">Acesso ao Financeiro</h3>
-        <p id="subtitulo-modal-senha" class="text-sm text-gray-600 mb-3">Digite a senha:</p>
-        
-        <!-- Campo com type="password" para mostrar asteriscos -->
-        <input type="password" id="input-senha-modal" class="w-full border rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Sua senha">
-        
-        <div class="flex justify-end gap-2">
-            <button onclick="fecharModalSenha()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300">Cancelar</button>
-            <button onclick="confirmarSenhaModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Confirmar</button>
+<!-- Modal Pós-Salvamento Atualizado -->
+    <div id="modal-pos-salvamento" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+                ✓
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Orçamento Salvo com Sucesso!</h3>
+            <p class="text-sm text-gray-600 mb-6">O que você deseja fazer agora com o orçamento de <span id="nomeLeadDestaque" class="font-semibold text-gray-800"></span>?</p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="gerarPDFOrcamento()" class="w-full bg-blue-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-800 transition flex items-center justify-center gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Baixar PDF Executivo (Esboço 3)
+                </button>
+                <button onclick="executarAcaoWhatsApp()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-emerald-500 transition shadow-sm">
+                    Enviar por WhatsApp
+                </button>
+                <button onclick="fecharModalPosSalvamento()" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+                    Fechar
+                </button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Script Definitivo e Global do Esboço 3 -->
+    <script>
+        // Função declarada globalmente para ser encontrada por qualquer botão
+        window.gerarPDFOrcamento = function() {
+            const dados = window.orcamentoAtualSalvo || {
+                nome: document.getElementById('input-cliente-nome')?.value || document.getElementById('orc-nome')?.value || 'CLIENTE',
+                whatsapp: document.getElementById('input-cliente-whatsapp')?.value || document.getElementById('orc-whatsapp')?.value || '',
+                servicos: window.servicosEscolhidosParaSalvar || 'Serviços personalizados',
+                valor: document.getElementById('input-valor-total')?.value || document.getElementById('orc-valor')?.value || '0.00'
+            };
+
+            document.getElementById("pdf-cliente").innerText = (dados.nome || '').toUpperCase();
+            document.getElementById("pdf-whatsapp").innerText = dados.whatsapp || '';
+            document.getElementById("pdf-servicos").innerText = dados.servicos || '';
+            document.getElementById("pdf-valor").innerText = "R$ " + Number(dados.valor || 0).toFixed(2);
+            document.getElementById("pdf-data").innerText = new Date().toLocaleDateString('pt-BR');
+
+            const elemento = document.getElementById("orcamento-pdf");
+            if (!elemento) {
+                alert("Elemento #orcamento-pdf não encontrado!");
+                return;
+            }
+
+            elemento.style.display = "block";
+
+            html2pdf().set({
+                margin: 0,
+                filename: "Proposta_" + (dados.nome || 'Cliente').replace(/\s+/g, '_') + ".pdf",
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(elemento).save().then(() => {
+                elemento.style.display = "none";
+                if (typeof fecharModalPosSalvamento === 'function') {
+                    fecharModalPosSalvamento();
+                }
+            });
+        };
+
+        window.gerarPDF = window.gerarPDFOrcamento;
+        window.imprimirPDF = window.gerarPDFOrcamento;
+        window.executarAcaoPDF = window.gerarPDFOrcamento;
+    </script>
+</body>
+</html>
 </body>
 </html>
