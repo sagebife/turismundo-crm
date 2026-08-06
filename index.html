@@ -1054,7 +1054,8 @@
           >
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1"
+                <label
+                  class="block text-xs font-bold text-gray-700 uppercase mb-1"
                   >Nome do Lead / Cliente</label
                 >
                 <input
@@ -1066,7 +1067,8 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase mb-1"
+                <label
+                  class="block text-xs font-bold text-gray-700 uppercase mb-1"
                   >WhatsApp</label
                 >
                 <input
@@ -1079,13 +1081,18 @@
             </div>
 
             <!-- Bloco de Adição de Serviços Dinâmicos -->
-            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+            <div
+              class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3"
+            >
               <h4 class="text-xs font-bold text-blue-900 uppercase">
                 Adicionar Serviços ao Orçamento
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
                 <div class="md:col-span-5">
-                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Serviço</label>
+                  <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                    >Serviço</label
+                  >
                   <select
                     id="orc-select-servico"
                     class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white"
@@ -1095,7 +1102,10 @@
                   </select>
                 </div>
                 <div class="md:col-span-3">
-                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Qtd</label>
+                  <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                    >Qtd</label
+                  >
                   <input
                     type="number"
                     id="orc-qtd"
@@ -1105,7 +1115,10 @@
                   />
                 </div>
                 <div class="md:col-span-3">
-                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor Unit. (R$)</label>
+                  <label
+                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                    >Valor Unit. (R$)</label
+                  >
                   <input
                     type="number"
                     step="0.01"
@@ -1127,7 +1140,9 @@
               </div>
 
               <!-- Tabela / Lista de Itens Adicionados -->
-              <div class="mt-3 overflow-x-auto bg-white rounded-lg border border-gray-200">
+              <div
+                class="mt-3 overflow-x-auto bg-white rounded-lg border border-gray-200"
+              >
                 <table class="w-full text-left border-collapse text-xs">
                   <thead class="bg-gray-100 text-gray-700 uppercase text-[9px]">
                     <tr>
@@ -1140,7 +1155,10 @@
                   </thead>
                   <tbody id="orc-tabela-itens" class="divide-y divide-gray-100">
                     <tr>
-                      <td colspan="5" class="p-3 text-center text-gray-400 italic">
+                      <td
+                        colspan="5"
+                        class="p-3 text-center text-gray-400 italic"
+                      >
                         Nenhum item adicionado ainda.
                       </td>
                     </tr>
@@ -1150,9 +1168,17 @@
             </div>
 
             <!-- Resumo e Total Geral -->
-            <div class="flex justify-between items-center bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-              <span class="text-xs font-bold text-gray-700 uppercase">Valor Total Geral:</span>
-              <span class="text-xl font-black text-blue-900" id="orc-label-total">R$ 0,00</span>
+            <div
+              class="flex justify-between items-center bg-blue-50/50 p-3 rounded-xl border border-blue-100"
+            >
+              <span class="text-xs font-bold text-gray-700 uppercase"
+                >Valor Total Geral:</span
+              >
+              <span
+                class="text-xl font-black text-blue-900"
+                id="orc-label-total"
+                >R$ 0,00</span
+              >
               <input type="hidden" id="orc-valor-total-geral" value="0" />
             </div>
 
@@ -1167,26 +1193,6 @@
               <button
                 type="submit"
                 class="px-5 py-2 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition shadow-sm font-bold"
-              >
-                Salvar Orçamento
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-4 border-t">
-              <button
-                type="button"
-                onclick="fecharModalOrcamento()"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-sm"
               >
                 Salvar Orçamento
               </button>
@@ -4186,12 +4192,16 @@
         }, 450);
       }
 
+      // =======================================================
+      // MÓDULO DE ORÇAMENTOS E LEADS (REFATORADO E DEFINITIVO)
+      // =======================================================
+
+      let itensOrcamentoAtual = [];
+
       async function carregarOrcamentos() {
         if (!window.supabaseClient) return;
-
         const tbody = document.getElementById("tabela-orcamentos-body");
         if (!tbody) return;
-
         tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
 
         try {
@@ -4200,254 +4210,21 @@
             .select("*")
             .order("created_at", { ascending: false });
 
-          if (error) {
-            console.error("Erro ao buscar orçamentos:", error.message);
-            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Erro ao carregar orçamentos.</td></tr>`;
-            return;
-          }
-
-          if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nenhum orçamento cadastrado.</td></tr>`;
-            return;
-          }
-
-          tbody.innerHTML = "";
-          data.forEach((orc) => {
-            const tr = document.createElement("tr");
-            tr.className = "hover:bg-gray-50 transition-colors";
-
-            tr.innerHTML = `
-                        <td class="px-6 py-4 font-medium text-gray-900">${orc.nome_lead || "Lead sem nome"}</td>
-                        <td class="px-6 py-4 text-gray-600">${orc.whatsapp || "-"}</td>
-                        <td class="px-6 py-4 text-gray-600">${orc.servicos_solicitados || "Serviços diversos"}</td>
-                        <td class="px-6 py-4 font-semibold text-gray-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
-                        <td class="px-6 py-4">
-                        ${
-                          orc.status === "Aprovado"
-                            ? `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Aprovado</span>`
-                            : `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">Pendente</span>`
-                        }
-                    </td>
-                    <td class="px-6 py-4 flex gap-2 flex-wrap">
-                        <button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors" title="Gerar PDF Profissional">PDF</button>
-                        <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors" title="Enviar Proposta via WhatsApp">WhatsApp</button>
-                        ${
-                          orc.status !== "Aprovado"
-                            ? `
-                            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
-                            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-                        `
-                            : `
-                            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-                        `
-                        }
-                    </td>
-                    `;
-            tbody.appendChild(tr);
-          });
-        } catch (err) {
-          console.error("Erro inesperado:", err);
-        }
-      }
-
-      function abrirModalOrcamento() {
-        const inputNome =
-          document.getElementById("orc-nome") ||
-          document.getElementById("nome_lead");
-        const inputWhatsapp =
-          document.getElementById("orc-whatsapp") ||
-          document.getElementById("whatsapp_lead");
-        const inputValor =
-          document.getElementById("orc-valor") ||
-          document.getElementById("valor_total");
-
-        if (inputNome) inputNome.value = "";
-        if (inputWhatsapp) inputWhatsapp.value = "";
-        if (inputValor) inputValor.value = "0.00";
-
-        const container = document.getElementById("lista-servicos-checkbox");
-        if (!container) return;
-
-        container.innerHTML =
-          '<p class="text-sm text-gray-500">Carregando serviços...</p>';
-
-        supabaseClient
-          .from("servicos")
-          .select("*")
-          .then(({ data: servicos, error }) => {
-            if (error) {
-              container.innerHTML =
-                '<p class="text-sm text-red-500">Erro ao carregar os serviços.</p>';
-              return;
-            }
-
-            if (!servicos || servicos.length === 0) {
-              container.innerHTML =
-                '<p class="text-sm text-gray-500">Nenhum serviço cadastrado.</p>';
-              return;
-            }
-
-            container.innerHTML = "";
-            servicos.forEach((servico) => {
-              const nomeServico = servico.nome || servico.titulo || "Serviço";
-              const precoServico = servico.preco || servico.valor || 0;
-
-              const div = document.createElement("div");
-              div.className = "flex items-center justify-between";
-              div.innerHTML = `
-                        <label class="flex items-center text-sm text-gray-700 cursor-pointer">
-                            <input type="checkbox" value="${precoServico}" data-nome="${nomeServico}" onchange="calcularTotalOrcamento()" class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mr-2">
-                            ${nomeServico}
-                        </label>
-                        <span class="text-sm font-semibold text-gray-600">R$ ${parseFloat(precoServico).toFixed(2)}</span>
-                    `;
-              container.appendChild(div);
-            });
-          });
-
-        const modal = document.getElementById("modal-orcamento");
-        if (modal) modal.classList.remove("hidden");
-      }
-
-      function fecharModalOrcamento() {
-        const modal = document.getElementById("modal-orcamento");
-        if (modal) {
-          modal.classList.add("hidden");
-          document.getElementById("form-orcamento").reset();
-        }
-      }
-
-      async function salvarOrcamento(event) {
-        if (event && typeof event.preventDefault === "function") {
-          event.preventDefault();
-        }
-        if (!window.supabaseClient) return;
-
-        const lead_nome = document.getElementById("orc-nome")?.value || "";
-        const lead_whatsapp =
-          document.getElementById("orc-whatsapp")?.value || "";
-        const valor_total =
-          parseFloat(document.getElementById("orc-valor")?.value) || 0;
-        const servicos_resumo =
-          window.servicosEscolhidosParaSalvar || "Serviços personalizados";
-
-        try {
-          const { error } = await window.supabaseClient
-            .from("orcamentos")
-            .insert([
-              {
-                nome_lead: lead_nome,
-                whatsapp: lead_whatsapp,
-                valor_total: valor_total,
-                servicos_solicitados: servicos_resumo,
-                status: "Pendente",
-              },
-            ]);
-
-          if (error) {
-            alert("Erro ao salvar o orçamento: " + error.message);
-            return;
-          }
-
-          fecharModalOrcamento();
-          document.getElementById("form-orcamento")?.reset();
-          carregarOrcamentos();
-
-          window.orcamentoAtualSalvo = {
-            nome: lead_nome,
-            whatsapp: lead_whatsapp,
-            valor: valor_total,
-            servicos: servicos_resumo,
-          };
-
-          const spanNome = document.getElementById("nomeLeadDestaque");
-          if (spanNome) spanNome.innerText = lead_nome;
-
-          const modalElement = document.getElementById("modal-pos-salvamento");
-          if (modalElement) modalElement.classList.remove("hidden");
-        } catch (err) {
-          console.error("Erro inesperado:", err);
-        }
-      }
-
-      async function aprovarOrcamento(id) {
-  if (!window.supabaseClient) {
-    alert("Erro: Cliente Supabase não inicializado.");
-    return;
-  }
-
-  try {
-    // Atualiza estritamente a tabela 'orcamentos' para Aprovado
-    const { error } = await window.supabaseClient
-      .from("orcamentos")
-      .update({ status: "Aprovado" })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Erro Supabase ao aprovar:", error);
-      alert("Erro ao aprovar orçamento: " + error.message);
-      return;
-    }
-
-    alert("Orçamento aprovado com sucesso!");
-    
-    // Recarrega a listagem atualizada
-    if (typeof carregarOrcamentos === 'function') {
-      carregarOrcamentos('Todos');
-    }
-  } catch (err) {
-    console.error("Erro inesperado ao aprovar:", err);
-    alert("Erro inesperado ao aprovar orçamento.");
-  }
-}
-
-      async function deletarOrcamento(id) {
-        if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
-
-        try {
-          const { error } = await window.supabaseClient
-            .from("orcamentos")
-            .delete()
-            .eq("id", id);
-
           if (error) throw error;
-          carregarOrcamentos();
-        } catch (error) {
-          console.error("Erro ao excluir orçamento:", error);
-          alert("Erro ao excluir o orçamento. Tente novamente.");
+          carregarTabelaFiltrada(data || []);
+        } catch (err) {
+          console.error("Erro ao buscar orçamentos:", err.message);
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Erro ao carregar orçamentos.</td></tr>`;
         }
-      }
-
-      function calcularTotalOrcamento() {
-        const checkboxes = document.querySelectorAll(
-          '#lista-servicos-checkbox input[type="checkbox"]',
-        );
-        let total = 0;
-        let servicosSelecionados = [];
-
-        checkboxes.forEach((cb) => {
-          if (cb.checked) {
-            total += parseFloat(cb.value) || 0;
-            servicosSelecionados.push(cb.getAttribute("data-nome"));
-          }
-        });
-
-        const inputValor =
-          document.getElementById("orc-valor") ||
-          document.getElementById("valor_total");
-        if (inputValor) {
-          inputValor.value = total.toFixed(2);
-        }
-
-        window.servicosEscolhidosParaSalvar = servicosSelecionados.join(", ");
       }
 
       async function filtrarOrcamentos(status) {
-        ["todos", "pendente", "aprovado"].forEach((s) => {
-          const btn = document.getElementById(`btn-filtro-${s}`);
+        ["todos", "Pendente", "Aprovado"].forEach((s) => {
+          const btnId = `btn-filtro-${s.toLowerCase()}`;
+          const btn = document.getElementById(btnId);
           if (!btn) return;
           if (
-            s === status.toLowerCase() ||
+            s.toLowerCase() === status.toLowerCase() ||
             (status === "todos" && s === "todos")
           ) {
             btn.className =
@@ -4458,16 +4235,18 @@
           }
         });
 
+        if (!window.supabaseClient) return;
         try {
-          let query = supabaseClient.from("orcamentos").select("*");
-          if (status !== "todos") {
+          let query = window.supabaseClient
+            .from("orcamentos")
+            .select("*")
+            .order("created_at", { ascending: false });
+          if (status.toLowerCase() !== "todos") {
             query = query.eq("status", status);
           }
-
-          const { data: orcamentos, error } = await query;
+          const { data, error } = await query;
           if (error) throw error;
-
-          carregarTabelaFiltrada(orcamentos || []);
+          carregarTabelaFiltrada(data || []);
         } catch (err) {
           console.error("Erro ao filtrar orçamentos:", err);
         }
@@ -4476,7 +4255,6 @@
       function carregarTabelaFiltrada(lista) {
         const tbody = document.getElementById("tabela-orcamentos-body");
         if (!tbody) return;
-
         tbody.innerHTML = "";
 
         if (lista.length === 0) {
@@ -4486,25 +4264,188 @@
 
         lista.forEach((orc) => {
           const tr = document.createElement("tr");
+          tr.className =
+            "hover:bg-gray-50 transition-colors border-b border-gray-100";
           const statusAtual = orc.status || "Pendente";
 
           tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || orc.cliente || "Cliente"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.servicos_solicitados || orc.servicos || "-"}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ ${parseFloat(orc.valor_total || orc.valor || 0).toFixed(2)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusAtual === "Aprovado" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}">
-                            ${statusAtual}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        ${statusAtual !== "Aprovado" ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-xs font-semibold">Aprovar</button>` : ""}
-                        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-semibold">Excluir</button>
-                    </td>
-                `;
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || "Cliente"}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
+            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${orc.servicos_solicitados}">${orc.servicos_solicitados || "-"}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${statusAtual === "Aprovado" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}">${statusAtual}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                <button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">PDF</button>
+                <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">WhatsApp</button>
+                ${statusAtual !== "Aprovado" ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>` : ""}
+                <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+            </td>
+          `;
           tbody.appendChild(tr);
         });
+      }
+
+      async function abrirModalOrcamento() {
+        const modal = document.getElementById("modal-orcamento");
+        if (modal) modal.classList.remove("hidden");
+
+        document.getElementById("form-orcamento").reset();
+        itensOrcamentoAtual = [];
+        renderizarTabelaItensOrcamento();
+
+        const select = document.getElementById("orc-select-servico");
+        if (!select || !window.supabaseClient) return;
+
+        try {
+          const { data: servicos } = await window.supabaseClient
+            .from("servicos")
+            .select("*")
+            .order("categoria", { ascending: true });
+          select.innerHTML = '<option value="">Selecione o serviço...</option>';
+          if (servicos) {
+            servicos.forEach((s) => {
+              select.innerHTML += `<option value="${s.id}" data-nome="${s.nome}" data-preco="${s.preco}">${s.categoria || "Geral"} - ${s.nome} (R$ ${s.preco})</option>`;
+            });
+          }
+        } catch (err) {
+          console.error("Erro ao carregar serviços:", err);
+        }
+      }
+
+      function fecharModalOrcamento() {
+        const modal = document.getElementById("modal-orcamento");
+        if (modal) modal.classList.add("hidden");
+        document.getElementById("form-orcamento").reset();
+        itensOrcamentoAtual = [];
+      }
+
+      function preencherValorSugerido() {
+        const select = document.getElementById("orc-select-servico");
+        if (select.selectedIndex <= 0) {
+          document.getElementById("orc-valor-unit").value = "";
+          return;
+        }
+        const opt = select.options[select.selectedIndex];
+        const preco = opt.getAttribute("data-preco") || 0;
+        document.getElementById("orc-valor-unit").value =
+          parseFloat(preco).toFixed(2);
+      }
+
+      function adicionarItemNaListaOrcamento() {
+        const select = document.getElementById("orc-select-servico");
+        if (select.selectedIndex <= 0)
+          return alert("Selecione um serviço primeiro.");
+        const opt = select.options[select.selectedIndex];
+
+        const quantidade =
+          parseInt(document.getElementById("orc-qtd").value) || 1;
+        const valorUnit =
+          parseFloat(document.getElementById("orc-valor-unit").value) || 0;
+        const valorTotalItem = quantidade * valorUnit;
+
+        itensOrcamentoAtual.push({
+          servico_id: select.value,
+          categoria: opt.text.split(" - ")[0],
+          servico: opt.getAttribute("data-nome"),
+          quantidade: quantidade,
+          valor_unitario: valorUnit,
+          valor_total: valorTotalItem,
+        });
+
+        renderizarTabelaItensOrcamento();
+        document.getElementById("orc-qtd").value = "1";
+        select.selectedIndex = 0;
+        document.getElementById("orc-valor-unit").value = "";
+      }
+
+      function removerItemOrcamento(index) {
+        itensOrcamentoAtual.splice(index, 1);
+        renderizarTabelaItensOrcamento();
+      }
+
+      function renderizarTabelaItensOrcamento() {
+        const tbody = document.getElementById("orc-tabela-itens");
+        const labelTotal = document.getElementById("orc-label-total");
+        const inputTotalGeral = document.getElementById(
+          "orc-valor-total-geral",
+        );
+        if (!tbody) return;
+
+        if (itensOrcamentoAtual.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400 italic">Nenhum item adicionado.</td></tr>`;
+          labelTotal.innerText = "R$ 0,00";
+          inputTotalGeral.value = 0;
+          return;
+        }
+
+        tbody.innerHTML = "";
+        let somaTotal = 0;
+        itensOrcamentoAtual.forEach((item, index) => {
+          somaTotal += item.valor_total;
+          tbody.innerHTML += `
+            <tr>
+                <td class="p-2 font-medium text-gray-800">${item.servico}</td>
+                <td class="p-2 text-center">${item.quantidade}</td>
+                <td class="p-2 text-right">R$ ${item.valor_unitario.toFixed(2)}</td>
+                <td class="p-2 text-right font-bold text-blue-900">R$ ${item.valor_total.toFixed(2)}</td>
+                <td class="p-2 text-center">
+                    <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>`;
+        });
+        labelTotal.innerText = `R$ ${somaTotal.toFixed(2)}`;
+        inputTotalGeral.value = somaTotal;
+      }
+
+      async function salvarOrcamentoDinamico(event) {
+        if (event) event.preventDefault();
+        if (!window.supabaseClient) return;
+
+        const nomeLead = document.getElementById("orc-nome").value.trim();
+        const whatsapp = document.getElementById("orc-whatsapp").value.trim();
+        const valorTotal =
+          parseFloat(document.getElementById("orc-valor-total-geral").value) ||
+          0;
+
+        if (itensOrcamentoAtual.length === 0)
+          return alert("Adicione serviços ao orçamento.");
+
+        const resumoServicos = itensOrcamentoAtual
+          .map((i) => `${i.quantidade}x ${i.servico}`)
+          .join(", ");
+
+        try {
+          const { data, error } = await window.supabaseClient
+            .from("orcamentos")
+            .insert([
+              {
+                nome_lead: nomeLead,
+                whatsapp: whatsapp,
+                valor_total: valorTotal,
+                servicos_solicitados: resumoServicos,
+                dados_detalhados: itensOrcamentoAtual,
+                status: "Pendente",
+              },
+            ])
+            .select();
+
+          if (error) throw error;
+
+          fecharModalOrcamento();
+          carregarOrcamentos();
+
+          if (data && data.length > 0) window.orcamentoAtualSalvo = data[0];
+
+          const spanNome = document.getElementById("nomeLeadDestaque");
+          if (spanNome) spanNome.innerText = nomeLead;
+          const modalElement = document.getElementById("modal-pos-salvamento");
+          if (modalElement) modalElement.classList.remove("hidden");
+        } catch (err) {
+          console.error("Erro ao salvar:", err);
+          alert("Erro ao salvar orçamento.");
+        }
       }
 
       function fecharModalPosSalvamento() {
@@ -4514,177 +4455,230 @@
       }
 
       function executarAcaoWhatsApp() {
-        const dados = window.orcamentoAtualSalvo;
-        if (!dados) {
-          alert("Nenhum orçamento encontrado.");
-          return;
-        }
-        alert("Em breve a proposta será enviada pelo WhatsApp.");
+        if (window.orcamentoAtualSalvo)
+          enviarOrcamentoWhatsAppDinamico(
+            window.orcamentoAtualSalvo.id,
+            window.orcamentoAtualSalvo,
+          );
         fecharModalPosSalvamento();
       }
-async function gerarPDFOrcamentoDinamico(orcamentoId) {
-  if (!window.supabaseClient) return;
 
-  try {
-    const { data: orc, error } = await window.supabaseClient
-      .from("orcamentos")
-      .select("*")
-      .eq("id", orcamentoId)
-      .single();
-
-    if (error || !orc) throw new Error("Orçamento não encontrado.");
-
-    // Cria um elemento temporário estilizado perfeitamente para o PDF
-    const containerTemp = document.createElement("div");
-    containerTemp.style.padding = "30px";
-    containerTemp.style.fontFamily = "Arial, sans-serif";
-    containerTemp.style.color = "#1f2937";
-    containerTemp.style.background = "#ffffff";
-    containerTemp.style.width = "190mm"; // Largura padrão A4 com margem
-
-    // Monta a listagem de itens em tabela limpa
-    let linhasTabela = "";
-    if (orc.dados_detalhados && Array.isArray(orc.dados_detalhados) && orc.dados_detalhados.length > 0) {
-      orc.dados_detalhados.forEach((item, index) => {
-        linhasTabela += `
-          <tr style="border-bottom: 1px solid #e5e7eb; background-color: ${index % 2 === 0 ? '#f9fafb' : '#ffffff'};">
-            <td style="padding: 10px; font-size: 13px;">
-              <strong>${item.servico}</strong><br>
-              <span style="font-size: 11px; color: #6b7280;">Categoria: ${item.categoria || 'Geral'}</span>
-            </td>
-            <td style="padding: 10px; text-align: center; font-size: 13px;">${item.quantidade}</td>
-            <td style="padding: 10px; text-align: right; font-size: 13px;">R$ ${Number(item.valor_unitario).toFixed(2)}</td>
-            <td style="padding: 10px; text-align: right; font-size: 13px; font-weight: bold; color: #059669;">R$ ${Number(item.valor_total).toFixed(2)}</td>
-          </tr>`;
-      });
-    } else {
-      linhasTabela = `
-        <tr>
-          <td colspan="4" style="padding: 12px; text-align: center; font-size: 13px;">${orc.servicos_solicitados || "Serviços Turismundo"}</td>
-        </tr>`;
-    }
-
-    containerTemp.innerHTML = `
-      <!-- Cabeçalho -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
-        <div>
-          <h1 style="color: #1e40af; margin: 0; font-size: 24px; font-weight: bold;">TURISMUNDO</h1>
-          <p style="margin: 3px 0 0 0; font-size: 11px; color: #6b7280; letter-spacing: 1px;">TURISMO RECEPTIVO • BUENOS AIRES</p>
-        </div>
-        <div style="text-align: right;">
-          <h2 style="margin: 0; font-size: 16px; color: #374151;">PROPOSTA COMERCIAL</h2>
-          <p style="margin: 3px 0 0 0; font-size: 12px; color: #4b5563;">Nº ${String(orc.id).slice(-4).toUpperCase()}</p>
-          <p style="margin: 2px 0 0 0; font-size: 11px; color: #6b7280;">Data: ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</p>
-        </div>
-      </div>
-
-      <!-- Dados do Cliente -->
-      <div style="background-color: #f3f4f6; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px;">
-        <table style="width: 100%; font-size: 13px;">
-          <tr>
-            <td><strong>Cliente:</strong> ${(orc.nome_lead || "Cliente").toUpperCase()}</td>
-            <td style="text-align: right;"><strong>WhatsApp:</strong> ${orc.whatsapp || "-"}</td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- Tabela de Serviços -->
-      <h3 style="font-size: 14px; color: #1e3a8a; margin-bottom: 8px; border-left: 3px solid #2563eb; padding-left: 8px;">Serviços Solicitados</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <thead>
-          <tr style="background-color: #1e40af; color: #ffffff; text-align: left; font-size: 12px;">
-            <th style="padding: 10px;">Serviço / Experiência</th>
-            <th style="padding: 10px; text-align: center;">Qtd</th>
-            <th style="padding: 10px; text-align: right;">Valor Unit.</th>
-            <th style="padding: 10px; text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${linhasTabela}
-        </tbody>
-      </table>
-
-      <!-- Valor Total Geral -->
-      <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 20px; border-radius: 6px; text-align: right; min-width: 220px;">
-          <span style="font-size: 12px; color: #1e40af; display: block;">VALOR TOTAL GERAL</span>
-          <span style="font-size: 20px; font-weight: bold; color: #1e3a8a;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
-        </div>
-      </div>
-
-      <!-- Rodapé / Termos -->
-      <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 11px; color: #6b7280; text-align: center;">
-        <p style="margin: 0 0 5px 0;">Esta proposta possui validade de 7 dias. Valores sujeitos à disponibilidade dos serviços.</p>
-        <p style="margin: 0; font-weight: bold; color: #374151;">Dúvidas? Nossa equipe está pronta para atender você na Turismundo 🇦🇷✈️</p>
-      </div>
-    `;
-
-    // Configurações e exportação limpa do html2pdf
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: `Proposta_Turismundo_${(orc.nome_lead || "Cliente").replace(/\s+/g, "_")}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-      })
-      .from(containerTemp)
-      .save();
-
-  } catch (err) {
-    console.error("Erro ao gerar PDF:", err);
-    alert("Não foi possível gerar o PDF profissional.");
-  }
-}
       function executarAcaoPDF() {
-        const dados = window.orcamentoAtualSalvo;
-        if (!dados) {
-          alert("Nenhum orçamento encontrado.");
-          return;
-        }
-
-        document.getElementById("pdf-cliente").innerText = dados.nome;
-        document.getElementById("pdf-whatsapp").innerText = dados.whatsapp;
-        document.getElementById("pdf-servicos").innerText = dados.servicos;
-        document.getElementById("pdf-valor").innerText =
-          "R$ " + Number(dados.valor).toFixed(2);
-        document.getElementById("pdf-data").innerText =
-          new Date().toLocaleDateString("pt-BR");
-
-        const elemento = document.getElementById("orcamento-pdf");
-        elemento.style.display = "block";
-
-        html2pdf()
-          .set({
-            margin: 10,
-            filename: "Proposta_" + dados.nome + ".pdf",
-            image: { type: "jpeg", quality: 1 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          })
-          .from(elemento)
-          .save()
-          .then(() => {
-            elemento.style.display = "none";
-            fecharModalPosSalvamento();
-          });
+        if (window.orcamentoAtualSalvo)
+          gerarPDFOrcamentoDinamico(window.orcamentoAtualSalvo.id);
+        fecharModalPosSalvamento();
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        if (typeof carregarOrcamentos === "function") carregarOrcamentos();
-        if (typeof renderClientes === "function") renderClientes();
-        if (typeof carregarAtencaoOperacional === "function")
-          carregarAtencaoOperacional();
-      });
+      async function aprovarOrcamento(id) {
+        if (!window.supabaseClient) return;
+
+        try {
+          // 1. Busca os dados do orçamento
+          const { data: orc, error: errBusca } = await window.supabaseClient
+            .from("orcamentos")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+          if (errBusca || !orc) throw new Error("Orçamento não encontrado.");
+
+          // 2. Copia para a tabela Clientes (apenas nome e whatsapp, que existem na sua base)
+          const { error: errInsert } = await window.supabaseClient
+            .from("clientes")
+            .insert([
+              {
+                nome: orc.nome_lead,
+                whatsapp: orc.whatsapp,
+              },
+            ]);
+
+          if (errInsert) {
+            console.error("Erro ao transferir para clientes:", errInsert);
+            alert(
+              "Aviso: O orçamento será aprovado, mas houve um erro ao criar o cliente.",
+            );
+          }
+
+          // 3. Atualiza o status do orçamento
+          const { error: errUpdate } = await window.supabaseClient
+            .from("orcamentos")
+            .update({ status: "Aprovado" })
+            .eq("id", id);
+
+          if (errUpdate) throw errUpdate;
+
+          // 4. Atualiza a tela
+          carregarOrcamentos();
+
+          if (typeof carregarClientes === "function") {
+            carregarClientes();
+          }
+
+          alert("Orçamento aprovado e cliente gerado com sucesso!");
+        } catch (err) {
+          console.error("Erro na aprovação:", err);
+          alert("Erro ao tentar aprovar o orçamento.");
+        }
+      }
+
+      async function deletarOrcamento(id) {
+        if (!confirm("Excluir este orçamento?")) return;
+        try {
+          const { error } = await window.supabaseClient
+            .from("orcamentos")
+            .delete()
+            .eq("id", id);
+          if (error) throw error;
+          carregarOrcamentos();
+        } catch (error) {
+          console.error("Erro:", error);
+        }
+      }
+
+      async function enviarOrcamentoWhatsAppDinamico(id, dados = null) {
+        let orc = dados;
+        if (!orc) {
+          const { data, error } = await window.supabaseClient
+            .from("orcamentos")
+            .select("*")
+            .eq("id", id)
+            .single();
+          if (error || !data) return alert("Orçamento não encontrado.");
+          orc = data;
+        }
+
+        const cliente = orc.nome_lead || "Cliente";
+        let numLimpo = (orc.whatsapp || "").replace(/[^0-9]/g, "");
+        if (
+          numLimpo &&
+          !numLimpo.startsWith("55") &&
+          !numLimpo.startsWith("54")
+        )
+          numLimpo = "55" + numLimpo;
+
+        let textoMsg = `Olá, *${cliente.toUpperCase()}*! Segue o resumo do seu orçamento da *Turismundo*:\n\n`;
+        if (orc.dados_detalhados && Array.isArray(orc.dados_detalhados)) {
+          orc.dados_detalhados.forEach((item) => {
+            textoMsg += `- ${item.quantidade}x ${item.servico} - R$ ${Number(item.valor_total).toFixed(2)}\n`;
+          });
+        } else {
+          textoMsg += `- ${orc.servicos_solicitados}\n`;
+        }
+        textoMsg += `\n*Valor Total: R$ ${Number(orc.valor_total || 0).toFixed(2)}*\n\nValidade: 7 dias. Qualquer dúvida, estamos à disposição!`;
+
+        window.open(
+          `https://wa.me/${numLimpo}?text=${encodeURIComponent(textoMsg)}`,
+          "_blank",
+        );
+      }
+
+      async function gerarPDFOrcamentoDinamico(orcamentoId) {
+        if (!window.supabaseClient) return;
+        try {
+          const { data: orc, error } = await window.supabaseClient
+            .from("orcamentos")
+            .select("*")
+            .eq("id", orcamentoId)
+            .single();
+          if (error || !orc) throw new Error("Orçamento não encontrado.");
+
+          const containerTemp = document.createElement("div");
+          containerTemp.style.padding = "30px";
+          containerTemp.style.fontFamily = "Arial, sans-serif";
+          containerTemp.style.color = "#1f2937";
+          containerTemp.style.background = "#ffffff";
+          containerTemp.style.width = "190mm";
+
+          let linhasTabela = "";
+          if (
+            orc.dados_detalhados &&
+            Array.isArray(orc.dados_detalhados) &&
+            orc.dados_detalhados.length > 0
+          ) {
+            orc.dados_detalhados.forEach((item, index) => {
+              linhasTabela += `
+                  <tr style="border-bottom: 1px solid #e5e7eb; background-color: ${index % 2 === 0 ? "#f9fafb" : "#ffffff"};">
+                      <td style="padding: 10px; font-size: 13px;"><strong>${item.servico}</strong></td>
+                      <td style="padding: 10px; text-align: center; font-size: 13px;">${item.quantidade}</td>
+                      <td style="padding: 10px; text-align: right; font-size: 13px;">R$ ${Number(item.valor_unitario).toFixed(2)}</td>
+                      <td style="padding: 10px; text-align: right; font-size: 13px; font-weight: bold; color: #059669;">R$ ${Number(item.valor_total).toFixed(2)}</td>
+                  </tr>`;
+            });
+          } else {
+            linhasTabela = `<tr><td colspan="4" style="padding: 12px; text-align: center; font-size: 13px;">${orc.servicos_solicitados}</td></tr>`;
+          }
+
+          containerTemp.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
+              <div>
+              <h1 style="color: #1e40af; margin: 0; font-size: 24px; font-weight: bold;">TURISMUNDO</h1>
+              <p style="margin: 3px 0 0 0; font-size: 11px; color: #6b7280; letter-spacing: 1px;">TURISMO RECEPTIVO • BUENOS AIRES</p>
+              </div>
+              <div style="text-align: right;">
+              <h2 style="margin: 0; font-size: 16px; color: #374151;">PROPOSTA COMERCIAL</h2>
+              <p style="margin: 3px 0 0 0; font-size: 12px; color: #4b5563;">Nº ${String(orc.id).slice(-4).toUpperCase()}</p>
+              <p style="margin: 2px 0 0 0; font-size: 11px; color: #6b7280;">Data: ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</p>
+              </div>
+          </div>
+          <div style="background-color: #f3f4f6; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px;">
+              <table style="width: 100%; font-size: 13px;">
+              <tr>
+                  <td><strong>Cliente:</strong> ${(orc.nome_lead || "Cliente").toUpperCase()}</td>
+                  <td style="text-align: right;"><strong>WhatsApp:</strong> ${orc.whatsapp || "-"}</td>
+              </tr>
+              </table>
+          </div>
+          <h3 style="font-size: 14px; color: #1e3a8a; margin-bottom: 8px; border-left: 3px solid #2563eb; padding-left: 8px;">Serviços Solicitados</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <thead>
+              <tr style="background-color: #1e40af; color: #ffffff; text-align: left; font-size: 12px;">
+                  <th style="padding: 10px;">Serviço</th>
+                  <th style="padding: 10px; text-align: center;">Qtd</th>
+                  <th style="padding: 10px; text-align: right;">V. Unit.</th>
+                  <th style="padding: 10px; text-align: right;">Total</th>
+              </tr>
+              </thead>
+              <tbody>${linhasTabela}</tbody>
+          </table>
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
+              <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 20px; border-radius: 6px; text-align: right; min-width: 220px;">
+              <span style="font-size: 12px; color: #1e40af; display: block;">VALOR TOTAL GERAL</span>
+              <span style="font-size: 20px; font-weight: bold; color: #1e3a8a;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
+              </div>
+          </div>
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 11px; color: #6b7280; text-align: center;">
+              <p style="margin: 0 0 5px 0;">Esta proposta possui validade de 7 dias. Valores sujeitos à disponibilidade dos serviços.</p>
+              <p style="margin: 0; font-weight: bold; color: #374151;">Dúvidas? Nossa equipe está pronta para atender você na Turismundo 🇦🇷✈️</p>
+          </div>
+          `;
+
+          html2pdf()
+            .set({
+              margin: 10,
+              filename: `Proposta_${(orc.nome_lead || "Cliente").replace(/\s+/g, "_")}.pdf`,
+              image: { type: "jpeg", quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            })
+            .from(containerTemp)
+            .save();
+        } catch (err) {
+          console.error("Erro ao gerar PDF:", err);
+          alert("Não foi possível gerar o PDF.");
+        }
+      }
+
+      // =======================================================
+      // MÓDULO RESTAURADO: DASHBOARD, FATURAMENTO E FINANCEIRO
+      // =======================================================
+
       let faturamentoOculto = true;
-      const valorRealFaturamento = "R$ 4.310"; // No futuro, você pode puxar isso dinamicamente do banco de dados
+      const valorRealFaturamento = "R$ 4.310";
 
       function toggleFaturamento() {
         const elValor = document.getElementById("faturamentoValor");
         const elIcon = document.getElementById("eyeIcon");
-
         faturamentoOculto = !faturamentoOculto;
-
         if (faturamentoOculto) {
           elValor.innerText = "R$ •••••";
           elIcon.classList.remove("fa-eye");
@@ -4695,9 +4689,8 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
           elIcon.classList.add("fa-eye");
         }
       }
-      let filtroDashboardAtual = "todos";
 
-      // Variável de controle e função única do Modal para os cards do Dashboard
+      let filtroDashboardAtual = "todos";
       let filtroDashboardAtivo = null;
 
       function filtrarDashboardPor(tipo) {
@@ -4718,7 +4711,6 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
             "fas fa-map-marked-alt text-orange-400 text-lg";
         }
 
-        // Alvo direto: pega cada linha/card individual de serviço dentro da lista
         const cardsIndividuais = document.querySelectorAll(
           "#\\-prximas-atividades-de-hoje-container > div > div, .bg-white.p-4.rounded-xl, .bg-white.rounded-2xl",
         );
@@ -4753,11 +4745,10 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
               texto.includes("tour");
 
             let atendeFiltro = false;
-            if (tipo === "chegada" && isChegada && !isPasseio) {
+            if (tipo === "chegada" && isChegada && !isPasseio)
               atendeFiltro = true;
-            } else if (tipo === "passeio" && isPasseio && !isChegada) {
+            else if (tipo === "passeio" && isPasseio && !isChegada)
               atendeFiltro = true;
-            }
 
             if (atendeFiltro) {
               encontrados++;
@@ -4771,50 +4762,35 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         });
 
         if (encontrados === 0) {
-          conteudoLista.innerHTML = `
-            <div class="text-center py-8 text-gray-400">
-                <i class="fas fa-info-circle text-2xl mb-2"></i>
-                <p class="text-sm font-medium">Nenhum registro encontrado para esta categoria.</p>
-            </div>
-        `;
+          conteudoLista.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-info-circle text-2xl mb-2"></i><p class="text-sm font-medium">Nenhum registro encontrado.</p></div>`;
         }
-
         modal.classList.remove("hidden");
       }
+
       function fecharModalFiltro() {
         const modal = document.getElementById("modalFiltroDashboard");
-        if (modal) {
-          modal.classList.add("hidden");
-        }
+        if (modal) modal.classList.add("hidden");
       }
-      // Função principal chamada ao clicar na aba Financeiro
-      let acaoSenhaCallback = null; // Controla se estamos acessando ou resetando
 
-      // 1. Chamado ao clicar no botão "Financeiro" do menu
+      let acaoSenhaCallback = null;
+
       function protegerFinanceiro(event) {
         if (event) event.preventDefault();
-
         const senhaSalva = localStorage.getItem("turismundo_senha_financeiro");
 
         if (!senhaSalva) {
-          // Primeiro acesso: Criação de senha
-          abrirModalSenha(
-            "Criar Senha do Financeiro",
-            "Crie uma senha de acesso:",
-            () => {
-              const novaSenha =
-                document.getElementById("input-senha-modal").value;
-              if (!novaSenha || novaSenha.trim() === "") {
-                alert("A senha não pode ser vazia.");
-                return;
-              }
-              localStorage.setItem("turismundo_senha_financeiro", novaSenha);
-              alert("Senha criada com sucesso!");
-              abrirAbaFinanceiroReal();
-            },
-          );
+          abrirModalSenha("Criar Senha", "Crie uma senha de acesso:", () => {
+            const novaSenha =
+              document.getElementById("input-senha-modal").value;
+            if (!novaSenha || novaSenha.trim() === "") {
+              alert("Senha inválida.");
+              return;
+            }
+            localStorage.setItem("turismundo_senha_financeiro", novaSenha);
+            alert("Senha criada com sucesso!");
+            abrirAbaFinanceiroReal();
+          });
         } else {
-          // Acesso normal: Digitar senha
           abrirModalSenha("Acesso ao Financeiro", "Digite a sua senha:", () => {
             const senhaInformada =
               document.getElementById("input-senha-modal").value;
@@ -4827,31 +4803,22 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         }
       }
 
-      // 2. Função para Resetar/Alterar a Senha
       function resetarSenhaFinanceiro() {
         const senhaSalva = localStorage.getItem("turismundo_senha_financeiro");
-
         if (!senhaSalva) {
-          alert("Não há senha cadastrada ainda.");
+          alert("Não há senha.");
           return;
         }
-
-        // Valida primeiro a senha atual usando o modal
         abrirModalSenha("Alterar Senha", "Digite a senha ATUAL:", () => {
           const senhaAtual = document.getElementById("input-senha-modal").value;
-
           if (senhaAtual === senhaSalva) {
-            // Se acertou a atual, pede a nova senha logo em seguida
             setTimeout(() => {
               abrirModalSenha("Nova Senha", "Digite a NOVA senha:", () => {
                 const novaSenha =
                   document.getElementById("input-senha-modal").value;
-                if (!novaSenha || novaSenha.trim() === "") {
-                  alert("A nova senha não pode ser vazia.");
-                  return;
-                }
+                if (!novaSenha || novaSenha.trim() === "") return;
                 localStorage.setItem("turismundo_senha_financeiro", novaSenha);
-                alert("Senha alterada com sucesso!");
+                alert("Senha alterada!");
               });
             }, 300);
           } else {
@@ -4860,7 +4827,6 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         });
       }
 
-      // Funções de controle visual do Modal
       function abrirModalSenha(titulo, subtitulo, callback) {
         document.getElementById("titulo-modal-senha").innerText = titulo;
         document.getElementById("subtitulo-modal-senha").innerText = subtitulo;
@@ -4891,345 +4857,14 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         switchTab("financeiro");
       }
 
-      // Função que realmente abre a aba financeiro (ajustada para o padrão de abas do seu sistema)
-      function abrirAbaFinanceiroReal() {
-        // Se o seu sistema usa uma função global de troca de abas (ex: switchTab ou openTab), chame-a aqui.
-        // Ou altere a classe 'hidden' manualmente caso o seu código faça isso:
-
-        // Exemplo padrão de navegação por abas:
-        const linkFinanceiro =
-          document.querySelector('[data-tab="financeiro"]') ||
-          document.getElementById("btn-financeiro");
-        if (typeof switchTab === "function") {
-          switchTab("financeiro");
-        } else {
-          // Fallback genérico caso precise mostrar a seção manualmente
-          console.log("Acesso ao financeiro permitido");
-        }
-      }
-
-      // Função para Alterar/Resetar a Senha (pode ser ligada a um botão de configurações)
-      function resetarSenhaFinanceiro() {
-        const senhaAtual = prompt(
-          "Para alterar a senha, digite a senha ATUAL:",
-        );
-        const senhaSalva = localStorage.getItem("turismundo_senha_financeiro");
-
-        if (senhaAtual === senhaSalva) {
-          const novaSenha = prompt("Digite a NOVA senha:");
-          if (!novaSenha || novaSenha.trim() === "") {
-            alert("A nova senha não pode ser vazia.");
-            return;
-          }
-          const confirmacao = prompt("Confirme a NOVA senha:");
-          if (novaSenha !== confirmacao) {
-            alert("As senhas não coincidem.");
-            return;
-          }
-
-          localStorage.setItem("turismundo_senha_financeiro", novaSenha);
-          alert("Senha alterada com sucesso!");
-        } else if (senhaAtual !== null) {
-          alert("Senha atual incorreta. Alteração cancelada.");
-        }
-      }
-      function abrirAbaFinanceiroReal() {
-        switchTab("financeiro");
-      }
-
-      // Cole aqui:
       document.addEventListener("DOMContentLoaded", () => {
-        if (typeof initSupabase === "function") {
-          initSupabase();
-        }
+        if (typeof carregarOrcamentos === "function") carregarOrcamentos();
+        if (typeof renderClientes === "function") renderClientes();
+        if (typeof carregarAtencaoOperacional === "function")
+          carregarAtencaoOperacional();
+        if (typeof initSupabase === "function") initSupabase();
       });
-      // Função para popular o template oculto e gerar a ação (PDF ou WhatsApp)
-      function prepararDadosPDF() {
-        // Pega os valores dos inputs visuais da sua tela (ajuste os IDs conforme os seus inputs reais)
-        const cliente =
-          document.getElementById("input-cliente-nome")?.value || "CLIENTE";
-        const whatsapp =
-          document.getElementById("input-cliente-whatsapp")?.value || "";
-        const dataAtual = new Date().toLocaleDateString("pt-BR");
-
-        // Pega os serviços selecionados/digitados
-        // (Supondo que você tenha uma lista ou container onde os serviços foram adicionados)
-        const listaServicosElement = document.getElementById(
-          "container-servicos-selecionados",
-        );
-        let servicosTexto = "";
-
-        if (listaServicosElement) {
-          // Exemplo: se forem elementos filhos ou texto
-          servicosTexto =
-            listaServicosElement.innerText || "TRANSLADO E PASSEIO PRIVATIVO";
-        } else {
-          servicosTexto = "TRANSLADO RECEPTIVO EZEIZA / CITY TOUR";
-        }
-
-        const valorTotal =
-          document.getElementById("input-valor-total")?.value || "1120.00";
-
-        // Injeta os dados nos IDs do template PDF oculto que você colou
-        document.getElementById("pdf-cliente").innerText =
-          cliente.toUpperCase();
-        document.getElementById("pdf-whatsapp").innerText = whatsapp;
-        document.getElementById("pdf-data").innerText = dataAtual;
-        document.getElementById("pdf-servicos").innerText = servicosTexto;
-        document.getElementById("pdf-valor").innerText = `R$ ${valorTotal}`;
-      }
-
-      // Função para Gerar / Imprimir o PDF usando o template oculto
-      function gerarPDFOrcamento() {
-        prepararDadosPDF();
-
-        const elementoPDF = document.getElementById("orcamento-pdf");
-        if (!elementoPDF) return;
-
-        // Torna o template visível temporariamente para impressão
-        elementoPDF.style.display = "block";
-
-        // Dispara a janela de impressão do navegador focada no template
-        window.print();
-
-        // Oculta novamente após a impressão
-        elementoPDF.style.display = "none";
-      }
-
-      // Função para Enviar via WhatsApp mantendo a formatação limpa
-      function enviarOrcamentoWhatsApp() {
-        const cliente =
-          document.getElementById("input-cliente-nome")?.value || "Cliente";
-        const whatsappInput =
-          document.getElementById("input-cliente-whatsapp")?.value || "";
-        const valorTotal =
-          document.getElementById("input-valor-total")?.value || "0.00";
-
-        // Limpa o número do WhatsApp (deixa apenas dígitos)
-        let numeroLimpo = whatsappInput.replace(/\D/g, "");
-        if (!numeroLimpo.startsWith("55") && numeroLimpo.length >= 10) {
-          numeroLimpo = "55" + numeroLink; // Ajuste DDI/DDD se necessário
-        }
-
-        // Monta a mensagem idêntica ao padrão que você usava no Python
-        let textoMsg = `Olá, *${cliente.toUpperCase()}*! Segue o resumo do seu orçamento da *TurismundoArg* 🇦🇷✈️:\n\n`;
-        textoMsg += `*Valor Total Geral: R$ ${valorTotal}*\n\nValidade: 7 dias.\nQualquer dúvida estamos à disposição!`;
-
-        const url = `https://web.whatsapp.com/send?phone=${numeroLimpo}&text=${encodeURIComponent(textoMsg)}`;
-        window.open(url, "_blank");
-      }
-      // Array global temporário para montar os itens do orçamento antes de salvar
-let itensOrcamentoAtual = [];
-
-// Carrega os serviços cadastrados no <select> do modal de orçamento
-async function carregarOpcoesServicosOrcamento() {
-  const select = document.getElementById("orc-select-servico");
-  if (!select || !window.supabaseClient) return;
-
-  try {
-    const { data: servicos } = await window.supabaseClient
-      .from("servicos")
-      .select("*")
-      .order("categoria", { ascending: true });
-
-    select.innerHTML = '<option value="">Selecione o serviço...</option>';
-    if (servicos) {
-      window._listaServicosCache = servicos; // Guarda em cache para consulta rápida
-      servicos.forEach((s) => {
-        select.innerHTML += `<option value="${s.id}" data-nome="${s.nome}" data-preco="${s.preco}">${s.categoria} - ${s.nome} (R$ ${s.preco})</option>`;
-      });
-    }
-  } catch (err) {
-    console.error("Erro ao carregar serviços para orçamento:", err);
-  }
-}
-
-// Preenche o valor unitário automaticamente ao escolher o serviço
-function preencherValorSugerido() {
-  const select = document.getElementById("orc-select-servico");
-  const opt = select.options[select.selectedIndex];
-  const preco = opt.getAttribute("data-preco") || 0;
-  document.getElementById("orc-valor-unit").value = parseFloat(preco).toFixed(2);
-}
-
-// Adiciona um item na lista visual do orçamento
-function adicionarItemNaListaOrcamento() {
-  const select = document.getElementById("orc-select-servico");
-  const opt = select.options[select.selectedIndex];
-  if (!select.value) {
-    alert("Selecione um serviço.");
-    return;
-  }
-
-  const servicoId = select.value;
-  const servicoNome = opt.getAttribute("data-nome");
-  const categoria = opt.text.split(" - ")[0];
-  const quantidade = parseInt(document.getElementById("orc-qtd").value) || 1;
-  const valorUnit = parseFloat(document.getElementById("orc-valor-unit").value) || 0;
-  const valorTotalItem = quantidade * valorUnit;
-
-  itensOrcamentoAtual.push({
-    servico_id: servicoId,
-    categoria: categoria,
-    servico: servicoNome,
-    quantidade: quantidade,
-    valor_unitario: valorUnit,
-    valor_total: valorTotalItem
-  });
-
-  renderizarTabelaItensOrcamento();
-  document.getElementById("orc-qtd").value = "1";
-}
-
-// Remove item da lista temporária
-function removerItemOrcamento(index) {
-  itensOrcamentoAtual.splice(index, 1);
-  renderizarTabelaItensOrcamento();
-}
-
-// Renderiza a tabela de itens na tela e atualiza o valor total
-function renderizarTabelaItensOrcamento() {
-  const tbody = document.getElementById("orc-tabela-itens");
-  const labelTotal = document.getElementById("orc-label-total");
-  const inputTotalGeral = document.getElementById("orc-valor-total-geral");
-
-  if (!tbody) return;
-
-  if (itensOrcamentoAtual.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400 italic">Nenhum item adicionado ainda.</td></tr>`;
-    labelTotal.innerText = "R$ 0,00";
-    inputTotalGeral.value = 0;
-    return;
-  }
-
-  tbody.innerHTML = "";
-  let somaTotal = 0;
-
-  itensOrcamentoAtual.forEach((item, index) => {
-    somaTotal += item.valor_total;
-    tbody.innerHTML += `
-      <tr>
-        <td class="p-2 font-medium text-gray-800">${item.servico}</td>
-        <td class="p-2 text-center">${item.quantidade}</td>
-        <td class="p-2 text-right">R$ ${item.valor_unitario.toFixed(2)}</td>
-        <td class="p-2 text-right font-bold text-gray-900">R$ ${item.valor_total.toFixed(2)}</td>
-        <td class="p-2 text-center">
-          <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
-        </td>
-      </tr>
-    `;
-  });
-
-  labelTotal.innerText = `R$ ${somaTotal.toFixed(2)}`;
-  inputTotalGeral.value = somaTotal;
-}
-
-// Sobrescreve a abertura do modal para carregar a lista de serviços
-const funcaoAntigaAbrirModal = window.abrirModalOrcamento;
-window.abrirModalOrcamento = function() {
-  itensOrcamentoAtual = [];
-  renderizarTabelaItensOrcamento();
-  carregarOpcoesServicosOrcamento();
-  if (typeof funcaoAntigaAbrirModal === "function") {
-    // Mantém comportamentos anteriores se houver
-  }
-  const modal = document.getElementById("modal-orcamento");
-  if (modal) modal.classList.remove("hidden");
-};
-
-async function salvarOrcamentoDinamico(event) {
-  if (event && typeof event.preventDefault === "function") {
-    event.preventDefault();
-  }
-  if (!window.supabaseClient) return;
-
-  const nomeLead = document.getElementById("orc-nome").value.trim();
-  const whatsapp = document.getElementById("orc-whatsapp").value.trim();
-  const valorTotal = parseFloat(document.getElementById("orc-valor-total-geral").value) || 0;
-
-  if (itensOrcamentoAtual.length === 0) {
-    alert("Adicione pelo menos um serviço ao orçamento.");
-    return;
-  }
-
-  // Cria uma string resumo para a coluna antiga servicos_solicitados
-  const resumoServicos = itensOrcamentoAtual.map(i => `${i.quantidade}x ${i.servico}`).join(", ");
-
-  try {
-    const { error } = await window.supabaseClient.from("orcamentos").insert([
-      {
-        nome_lead: nomeLead,
-        whatsapp: whatsapp,
-        valor_total: valorTotal,
-        servicos_solicitados: resumoServicos,
-        dados_detalhados: itensOrcamentoAtual, // Salva o JSON estruturado!
-        status: "Pendente"
-      }
-    ]);
-
-    if (error) throw error;
-
-    alert("Orçamento salvo com sucesso!");
-    fecharModalOrcamento();
-    if (typeof carregarOrcamentos === "function") carregarOrcamentos();
-  } catch (err) {
-    console.error("Erro ao salvar orçamento dinâmico:", err);
-    alert("Erro ao salvar orçamento: " + err.message);
-  }
-}
-function enviarWhatsAppOrcamento(id) {
-  // Implementação padrão de disparo de WhatsApp ou alerta temporário
-  console.log("Disparando WhatsApp para o orçamento ID:", id);
-  // Se você já tem a lógica pronta, pode substituir o miolo desta função pela sua original.
-}
-function renderizarTabelaOrcamentos(lista) {
-  const tbody = document.querySelector("tbody"); // Ajuste o seletor se sua tabela usar um ID específico, ex: document.getElementById('tabela-orcamentos')
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (!lista || lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
-    return;
-  }
-
-  lista.forEach(orc => {
-    const tr = document.createElement("tr");
-    tr.className = "border-b hover:bg-gray-50";
-
-    // Tratamento seguro para os dados
-    const clienteNome = orc.cliente_nome || orc.nome_cliente || "Cliente / Lead";
-    const whatsapp = orc.whatsapp || orc.telefone || "-";
-    const servicos = orc.servicos_solicitados || orc.servicos || "-";
-    const valorTotal = orc.valor_total ? `R$ ${Number(orc.valor_total).toFixed(2)}` : "R$ 0.00";
-    
-    const statusLower = (orc.status || "Pendente").toLowerCase();
-    let badgeClass = "bg-yellow-100 text-yellow-800";
-    let statusText = "Pendente";
-
-    if (statusLower === "aprovado" || statusLower === "confirmado") {
-      badgeClass = "bg-green-100 text-green-800";
-      statusText = "Aprovado";
-    }
-
-    tr.innerHTML = `
-      <td class="py-3 px-4 font-medium text-gray-900">${clienteNome}</td>
-      <td class="py-3 px-4 text-gray-600">${whatsapp}</td>
-      <td class="py-3 px-4 text-gray-600">${servicos}</td>
-      <td class="py-3 px-4 text-gray-900 font-semibold">${valorTotal}</td>
-      <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">${statusText}</span></td>
-      <td class="py-3 px-4 flex gap-2">
-        <button onclick="gerarPDFOrcamento('${orc.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">PDF</button>
-        <button onclick="enviarWhatsAppOrcamento('${orc.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">WhatsApp</button>
-        ${statusText !== 'Aprovado' ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs hover:bg-emerald-700">Aprovar</button>` : ''}
-        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Excluir</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
     </script>
-
     <!-- Template PDF Oculto -->
     <div
       id="orcamento-pdf"
