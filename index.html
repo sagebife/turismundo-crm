@@ -4371,55 +4371,35 @@
       }
 
       async function aprovarOrcamento(id) {
-        try {
-          const { data: orcamento, error: erroBusca } =
-            await window.supabaseClient
-              .from("orcamentos")
-              .select("*")
-              .eq("id", id)
-              .single();
+  if (!window.supabaseClient) {
+    alert("Erro: Cliente Supabase não inicializado.");
+    return;
+  }
 
-          if (erroBusca) {
-            alert("Erro ao buscar dados do orçamento.");
-            return;
-          }
+  try {
+    // Atualiza estritamente a tabela 'orcamentos' para Aprovado
+    const { error } = await window.supabaseClient
+      .from("orcamentos")
+      .update({ status: "Aprovado" })
+      .eq("id", id);
 
-          if (orcamento) {
-            const { error: erroCliente } = await window.supabaseClient
-              .from("clientes")
-              .insert([
-                {
-                  nome: orcamento.nome_lead,
-                  whatsapp: orcamento.whatsapp,
-                  servicos: orcamento.servicos_solicitados,
-                  valor: orcamento.valor_total,
-                },
-              ]);
+    if (error) {
+      console.error("Erro Supabase ao aprovar:", error);
+      alert("Erro ao aprovar orçamento: " + error.message);
+      return;
+    }
 
-            if (erroCliente) {
-              alert("Erro ao cadastrar cliente: " + erroCliente.message);
-              return;
-            }
-          }
-
-          const { error } = await window.supabaseClient
-            .from("orcamentos")
-            .update({ status: "Aprovado" })
-            .eq("id", id);
-
-          if (error) {
-            alert("Erro ao aprovar orçamento.");
-            return;
-          }
-
-          carregarOrcamentos();
-          if (typeof renderClientes === "function") renderClientes();
-
-          alert("Orçamento aprovado e cliente cadastrado com sucesso!");
-        } catch (err) {
-          console.error("Erro inesperado ao aprovar:", err);
-        }
-      }
+    alert("Orçamento aprovado com sucesso!");
+    
+    // Recarrega a listagem atualizada
+    if (typeof carregarOrcamentos === 'function') {
+      carregarOrcamentos('Todos');
+    }
+  } catch (err) {
+    console.error("Erro inesperado ao aprovar:", err);
+    alert("Erro inesperado ao aprovar orçamento.");
+  }
+}
 
       async function deletarOrcamento(id) {
         if (!confirm("Tem certeza que deseja excluir este orçamento?")) return;
@@ -5196,6 +5176,57 @@ async function salvarOrcamentoDinamico(event) {
     console.error("Erro ao salvar orçamento dinâmico:", err);
     alert("Erro ao salvar orçamento: " + err.message);
   }
+}
+function enviarWhatsAppOrcamento(id) {
+  // Implementação padrão de disparo de WhatsApp ou alerta temporário
+  console.log("Disparando WhatsApp para o orçamento ID:", id);
+  // Se você já tem a lógica pronta, pode substituir o miolo desta função pela sua original.
+}
+function renderizarTabelaOrcamentos(lista) {
+  const tbody = document.querySelector("tbody"); // Ajuste o seletor se sua tabela usar um ID específico, ex: document.getElementById('tabela-orcamentos')
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
+    return;
+  }
+
+  lista.forEach(orc => {
+    const tr = document.createElement("tr");
+    tr.className = "border-b hover:bg-gray-50";
+
+    // Tratamento seguro para os dados
+    const clienteNome = orc.cliente_nome || orc.nome_cliente || "Cliente / Lead";
+    const whatsapp = orc.whatsapp || orc.telefone || "-";
+    const servicos = orc.servicos_solicitados || orc.servicos || "-";
+    const valorTotal = orc.valor_total ? `R$ ${Number(orc.valor_total).toFixed(2)}` : "R$ 0.00";
+    
+    const statusLower = (orc.status || "Pendente").toLowerCase();
+    let badgeClass = "bg-yellow-100 text-yellow-800";
+    let statusText = "Pendente";
+
+    if (statusLower === "aprovado" || statusLower === "confirmado") {
+      badgeClass = "bg-green-100 text-green-800";
+      statusText = "Aprovado";
+    }
+
+    tr.innerHTML = `
+      <td class="py-3 px-4 font-medium text-gray-900">${clienteNome}</td>
+      <td class="py-3 px-4 text-gray-600">${whatsapp}</td>
+      <td class="py-3 px-4 text-gray-600">${servicos}</td>
+      <td class="py-3 px-4 text-gray-900 font-semibold">${valorTotal}</td>
+      <td class="py-3 px-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}">${statusText}</span></td>
+      <td class="py-3 px-4 flex gap-2">
+        <button onclick="gerarPDFOrcamento('${orc.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">PDF</button>
+        <button onclick="enviarWhatsAppOrcamento('${orc.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">WhatsApp</button>
+        ${statusText !== 'Aprovado' ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs hover:bg-emerald-700">Aprovar</button>` : ''}
+        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Excluir</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
     </script>
 
