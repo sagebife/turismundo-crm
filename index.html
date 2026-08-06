@@ -52,11 +52,17 @@
       <div class="max-w-7xl mx-auto flex justify-between items-center">
         <!-- LOGO TURISMUNDO EM VERDE ESMERALDA -->
         <div
-          class="flex items-center space-x-3 cursor-pointer"
+          class="flex items-center space-x-4 cursor-pointer"
           onclick="switchTab('dashboard')"
         >
+          <!-- Mantivemos o tamanho gigante, mas tiramos o -my-10 -->
+          <img
+            src="logo.png"
+            alt="Turismundo Logo"
+            class="h-20 w-20 md:h-24 md:w-24 -my-13 object-contain transition-transform hover:scale-110 drop-shadow-xl"
+          />
           <span
-            class="text-xl font-black tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors"
+            class="text-xl font-black tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors hidden md:block"
           >
             Turismundo
           </span>
@@ -1080,92 +1086,94 @@
               </div>
             </div>
 
-            <!-- Bloco de Adição de Serviços Dinâmicos -->
-            <div
-              class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3"
-            >
-              <h4 class="text-xs font-bold text-blue-900 uppercase">
-                Adicionar Serviços ao Orçamento
-              </h4>
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
-                <div class="md:col-span-5">
-                  <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                    >Serviço</label
-                  >
-                  <select
-                    id="orc-select-servico"
-                    class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white"
-                    onchange="preencherValorSugerido()"
-                  >
-                    <option value="">Selecione o serviço...</option>
-                  </select>
-                </div>
-                <div class="md:col-span-3">
-                  <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                    >Qtd</label
-                  >
-                  <input
-                    type="number"
-                    id="orc-qtd"
-                    min="1"
-                    value="1"
-                    class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white text-center"
-                  />
-                </div>
-                <div class="md:col-span-3">
-                  <label
-                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                    >Valor Unit. (R$)</label
-                  >
-                  <input
-                    type="number"
-                    step="0.01"
-                    id="orc-valor-unit"
-                    class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white text-right"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div class="md:col-span-1 flex items-end">
-                  <button
-                    type="button"
-                    onclick="adicionarItemNaListaOrcamento()"
-                    class="w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition flex items-center justify-center"
-                    title="Adicionar"
-                  >
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-              </div>
+          <!-- Bloco de Adição de Serviços Dinâmicos -->
+<div class="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+  <h4 class="text-xs font-bold text-blue-900 uppercase">
+    Adicionar Serviços ao Orçamento
+  </h4>
+  
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end relative"> 
+    
+    <!-- 1. Campo de Busca (Ocupa 5 colunas) -->
+    <div class="md:col-span-5 relative">
+      <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+        Serviço
+      </label>
+      <input 
+        type="text" 
+        id="input-busca-servico" 
+        placeholder="Digite para buscar..." 
+        class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+        autocomplete="off"
+      >
+      <input type="hidden" id="orc-select-servico">
+      
+      <!-- Dropdown com min-w-[350px] para o texto ter bastante espaço -->
+      <ul 
+        id="dropdown-servicos" 
+        class="absolute z-[100] min-w-[350px] left-0 top-[100%] mt-1 bg-white border border-gray-200 rounded-md shadow-2xl max-h-56 overflow-y-auto hidden"
+      >
+      </ul>
+    </div>
 
-              <!-- Tabela / Lista de Itens Adicionados -->
-              <div
-                class="mt-3 overflow-x-auto bg-white rounded-lg border border-gray-200"
-              >
-                <table class="w-full text-left border-collapse text-xs">
-                  <thead class="bg-gray-100 text-gray-700 uppercase text-[9px]">
-                    <tr>
-                      <th class="p-2">Serviço</th>
-                      <th class="p-2 text-center">Qtd</th>
-                      <th class="p-2 text-right">Unit.</th>
-                      <th class="p-2 text-right">Total</th>
-                      <th class="p-2 text-center">Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody id="orc-tabela-itens" class="divide-y divide-gray-100">
-                    <tr>
-                      <td
-                        colspan="5"
-                        class="p-3 text-center text-gray-400 italic"
-                      >
-                        Nenhum item adicionado ainda.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+    <!-- 2. Campo de Quantidade (Ocupa 3 colunas) -->
+    <div class="md:col-span-3">
+      <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Qtd</label>
+      <input 
+        type="number" 
+        id="orc-qtd" 
+        min="1" 
+        value="1" 
+        class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white text-center"
+      >
+    </div>
+
+    <!-- 3. Campo de Valor Unitário (Ocupa 3 colunas) -->
+    <div class="md:col-span-3">
+      <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor Unit. (R$)</label>
+      <input 
+        type="number" 
+        id="orc-valor-unit" 
+        class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white text-right"
+      >
+    </div>
+
+    <!-- 4. Botão Adicionar (Ocupa 1 coluna) -->
+    <div class="md:col-span-1">
+      <button 
+        type="button" 
+        onclick="adicionarItemOrcamento()" 
+        class="w-full bg-blue-900 text-white rounded-lg px-2 py-2 text-xs font-bold hover:bg-blue-800 transition-colors flex justify-center items-center h-[34px]"
+        title="Adicionar"
+      >
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tabela / Lista de Itens Adicionados -->
+<div class="mt-3 overflow-x-auto bg-white rounded-lg border border-gray-200">
+  <table class="w-full text-left border-collapse text-xs">
+    <thead class="bg-gray-100 text-gray-700 uppercase text-[9px]">
+      <tr>
+        <th class="p-2">Serviço</th>
+        <th class="p-2 text-center">Qtd</th>
+        <th class="p-2 text-right">Unit.</th>
+        <th class="p-2 text-right">Total</th>
+        <th class="p-2 text-center">Ação</th>
+      </tr>
+    </thead>
+    <tbody id="orc-tabela-itens" class="divide-y divide-gray-100">
+      <tr>
+        <td colspan="5" class="p-3 text-center text-gray-400 italic">
+          Nenhum item adicionado ainda.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
             <!-- Resumo e Total Geral -->
             <div
@@ -4287,33 +4295,7 @@
         });
       }
 
-      async function abrirModalOrcamento() {
-        const modal = document.getElementById("modal-orcamento");
-        if (modal) modal.classList.remove("hidden");
-
-        document.getElementById("form-orcamento").reset();
-        itensOrcamentoAtual = [];
-        renderizarTabelaItensOrcamento();
-
-        const select = document.getElementById("orc-select-servico");
-        if (!select || !window.supabaseClient) return;
-
-        try {
-          const { data: servicos } = await window.supabaseClient
-            .from("servicos")
-            .select("*")
-            .order("categoria", { ascending: true });
-          select.innerHTML = '<option value="">Selecione o serviço...</option>';
-          if (servicos) {
-            servicos.forEach((s) => {
-              select.innerHTML += `<option value="${s.id}" data-nome="${s.nome}" data-preco="${s.preco}">${s.categoria || "Geral"} - ${s.nome} (R$ ${s.preco})</option>`;
-            });
-          }
-        } catch (err) {
-          console.error("Erro ao carregar serviços:", err);
-        }
-      }
-
+      
       function fecharModalOrcamento() {
         const modal = document.getElementById("modal-orcamento");
         if (modal) modal.classList.add("hidden");
@@ -4321,45 +4303,127 @@
         itensOrcamentoAtual = [];
       }
 
-      function preencherValorSugerido() {
-        const select = document.getElementById("orc-select-servico");
-        if (select.selectedIndex <= 0) {
-          document.getElementById("orc-valor-unit").value = "";
-          return;
-        }
-        const opt = select.options[select.selectedIndex];
-        const preco = opt.getAttribute("data-preco") || 0;
-        document.getElementById("orc-valor-unit").value =
-          parseFloat(preco).toFixed(2);
-      }
+      // ==========================================
+// LÓGICA DO NOVO CAMPO DE BUSCA DE ORÇAMENTOS
+// ==========================================
 
-      function adicionarItemNaListaOrcamento() {
-        const select = document.getElementById("orc-select-servico");
-        if (select.selectedIndex <= 0)
-          return alert("Selecione um serviço primeiro.");
-        const opt = select.options[select.selectedIndex];
+let servicosDisponiveis = []; // Guarda a lista do Supabase
+let servicoSelecionado = null; // Guarda o item que o usuário clicou
 
-        const quantidade =
-          parseInt(document.getElementById("orc-qtd").value) || 1;
-        const valorUnit =
-          parseFloat(document.getElementById("orc-valor-unit").value) || 0;
-        const valorTotalItem = quantidade * valorUnit;
+// 1. Nova função para abrir o modal e carregar os serviços na memória
+async function abrirModalOrcamento() {
+  const modal = document.getElementById("modal-orcamento");
+  if (modal) modal.classList.remove("hidden");
 
-        itensOrcamentoAtual.push({
-          servico_id: select.value,
-          categoria: opt.text.split(" - ")[0],
-          servico: opt.getAttribute("data-nome"),
-          quantidade: quantidade,
-          valor_unitario: valorUnit,
-          valor_total: valorTotalItem,
-        });
+  document.getElementById("form-orcamento").reset();
+  itensOrcamentoAtual = [];
+  renderizarTabelaItensOrcamento();
 
-        renderizarTabelaItensOrcamento();
-        document.getElementById("orc-qtd").value = "1";
-        select.selectedIndex = 0;
+  // Limpa os campos da busca ao abrir
+  document.getElementById("input-busca-servico").value = "";
+  document.getElementById("orc-valor-unit").value = "";
+  servicoSelecionado = null;
+
+  if (!window.supabaseClient) return;
+
+  try {
+    const { data: servicos, error } = await window.supabaseClient
+      .from("servicos")
+      .select("*")
+      .order("categoria", { ascending: true });
+    
+    if (error) throw error;
+    
+    // Em vez de jogar num <select>, guardamos na variável global
+    servicosDisponiveis = servicos || [];
+  } catch (err) {
+    console.error("Erro ao carregar serviços:", err);
+  }
+}
+
+// 2. Motor do Autocomplete (Filtra enquanto você digita)
+document.addEventListener("DOMContentLoaded", () => {
+  const inputBusca = document.getElementById("input-busca-servico");
+  const dropdownServicos = document.getElementById("dropdown-servicos");
+
+  if(inputBusca) {
+    inputBusca.addEventListener("input", function() {
+      const termo = this.value.toLowerCase();
+      dropdownServicos.innerHTML = ""; // Limpa a lista anterior
+      
+      // Se apagar tudo, esconde a lista
+      if (termo.length === 0) {
+        dropdownServicos.classList.add("hidden");
+        servicoSelecionado = null;
         document.getElementById("orc-valor-unit").value = "";
+        return;
       }
 
+      // Filtra os serviços pelo nome ou categoria
+      const filtrados = servicosDisponiveis.filter(s => 
+        (s.nome && s.nome.toLowerCase().includes(termo)) || 
+        (s.categoria && s.categoria.toLowerCase().includes(termo))
+      );
+
+      // Monta as opções na tela
+      if (filtrados.length > 0) {
+        dropdownServicos.classList.remove("hidden");
+        filtrados.forEach(s => {
+          const li = document.createElement("li");
+          li.className = "px-3 py-2 cursor-pointer hover:bg-emerald-50 text-xs border-b border-gray-100 flex justify-between";
+          li.innerHTML = `<span><strong class="text-blue-900">${s.categoria || "Geral"}</strong> - ${s.nome}</span> <span class="text-gray-500 font-bold">R$ ${s.preco}</span>`;
+          
+          // Quando clica no serviço sugerido:
+          li.onclick = () => {
+            inputBusca.value = s.nome; // Preenche o nome no input
+            document.getElementById("orc-valor-unit").value = parseFloat(s.preco || 0).toFixed(2); // Preenche o preço
+            servicoSelecionado = s; // Salva o serviço inteiro na memória
+            dropdownServicos.classList.add("hidden"); // Esconde a lista
+          };
+          dropdownServicos.appendChild(li);
+        });
+      } else {
+        dropdownServicos.classList.add("hidden");
+      }
+    });
+
+    // Fecha a listinha suspensa se clicar fora dela
+    document.addEventListener("click", function(e) {
+      if (!inputBusca.contains(e.target) && !dropdownServicos.contains(e.target)) {
+        dropdownServicos.classList.add("hidden");
+      }
+    });
+  }
+});
+
+// 3. Nova função para adicionar o item na tabela do orçamento
+function adicionarItemOrcamento() {
+  if (!servicoSelecionado) {
+    return alert("Por favor, pesquise e clique em um serviço da lista antes de adicionar.");
+  }
+
+  const quantidade = parseInt(document.getElementById("orc-qtd").value) || 1;
+  const valorUnit = parseFloat(document.getElementById("orc-valor-unit").value) || 0;
+  const valorTotalItem = quantidade * valorUnit;
+
+  // Joga os dados para a sua tabela existente
+  itensOrcamentoAtual.push({
+    servico_id: servicoSelecionado.id,
+    categoria: servicoSelecionado.categoria || "Geral",
+    servico: servicoSelecionado.nome,
+    quantidade: quantidade,
+    valor_unitario: valorUnit,
+    valor_total: valorTotalItem,
+  });
+
+  renderizarTabelaItensOrcamento();
+  
+  // Limpa os campos para o próximo item
+  document.getElementById("orc-qtd").value = "1";
+  document.getElementById("orc-valor-unit").value = "";
+  document.getElementById("input-busca-servico").value = "";
+  servicoSelecionado = null;
+}
       function removerItemOrcamento(index) {
         itensOrcamentoAtual.splice(index, 1);
         renderizarTabelaItensOrcamento();
@@ -4608,66 +4672,140 @@
             linhasTabela = `<tr><td colspan="4" style="padding: 12px; text-align: center; font-size: 13px;">${orc.servicos_solicitados}</td></tr>`;
           }
 
-          containerTemp.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
-              <div>
-              <h1 style="color: #1e40af; margin: 0; font-size: 24px; font-weight: bold;">TURISMUNDO</h1>
-              <p style="margin: 3px 0 0 0; font-size: 11px; color: #6b7280; letter-spacing: 1px;">TURISMO RECEPTIVO • BUENOS AIRES</p>
-              </div>
-              <div style="text-align: right;">
-              <h2 style="margin: 0; font-size: 16px; color: #374151;">PROPOSTA COMERCIAL</h2>
-              <p style="margin: 3px 0 0 0; font-size: 12px; color: #4b5563;">Nº ${String(orc.id).slice(-4).toUpperCase()}</p>
-              <p style="margin: 2px 0 0 0; font-size: 11px; color: #6b7280;">Data: ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</p>
-              </div>
-          </div>
-          <div style="background-color: #f3f4f6; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px;">
-              <table style="width: 100%; font-size: 13px;">
-              <tr>
-                  <td><strong>Cliente:</strong> ${(orc.nome_lead || "Cliente").toUpperCase()}</td>
-                  <td style="text-align: right;"><strong>WhatsApp:</strong> ${orc.whatsapp || "-"}</td>
-              </tr>
-              </table>
-          </div>
-          <h3 style="font-size: 14px; color: #1e3a8a; margin-bottom: 8px; border-left: 3px solid #2563eb; padding-left: 8px;">Serviços Solicitados</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-              <thead>
-              <tr style="background-color: #1e40af; color: #ffffff; text-align: left; font-size: 12px;">
-                  <th style="padding: 10px;">Serviço</th>
-                  <th style="padding: 10px; text-align: center;">Qtd</th>
-                  <th style="padding: 10px; text-align: right;">V. Unit.</th>
-                  <th style="padding: 10px; text-align: right;">Total</th>
-              </tr>
-              </thead>
-              <tbody>${linhasTabela}</tbody>
-          </table>
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-              <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 20px; border-radius: 6px; text-align: right; min-width: 220px;">
-              <span style="font-size: 12px; color: #1e40af; display: block;">VALOR TOTAL GERAL</span>
-              <span style="font-size: 20px; font-weight: bold; color: #1e3a8a;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
-              </div>
-          </div>
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 11px; color: #6b7280; text-align: center;">
-              <p style="margin: 0 0 5px 0;">Esta proposta possui validade de 7 dias. Valores sujeitos à disponibilidade dos serviços.</p>
-              <p style="margin: 0; font-weight: bold; color: #374151;">Dúvidas? Nossa equipe está pronta para atender você na Turismundo 🇦🇷✈️</p>
-          </div>
-          `;
+          // Ajuste o container principal para suportar o posicionamento absoluto da marca d'água
+containerTemp.style.width = "190mm";
+containerTemp.style.position = "relative";
+containerTemp.style.overflow = "hidden";
 
-          html2pdf()
-            .set({
-              margin: 10,
-              filename: `Proposta_${(orc.nome_lead || "Cliente").replace(/\s+/g, "_")}.pdf`,
-              image: { type: "jpeg", quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true },
-              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-            })
-            .from(containerTemp)
-            .save();
-        } catch (err) {
-          console.error("Erro ao gerar PDF:", err);
-          alert("Não foi possível gerar o PDF.");
-        }
+containerTemp.innerHTML = `
+        <!-- Marca d'água de fundo -->
+        <div style="position: absolute; top: 15%; left: 0; width: 100%; height: 70%; display: flex; justify-content: center; align-items: center; z-index: 0; pointer-events: none;">
+            <img src="logo.png" style="width: 550px; opacity: 0.04;">
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div style="position: relative; z-index: 1;">
+            
+            <!-- CABEÇALHO -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1e40af; padding-bottom: 12px; margin-bottom: 15px;">
+                <div>
+                    <h1 style="color: #1e40af; margin: 0; font-size: 22px; font-weight: bold; letter-spacing: -0.5px;">TURISMUNDO</h1>
+                    <p style="margin: 2px 0 0 0; font-size: 9px; color: #6b7280; letter-spacing: 1px;">VIAGENS E TURISMO</p>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="margin: 0; font-size: 18px; color: #1e3a8a; font-weight: bold;">PROPOSTA</h2>
+                    <p style="margin: 2px 0 0 0; font-size: 10px; color: #4b5563; font-style: italic;">Conectando destinos, criando experiências!</p>
+                </div>
+            </div>
+
+            <!-- DADOS DO CLIENTE E ORÇAMENTO -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 11px;">
+                <div style="flex: 2; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                    <div style="background-color: #1e40af; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">👤</div>
+                    <div>
+                        <span style="display: block; color: #64748b; font-size: 9px; font-weight: bold;">CLIENTE</span>
+                        <strong style="color: #1e293b; font-size: 12px;">${(orc.nome_lead || "Cliente").toUpperCase()}</strong>
+                    </div>
+                </div>
+                <div style="flex: 1.5; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="color: #64748b; font-size: 9px;">📋 &nbsp;<strong>Nº da Proposta:</strong> ${String(orc.id).length > 10 ? String(orc.id).slice(0, 8) : String(orc.id).padStart(6, '0')}</span>
+                    <span style="color: #64748b; font-size: 9px; margin-top: 3px;">📅 &nbsp;<strong>Data:</strong> ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</span>
+                </div>
+            </div>
+
+            <!-- TABELA DE SERVIÇOS -->
+            <div style="margin-bottom: 15px;">
+                <div style="background-color: #1e40af; color: #ffffff; padding: 6px 10px; font-size: 10px; font-weight: bold; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    🚗 &nbsp;SERVIÇOS SOLICITADOS
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; border: 1px solid #cbd5e1;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; color: #334155; text-align: left; border-bottom: 1px solid #cbd5e1;">
+                            <th style="padding: 8px; width: 55%;">SERVIÇO</th>
+                            <th style="padding: 8px; text-align: center; width: 15%;">QTD</th>
+                            <th style="padding: 8px; text-align: right; width: 15%;">V. UNITÁRIO</th>
+                            <th style="padding: 8px; text-align: right; width: 15%;">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- VALOR TOTAL -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 10px 20px; border-radius: 6px; text-align: right; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <span style="font-size: 10px; font-weight: bold; letter-spacing: 0.5px;">VALOR TOTAL DA PROPOSTA</span>
+                    <span style="font-size: 18px; font-weight: bold;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
+                </div>
+            </div>
+
+           <!-- 3 COLUNAS DO MEIO (Tabela Estrutural) -->
+            <table style="width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 15px; font-size: 9px;">
+                <tr>
+                    <!-- Coluna 1: Benefícios -->
+                    <td style="width: 33.33%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                        <div style="color: #1e40af; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">🛡️ &nbsp;POR QUE ESCOLHER A TURISMUNDO?</div>
+                        <div style="margin-bottom: 4px;"><strong>Segurança:</strong> Motoristas profissionais e veículos regulamentados.</div>
+                        <div style="margin-bottom: 4px;"><strong>Pontualidade:</strong> Monitoramento de voos e pontualidade garantida.</div>
+                        <div style="margin-bottom: 4px;"><strong>Conforto:</strong> Veículos climatizados e com amplo espaço.</div>
+                        <div><strong>Atendimento:</strong> Suporte via WhatsApp em português.</div>
+                    </td>
+
+                    <!-- Coluna 2: Observações -->
+                    <td style="width: 33.33%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                        <div style="color: #1e40af; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">📝 &nbsp;OBSERVAÇÕES &amp; VOOS</div>
+                        <div style="margin-bottom: 5px; color: #475569;">Voo: ____________________</div>
+                        <div style="margin-bottom: 5px; color: #475569;">Horário: _________________</div>
+                        <div style="margin-bottom: 5px; color: #475569;">Hotel: ___________________</div>
+                        <div style="color: #475569;">Encontro: ________________</div>
+                    </td>
+
+                    <!-- Coluna 3: Condições Comerciais -->
+                    <td style="width: 33.33%; vertical-align: top; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px;">
+                        <div style="color: #1e40af; font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">💳 &nbsp;CONDIÇÕES COMERCIAIS</div>
+                        <div style="margin-bottom: 4px;"><strong>Pagamento:</strong> A combinar com o consultor comercial.</div>
+                        <div style="margin-bottom: 4px;"><strong>Cancelamento:</strong> Gratuito até 24h antes do serviço.</div>
+                        <div><strong>Validade:</strong> Proposta válida por 7 dias. Sujeita à disponibilidade.</div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- RODAPÉ ESCURO ESTILO BANNER -->
+            <div style="background-color: #0f172a; color: #ffffff; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 9.5px;">
+                <div>
+                    <p style="margin: 0 0 4px 0; color: #38bdf8; font-weight: bold; font-size: 10.5px;">Pronto para embarcar?</p>
+                    <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 9px;">Fale conosco e tenha uma experiência tranquila do início ao fim!</p>
+                    <div style="display: flex; gap: 15px; color: #cbd5e1; font-size: 9px;">
+                        <span>📞 +54 9 11 1234-5678</span>
+                        <span>🌐 www.turismundo.com</span>
+                    </div>
+                </div>
+                <div style="text-align: right; background: #1e293b; padding: 6px 10px; border-radius: 4px; border: 1px solid #334155;">
+                    <span style="display: block; font-size: 8px; color: #94a3b8; margin-bottom: 2px;">ATENDIMENTO RÁPIDO</span>
+                    <span style="font-weight: bold; color: #38bdf8; font-size: 9.5px;">Suporte via WhatsApp 🇦🇷</span>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    html2pdf()
+      .set({
+        margin: 8,
+        filename: `Proposta_${(orc.nome_lead || "Cliente").replace(/\s+/g, "_")}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(containerTemp)
+      .save();
+} catch (err) {
+    console.error("Erro ao gerar PDF:", err);
+    alert("Não foi possível gerar o PDF.");
+}
       }
-
       // =======================================================
       // MÓDULO RESTAURADO: DASHBOARD, FATURAMENTO E FINANCEIRO
       // =======================================================
@@ -4864,6 +5002,66 @@
           carregarAtencaoOperacional();
         if (typeof initSupabase === "function") initSupabase();
       });
+    // Referências aos elementos
+const inputBusca = document.getElementById('input-busca-servico');
+const dropdown = document.getElementById('dropdown-servicos');
+const inputIdOculto = document.getElementById('servico-id-selecionado');
+
+// Esta função deve ser chamada quando você puxar seus serviços do banco (Supabase)
+function renderizarDropdownServicos(listaDeServicos) {
+  dropdown.innerHTML = ''; // Limpa a lista
+  
+  listaDeServicos.forEach(servico => {
+    const li = document.createElement('li');
+    li.className = 'px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer border-b border-gray-50 last:border-0';
+    // Coloquei o preço no texto visual para facilitar
+    li.textContent = `${servico.nome} (R$ ${servico.preco})`; 
+    
+    // Oculta o item na lista inicialmente (opcional, dependendo de como preferir)
+    // li.style.display = 'block'; 
+    
+    // Ação ao clicar no item da lista
+    li.onclick = () => {
+      inputBusca.value = servico.nome; // Preenche o campo com o nome
+      inputIdOculto.value = servico.id; // Salva o ID pro banco de dados
+      dropdown.classList.add('hidden'); // Esconde a lista
+    };
+    
+    dropdown.appendChild(li);
+  });
+}
+
+// Lógica de pesquisa (filtro em tempo real)
+inputBusca.addEventListener('keyup', function(e) {
+  const termoBusca = e.target.value.toLowerCase();
+  const itensLista = dropdown.getElementsByTagName('li');
+  let temResultado = false;
+
+  // Mostra a lista se tiver digitado algo, senão esconde
+  if (termoBusca.length > 0) {
+    dropdown.classList.remove('hidden');
+  } else {
+    dropdown.classList.add('hidden');
+  }
+
+  // Filtra os itens
+  for (let i = 0; i < itensLista.length; i++) {
+    const textoItem = itensLista[i].textContent.toLowerCase();
+    if (textoItem.includes(termoBusca)) {
+      itensLista[i].style.display = 'block';
+      temResultado = true;
+    } else {
+      itensLista[i].style.display = 'none';
+    }
+  }
+});
+
+// Esconder a lista se clicar fora dela
+document.addEventListener('click', function(e) {
+  if (!inputBusca.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
     </script>
     <!-- Template PDF Oculto -->
     <div
@@ -4968,7 +5166,7 @@
           ></div>
         </div>
         <div
-          style="
+          style=" 
             background: white;
             border-radius: 12px;
             padding: 25px;
