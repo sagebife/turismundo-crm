@@ -142,6 +142,86 @@
       </div>
     </header>
 
+    <!-- Modal: Extrato e Repasse do Motorista -->
+    <div
+      id="modal-extrato-motorista"
+      class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <h3
+            class="text-lg font-bold text-blue-900 flex items-center gap-2"
+            id="titulo-extrato-motorista"
+          >
+            <i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato
+            do Motorista
+          </h3>
+          <button
+            onclick="fecharModalExtrato()"
+            class="text-gray-400 hover:text-gray-600 text-xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            class="bg-blue-50 border border-blue-100 p-3 rounded-lg flex justify-between items-center"
+          >
+            <div>
+              <p class="text-[10px] uppercase font-bold text-blue-800">
+                Total a Pagar (Pendente)
+              </p>
+              <p
+                class="text-xl font-black text-emerald-600"
+                id="extrato-total-pendente"
+              >
+                R$ 0,00
+              </p>
+            </div>
+            <button
+              onclick="enviarExtratoWhatsApp()"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-sm"
+            >
+              <i class="fab fa-whatsapp text-sm"></i> Enviar Resumo via WhatsApp
+            </button>
+          </div>
+
+          <!-- Tabela de Viagens do Motorista -->
+          <div class="border border-gray-100 rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase border-b"
+                >
+                  <th class="p-3">Data / Hora</th>
+                  <th class="p-3">Cliente / Serviço</th>
+                  <th class="p-3 text-right">Repasse</th>
+                  <th class="p-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody
+                id="extrato-tabela-corridas"
+                class="text-xs divide-y divide-gray-100"
+              >
+                <!-- Injetado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-6 pt-4 border-t">
+          <button
+            onclick="fecharModalExtrato()"
+            class="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- CONTAINER DAS TELAS OPERACIONAIS -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
       <!-- VIEW: ORÇAMENTOS / LEADS -->
@@ -1545,33 +1625,26 @@
             </div>
           </div>
 
-          <!-- Linha 3: Categoria e Serviço -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >Categoria</label
-              >
-              <select
-                id="catSelectReserva"
-                onchange="filtrarServicosPorCategoria()"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
-              >
-                <option value="">Selecione...</option>
-              </select>
-            </div>
-            <div>
-              <label
-                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >Serviço</label
-              >
-              <select
-                id="servicoSelectReserva"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
-              >
-                <option value="">Selecione primeiro a categoria...</option>
-              </select>
-            </div>
+          <!-- Linha 3: Busca Dinâmica de Serviço -->
+          <div class="relative w-full">
+            <label
+              class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+              >Buscar Serviço / Rota</label
+            >
+            <input
+              type="text"
+              id="input-busca-servico-reserva"
+              placeholder="Digite o nome ou categoria do serviço..."
+              class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition"
+              autocomplete="off"
+            />
+            <input type="hidden" id="reserva-select-categoria" />
+
+            <!-- Lista Suspensa Inteligente -->
+            <ul
+              id="dropdown-servicos-reserva"
+              class="absolute z-[100] w-full left-0 top-[100%] mt-1 bg-white border border-gray-200 rounded-md shadow-2xl max-h-56 overflow-y-auto hidden"
+            ></ul>
           </div>
 
           <!-- Linha 4: Motorista e Voo -->
@@ -2145,12 +2218,11 @@
       }
 
       function renderDashboard() {
-        // Filtra as reservas da data selecionada (comparando de forma flexível)
+        // Filtra as reservas da data selecionada
         const hoje = databaseAgenda.filter((item) => {
           const itemDia = String(item.dia || "").trim();
           const selDia = String(selectedDay).trim();
-          const diaApenas = selDia.split("-")[2]; // Pega só o número do dia (ex: "02" vira "2")
-
+          const diaApenas = selDia.split("-")[2];
           return (
             itemDia === selDia ||
             itemDia === String(Number(diaApenas)) ||
@@ -2202,34 +2274,37 @@
 
         const container = document.getElementById("dashActivitiesContainer");
         if (!container) return;
-        container.innerHTML = "";
 
         if (hoje.length === 0) {
           container.innerHTML = `<p class="text-xs text-gray-400 py-3 text-center">Nenhuma atividade para esta data.</p>`;
           return;
         }
 
-        hoje.forEach((item) => {
-          let badge =
-            '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-          const statusStr = String(item.status || "").toLowerCase();
-          if (
-            statusStr.includes("concluido") ||
-            statusStr.includes("executado")
-          ) {
-            badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
-          }
+        // Otimização: Mapeamento em memória em vez de += no DOM
+        container.innerHTML = hoje
+          .map((item) => {
+            let badge =
+              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+            const statusStr = String(item.status || "").toLowerCase();
 
-          container.innerHTML += `
-                    <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
-                        <div>
-                            <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
-                            <p class="text-[11px] text-gray-600">${item.localizacao || ""}</p>
-                        </div>
-                        ${badge}
-                    </div>
-                `;
-        });
+            if (
+              statusStr.includes("concluido") ||
+              statusStr.includes("executado")
+            ) {
+              badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+            }
+
+            return `
+      <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
+        <div>
+          <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
+          <p class="text-[11px] text-gray-600">${item.localizacao || ""}</p>
+        </div>
+        ${badge}
+      </div>
+    `;
+          })
+          .join("");
       }
       async function renderAgenda() {
         const titleEl = document.getElementById("tituloDiaSelecionado");
@@ -2395,93 +2470,259 @@
             '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
         }
       }
+
+      let orcamentoAgendamentoAtual = null;
+
+      // 1. Abre a tela e exibe os serviços agrupados
+      async function abrirModalAgendamentoOrcamento(id) {
+        if (!window.supabaseClient) return;
+        showToast("Carregando serviços...", false);
+
+        try {
+          const { data: orc, error } = await window.supabaseClient
+            .from("orcamentos")
+            .select("*")
+            .eq("id", id)
+            .single();
+          if (error || !orc) throw new Error("Orçamento não encontrado.");
+
+          orcamentoAgendamentoAtual = orc;
+          document.getElementById("titulo-agendar-orcamento").innerHTML =
+            `<i class="fas fa-calendar-alt text-purple-600"></i> Agendar Serviços - ${orc.nome_lead}`;
+
+          const container = document.getElementById(
+            "lista-servicos-agendamento",
+          );
+          container.innerHTML = "";
+
+          if (!orc.dados_detalhados || orc.dados_detalhados.length === 0) {
+            container.innerHTML = `<p class="text-sm text-gray-500 italic text-center py-4">Nenhum detalhe de serviço estruturado foi encontrado neste orçamento antigo.</p>`;
+          } else {
+            // Puxa as opções de motoristas para selecionar
+            const driverOptions = drivers
+              .map((d) => `<option value="${d.id}">${d.nome}</option>`)
+              .join("");
+
+            orc.dados_detalhados.forEach((item) => {
+              // Agora geramos UMA única linha por serviço, independentemente da quantidade comprada.
+              // Guardamos o 'valor_total' daquele grupo e a 'quantidade' nos atributos data-*
+              container.innerHTML += `
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-wrap lg:flex-nowrap gap-3 items-end agendamento-item shadow-sm" 
+                         data-servico="${item.servico}" 
+                         data-categoria="${item.categoria}" 
+                         data-valor="${item.valor_total}" 
+                         data-qtd="${item.quantidade}">
+                        
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Serviço (Qtd)</label>
+                            <input type="text" value="${item.quantidade}x ${item.servico}" disabled class="w-full p-2 bg-gray-200 border border-gray-300 rounded-lg text-xs font-bold text-gray-700" />
+                        </div>
+                        <div class="w-full sm:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data *</label>
+                            <input type="date" class="agendamento-data w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500" required />
+                        </div>
+                        <div class="w-full sm:w-28">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Hora *</label>
+                            <input type="time" class="agendamento-hora w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500" required />
+                        </div>
+                        <div class="w-full sm:w-48">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Motorista (Opcional)</label>
+                            <select class="agendamento-motorista w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">A definir depois...</option>
+                                ${driverOptions}
+                            </select>
+                        </div>
+                    </div>
+                 `;
+            });
+          }
+
+          document
+            .getElementById("modal-agendar-orcamento")
+            .classList.remove("hidden");
+        } catch (err) {
+          console.error(err);
+          showToast("Erro ao abrir painel de agendamento.", true);
+        }
+      }
+
+      function fecharModalAgendamento() {
+        document
+          .getElementById("modal-agendar-orcamento")
+          .classList.add("hidden");
+        orcamentoAgendamentoAtual = null;
+      }
+
+      // 2. Dispara tudo para o banco com os totais consolidados
+      async function salvarAgendamentosOrcamento() {
+        if (!orcamentoAgendamentoAtual || !window.supabaseClient) return;
+
+        const itensDOM = document.querySelectorAll(".agendamento-item");
+        let reservasCriadas = 0;
+
+        // Validação de segurança
+        for (let el of itensDOM) {
+          if (
+            !el.querySelector(".agendamento-data").value ||
+            !el.querySelector(".agendamento-hora").value
+          ) {
+            showToast("Preencha Data e Hora para todos os serviços!", true);
+            return;
+          }
+        }
+
+        showToast("Processando integrações...", false);
+
+        // Usa a função de segurança para obter ou criar o cliente
+        const clientId = await buscarOuCriarCliente(
+          orcamentoAgendamentoAtual.nome_lead,
+          orcamentoAgendamentoAtual.whatsapp,
+        );
+
+        for (let el of itensDOM) {
+          const data = el.querySelector(".agendamento-data").value;
+          const hora = el.querySelector(".agendamento-hora").value;
+          const motoristaId = el.querySelector(".agendamento-motorista").value;
+          const servicoNome = el.getAttribute("data-servico");
+          const categoria = el.getAttribute("data-categoria") || "Geral";
+          const valorTotal = parseFloat(el.getAttribute("data-valor")) || 0;
+          const qtd = el.getAttribute("data-qtd") || "1";
+
+          const { error } = await window.supabaseClient
+            .from("reservas")
+            .insert([
+              {
+                cliente_id: clientId,
+                motorista_id: motoristaId || null,
+                dia: data,
+                hora: hora,
+                tipo: categoria,
+                pax: `${qtd} pax`,
+                localizacao: `${qtd}x ${servicoNome}`,
+                voo: "",
+                valor_total: valorTotal,
+                valor_repasse_motorista: 0,
+                status: motoristaId ? "confirmado" : "pendente",
+                pago_cliente: false,
+                pago_motorista: false,
+              },
+            ]);
+
+          if (!error) reservasCriadas++;
+        }
+
+        if (reservasCriadas > 0) {
+          showToast(
+            `Sucesso! ${reservasCriadas} evento(s) lançados na Agenda.`,
+            false,
+          );
+
+          await window.supabaseClient
+            .from("orcamentos")
+            .update({ status: "Agendado" })
+            .eq("id", orcamentoAgendamentoAtual.id);
+
+          fecharModalAgendamento();
+          carregarOrcamentos();
+          if (typeof loadRealData === "function") await loadRealData();
+        }
+      }
       function renderDrivers(dataToRender = drivers) {
         const container = document.getElementById("driversList");
         if (!container) return;
-        container.innerHTML = "";
 
-        dataToRender.forEach((driver) => {
-          let stars = "";
-          for (let i = 0; i < 5; i++) {
-            stars += `<i class="fas fa-star ${i < driver.avaliacao ? "text-amber-400" : "text-gray-200"} text-xs"></i>`;
-          }
+        // 1. Processamos todo o HTML na memória de forma ultrarrápida
+        const driversHTML = dataToRender
+          .map((driver) => {
+            let stars = "";
+            for (let i = 0; i < 5; i++) {
+              stars += `<i class="fas fa-star ${i < driver.avaliacao ? "text-amber-400" : "text-gray-200"} text-xs"></i>`;
+            }
 
-          container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
-                                        ${driver.nome.charAt(0)}${driver.nome.split(" ")[1] ? driver.nome.split(" ")[1].charAt(0) : ""}
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
-                                        <div class="flex gap-1 mt-1">${stars}</div>
-                                    </div>
-                                </div>
-                                <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
+            return `
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
+                ${driver.nome.charAt(0)}${driver.nome.split(" ")[1] ? driver.nome.split(" ")[1].charAt(0) : ""}
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
+                <div class="flex gap-1 mt-1">${stars}</div>
+              </div>
+            </div>
+            <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
 
-                            <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
-                                <p class="flex justify-between">
-                                    <span class="font-medium">🚗 Veículo:</span> 
-                                    <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
-                                </p>
-                                <p class="flex justify-between">
-                                    <span class="font-medium">🔢 Placa:</span> 
-                                    <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
-                                </p>
-                                <p class="flex justify-between">
-                                    <span class="font-medium">👥 Cap. Max:</span> 
-                                    <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
-                                </p>
-                            </div>
+          <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
+            <p class="flex justify-between">
+              <span class="font-medium">🚗 Veículo:</span> 
+              <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
+            </p>
+            <p class="flex justify-between">
+              <span class="font-medium">🔢 Placa:</span> 
+              <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
+            </p>
+            <p class="flex justify-between">
+              <span class="font-medium">👥 Cap. Max:</span> 
+              <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
+            </p>
+          </div>
 
-                            <div class="space-y-1 text-xs mb-4">
-                                <p class="flex justify-between items-center">
-                                    <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
-                                    <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
-                                </p>
-                                <div class="flex justify-between items-center gap-2">
-                                    <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
-                                        <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
-                                            <i class="fas fa-copy text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+          <div class="space-y-1 text-xs mb-4">
+            <p class="flex justify-between items-center">
+              <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
+              <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
+            </p>
+            <div class="flex justify-between items-center gap-2">
+              <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
+              <div class="flex items-center gap-1.5">
+                <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
+                <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
+                  <i class="fas fa-copy text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                        <div class="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100">
-                            <a href="https://wa.me/${driver.telefone}" target="_blank" 
-                                class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1.5">
-                                <i class="fab fa-whatsapp text-sm"></i> Chamar
-                            </a>
-                            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1.5">
-                                <i class="fas fa-route text-blue-500"></i> ${driver.corridas} viagens
-                            </div>
-                        </div>
-                    </div>
-                `;
-        });
+        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
+          <a href="https://wa.me/${driver.telefone}" target="_blank" 
+            class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
+            <i class="fab fa-whatsapp"></i> Chamar
+          </a>
+          <button onclick="abrirExtratoMotorista('${driver.id}', '${driver.nome}', '${driver.telefone}')" 
+            class="py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
+            <i class="fas fa-file-invoice"></i> Extrato
+          </button>
+          <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1">
+            <i class="fas fa-route text-blue-500"></i> ${driver.corridas}v
+          </div>
+        </div>
+      </div>
+    `;
+          })
+          .join("");
 
+        // 2. Injetamos no DOM apenas UMA única vez (Otimização Extrema)
+        container.innerHTML = driversHTML;
+
+        // 3. Atualizamos as métricas da aba
         const activeCountEl = document.getElementById("activeCount");
         const totalTripsEl = document.getElementById("totalTripsCount");
 
-        if (activeCountEl) activeCountEl.innerText = drivers.length;
+        if (activeCountEl) activeCountEl.innerText = dataToRender.length;
         if (totalTripsEl) {
-          const totalTrips = drivers.reduce(
-            (sum, d) => sum + Number(d.corridas),
+          const totalTrips = dataToRender.reduce(
+            (sum, d) => sum + Number(d.corridas || 0),
             0,
           );
           totalTripsEl.innerText = totalTrips;
         }
       }
-
       async function addDriver(event) {
         event.preventDefault();
 
@@ -2513,14 +2754,32 @@
                 },
               ]);
 
-            if (error) throw error;
-            showToast("Motorista cadastrado no Supabase!");
+            // Tratamento Inteligente de Erros do Supabase
+            if (error) {
+              if (error.code === "23505") {
+                throw new Error(
+                  `A placa ${plate} já está cadastrada no sistema!`,
+                );
+              }
+              throw error;
+            }
+
+            showToast("Motorista cadastrado com sucesso!", false);
             loadRealData();
+
+            // Limpa o formulário apenas se deu certo
+            document.getElementById("driverForm").reset();
+            document.getElementById("driverCapacity").value = "4";
           } catch (err) {
-            console.error(err);
-            showToast("Erro ao salvar motorista no banco.");
+            console.error("Erro no Supabase:", err);
+            // Dispara o Toast de Erro (o 'true' no final ativa a cor vermelha)
+            showToast(
+              err.message || "Erro ao salvar motorista no banco.",
+              true,
+            );
           }
         } else {
+          // --- Lógica do Modo Simulação Local (Mantida) ---
           const newDriver = {
             id: String(Date.now()),
             nome: name,
@@ -2534,43 +2793,22 @@
             avaliacao: 5,
             corridas: 0,
           };
+
+          // Verifica duplicidade no mock local
+          const exists = drivers.find((d) => d.placa === plate);
+          if (exists) {
+            showToast(`A placa ${plate} já existe no sistema local!`, true);
+            return;
+          }
+
           drivers.unshift(newDriver);
           renderDrivers();
-          showToast("Motorista ativado na simulação!");
-        }
+          showToast("Motorista ativado na simulação!", false);
 
-        document.getElementById("driverForm").reset();
-        document.getElementById("driverCapacity").value = "4";
-      }
-
-      async function deleteDriver(id) {
-        const confirmed = await openConfirmModal(
-          "Remover Motorista",
-          "Tem certeza de que deseja remover este motorista? Essa operação é permanente.",
-        );
-
-        if (confirmed) {
-          if (window.isConnectedToSupabase && window.supabaseClient) {
-            try {
-              const { error } = await window.supabaseClient
-                .from("motoristas")
-                .delete()
-                .eq("id", id);
-              if (error) throw error;
-              showToast("Motorista removido do Supabase!");
-              loadRealData();
-            } catch (err) {
-              console.error(err);
-              showToast("Erro ao remover motorista.");
-            }
-          } else {
-            drivers = drivers.filter((d) => String(d.id) !== String(id));
-            renderDrivers();
-            showToast("Motorista removido.");
-          }
+          document.getElementById("driverForm").reset();
+          document.getElementById("driverCapacity").value = "4";
         }
       }
-
       function updateDriverDropdowns() {
         const select = document.getElementById("modalDriverSelect");
         if (!select) return;
@@ -2730,29 +2968,30 @@
 
           if (error) throw error;
 
-          container.innerHTML = "";
-
           if (!data || data.length === 0) {
             container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Nenhum cliente cadastrado.</p>`;
             return;
           }
 
-          data.forEach((cliente) => {
-            container.innerHTML += `
-                        <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ""}', '${cliente.whatsapp || ""}', '${cliente.biografia || ""}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
-                            <div>
-                                <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || "Cliente sem nome"}</h3>
-                                <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
-                                ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic">${cliente.biografia}</p>` : ""}
-                            </div>
-                            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-                                <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
-                                    Deletar
-                                </button>
-                            </div>
-                        </div>
-                    `;
-          });
+          // Otimização: Renderização de Virtual DOM via Template Literals
+          container.innerHTML = data
+            .map(
+              (cliente) => `
+      <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ""}', '${cliente.whatsapp || ""}', '${cliente.biografia || ""}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
+        <div>
+          <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || "Cliente sem nome"}</h3>
+          <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
+          ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-1">${cliente.biografia}</p>` : ""}
+        </div>
+        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+          <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+            Deletar
+          </button>
+        </div>
+      </div>
+    `,
+            )
+            .join("");
         } catch (err) {
           console.error("Erro ao renderizar clientes:", err);
           container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar clientes do banco.</p>`;
@@ -2808,60 +3047,76 @@
       function renderFinanceiro() {
         const tableBody = document.getElementById("financeTableBody");
         if (!tableBody) return;
-        tableBody.innerHTML = "";
 
         let totalFaturamento = 0;
         let totalRepasses = 0;
         let totalLucro = 0;
         let totalPendente = 0;
 
-        databaseAgenda.forEach((item) => {
-          const valorCliente = Number(item.valorCliente) || 0;
-          const valorMotorista = Number(item.valorMotorista) || 0;
-          const lucro = valorCliente - valorMotorista;
+        // 1. Processamos todas as linhas e a matemática na memória
+        const linhasHTML = databaseAgenda
+          .map((item) => {
+            const valorCliente = Number(item.valorCliente) || 0;
+            const valorMotorista = Number(item.valorMotorista) || 0;
+            const lucro = valorCliente - valorMotorista;
 
-          totalFaturamento += valorCliente;
-          totalRepasses += valorMotorista;
-          totalLucro += lucro;
+            // Atualizamos os acumuladores globais
+            totalFaturamento += valorCliente;
+            totalRepasses += valorMotorista;
+            totalLucro += lucro;
 
-          if (!item.pagoCliente) {
-            totalPendente += valorCliente;
-          }
+            if (!item.pagoCliente) {
+              totalPendente += valorCliente;
+            }
 
-          const statusClienteBtn = item.pagoCliente
-            ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
-            : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
+            // Geração dos botões de status
+            const statusClienteBtn = item.pagoCliente
+              ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
+              : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
 
-          const statusMotoristaBtn = item.pagoMotorista
-            ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
-            : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
+            const statusMotoristaBtn = item.pagoMotorista
+              ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
+              : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
 
-          tableBody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 transition">
-                        <td class="p-4 font-bold text-gray-900">
-                            <div>${item.cliente}</div>
-                            <div class="text-[10px] text-gray-400 font-normal mt-0.5">${item.tipo === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia}/07</div>
-                        </td>
-                        <td class="p-4 font-semibold text-gray-700">${item.motorista}</td>
-                        <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente}</td>
-                        <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista}</td>
-                        <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro}</td>
-                        <td class="p-4 text-center">${statusClienteBtn}</td>
-                        <td class="p-4 text-center">${statusMotoristaBtn}</td>
-                    </tr>
-                `;
-        });
+            // Retorna a linha da tabela
+            return `
+      <tr class="hover:bg-gray-50/50 transition">
+        <td class="p-4 font-bold text-gray-900">
+          <div>${item.cliente || "Cliente Não Informado"}</div>
+          <div class="text-[10px] text-gray-400 font-normal mt-0.5">${String(item.tipo).toLowerCase() === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia || "--"}</div>
+        </td>
+        <td class="p-4 font-semibold text-gray-700">${item.motorista || "--"}</td>
+        <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
+        <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
+        <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
+        <td class="p-4 text-center">${statusClienteBtn}</td>
+        <td class="p-4 text-center">${statusMotoristaBtn}</td>
+      </tr>
+    `;
+          })
+          .join("");
+
+        // 2. Injetamos a tabela inteira no DOM de uma só vez!
+        tableBody.innerHTML =
+          linhasHTML ||
+          `<tr><td colspan="7" class="p-6 text-center text-gray-500 text-sm">Nenhum lançamento financeiro encontrado.</td></tr>`;
+
+        // 3. Atualizamos os painéis (Cards) superiores
+        const formatarMoeda = (valor) =>
+          valor.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
 
         document.getElementById("fin-faturamento").innerText =
-          `R$ ${totalFaturamento.toLocaleString()}`;
+          `R$ ${formatarMoeda(totalFaturamento)}`;
         document.getElementById("fin-repasses").innerText =
-          `R$ ${totalRepasses.toLocaleString()}`;
+          `R$ ${formatarMoeda(totalRepasses)}`;
         document.getElementById("fin-lucro").innerText =
-          `R$ ${totalLucro.toLocaleString()}`;
+          `R$ ${formatarMoeda(totalLucro)}`;
         document.getElementById("fin-pendente").innerText =
-          `R$ ${totalPendente.toLocaleString()}`;
+          `R$ ${formatarMoeda(totalPendente)}`;
       }
-
       async function toggleFinanceStatus(id, target) {
         const index = databaseAgenda.findIndex(
           (item) => String(item.id) === String(id),
@@ -2907,15 +3162,65 @@
         }
       }
 
+      // 1. Função Auxiliar: Responsável apenas por limpar o formulário
+      function limparFormularioReserva() {
+        const campos = [
+          "modalClient",
+          "modalPhone",
+          "modalDate",
+          "modalTime",
+          "modalDesc",
+          "modalFlight",
+          "modalValueTotal",
+          "modalValueDriver",
+          "input-busca-servico-reserva",
+          "reserva-select-categoria",
+        ];
+        campos.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+      }
+
+      // 2. Função Auxiliar: Gerenciar cliente no banco
+      async function buscarOuCriarCliente(nome, whatsapp) {
+        if (!window.supabaseClient) return null;
+        const { data: existingClient, error: searchError } =
+          await window.supabaseClient
+            .from("clientes")
+            .select("id")
+            .eq("whatsapp", whatsapp)
+            .maybeSingle();
+        if (searchError) throw searchError;
+        if (existingClient) return existingClient.id;
+
+        const { data: newClientData, error: insertError } =
+          await window.supabaseClient
+            .from("clientes")
+            .insert([{ nome: nome, whatsapp: whatsapp, biografia: "" }])
+            .select();
+        if (insertError) throw insertError;
+        return newClientData[0].id;
+      }
+
+      // 3. Função Principal: Orquestrador da Reserva
       async function saveQuickReserva(event) {
         event.preventDefault();
 
         const clientName = document.getElementById("modalClient").value.trim();
         const clientPhone = document.getElementById("modalPhone").value.trim();
-        const date = document.getElementById("modalDate").value;
+        const date =
+          document.getElementById("modalDate").value ||
+          new Date().toISOString().split("T")[0];
         const time = document.getElementById("modalTime").value;
-        const cat = document.getElementById("catSelectReserva").value;
-        const servico = document.getElementById("servicoSelectReserva").value;
+
+        // Coletando do Novo Autocomplete
+        const cat =
+          document.getElementById("reserva-select-categoria").value || "Geral";
+        const servico = document.getElementById(
+          "input-busca-servico-reserva",
+        ).value;
+
         const desc = document.getElementById("modalDesc").value;
         const driverId = document.getElementById("modalDriverSelect").value;
         const flight = document.getElementById("modalFlight").value;
@@ -2925,45 +3230,27 @@
           parseFloat(document.getElementById("modalValueDriver").value) || 0;
 
         if (!clientName || !clientPhone) {
-          alert("Preencha o nome e o WhatsApp do cliente.");
+          showToast("Preencha o nome e o WhatsApp do cliente.", true);
+          return;
+        }
+        if (!servico) {
+          showToast("Por favor, selecione um serviço na busca.", true);
           return;
         }
 
         if (window.isConnectedToSupabase && window.supabaseClient) {
           try {
-            let clientId = null;
-            const { data: existingClient } = await window.supabaseClient
-              .from("clientes")
-              .select("id")
-              .eq("whatsapp", clientPhone)
-              .maybeSingle();
-
-            if (existingClient) {
-              clientId = existingClient.id;
-            } else {
-              const { data: newClientData, error: clientErr } =
-                await window.supabaseClient
-                  .from("clientes")
-                  .insert([
-                    {
-                      nome: clientName,
-                      whatsapp: clientPhone,
-                      biografia: "",
-                    },
-                  ])
-                  .select();
-
-              if (clientErr) throw clientErr;
-              clientId = newClientData[0].id;
-            }
-
+            const clientId = await buscarOuCriarCliente(
+              clientName,
+              clientPhone,
+            );
             const { error: resErr } = await window.supabaseClient
               .from("reservas")
               .insert([
                 {
                   cliente_id: clientId,
                   motorista_id: driverId,
-                  dia: date.toString(),
+                  dia: date,
                   hora: time,
                   tipo: cat,
                   localizacao: (servico ? servico + " - " : "") + desc,
@@ -2973,35 +3260,22 @@
                   status: "confirmado",
                 },
               ]);
-
             if (resErr) throw resErr;
 
-            alert("Cliente atualizado e reserva agendada com sucesso!");
-
-            document.getElementById("modalClient").value = "";
-            document.getElementById("modalPhone").value = "";
-            document.getElementById("modalDate").value = "";
-            document.getElementById("modalTime").value = "";
-            document.getElementById("modalDesc").value = "";
-            document.getElementById("modalFlight").value = "";
-            document.getElementById("modalValueTotal").value = "";
-            document.getElementById("modalValueDriver").value = "";
-
-            closeQuickAddModal();
-
-            if (typeof renderAgenda === "function") renderAgenda();
-            if (typeof renderDashboard === "function") renderDashboard();
-            if (typeof renderClientes === "function") renderClientes();
+            showToast("Reserva agendada com sucesso!", false);
+            if (typeof loadRealData === "function") await loadRealData();
           } catch (err) {
             console.error(err);
-            alert(
-              "Erro ao processar reserva integrada: " + (err.message || err),
+            showToast(
+              "Erro ao processar reserva: " + (err.message || err),
+              true,
             );
+            return;
           }
         } else {
-          const newEvent = {
+          databaseAgenda.push({
             id: String(Date.now()),
-            dia: date ? date : new Date().toISOString().split("T")[0],
+            dia: date,
             hora: time,
             tipo: cat || "transfer",
             cliente: clientName,
@@ -3011,20 +3285,112 @@
             valorMotorista: valMotorista,
             telefone: clientPhone,
             status: "confirmado",
-          };
-          databaseAgenda.push(newEvent);
-
-          document.getElementById("modalClient").value = "";
-          document.getElementById("modalPhone").value = "";
-          document.getElementById("modalDesc").value = "";
-          document.getElementById("modalFlight").value = "";
-          document.getElementById("modalValueTotal").value = "";
-          document.getElementById("modalValueDriver").value = "";
-
+          });
+          showToast("Reserva simulada com sucesso!", false);
           renderAgenda();
           renderDashboard();
-          alert("Reserva e cliente simulados com sucesso!");
-          closeQuickAddModal();
+        }
+
+        limparFormularioReserva();
+        closeQuickAddModal();
+      }
+
+      // 4. Abrir Modal de Reserva e Carregar Serviços
+      async function openQuickAddModal() {
+        const modal = document.getElementById("quickModal");
+        const inputData = document.getElementById("modalDate");
+        if (inputData) inputData.value = selectedDay;
+
+        if (modal) {
+          modal.classList.remove("opacity-0", "pointer-events-none");
+          modal.classList.add("opacity-100");
+
+          // OTIMIZAÇÃO: Carrega a lista de serviços do Supabase para o Autocomplete funcionar instantaneamente
+          if (servicosDisponiveis.length === 0 && window.supabaseClient) {
+            try {
+              const { data } = await window.supabaseClient
+                .from("servicos")
+                .select("*")
+                .order("categoria", { ascending: true });
+              if (data) servicosDisponiveis = data;
+            } catch (e) {
+              console.error("Erro ao carregar serviços para autocomplete:", e);
+            }
+          }
+        }
+      }
+
+      // 5. O Motor de Autocomplete para a Reserva (Dispara quando o HTML carrega)
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputBuscaReserva = document.getElementById(
+          "input-busca-servico-reserva",
+        );
+        const dropdownReserva = document.getElementById(
+          "dropdown-servicos-reserva",
+        );
+        const hiddenCategoria = document.getElementById(
+          "reserva-select-categoria",
+        );
+
+        if (inputBuscaReserva) {
+          inputBuscaReserva.addEventListener("input", function () {
+            const termo = this.value.toLowerCase();
+            dropdownReserva.innerHTML = "";
+
+            if (termo.length === 0) {
+              dropdownReserva.classList.add("hidden");
+              hiddenCategoria.value = "";
+              document.getElementById("modalValueTotal").value = ""; // Limpa o preço
+              return;
+            }
+
+            const filtrados = servicosDisponiveis.filter(
+              (s) =>
+                (s.nome && s.nome.toLowerCase().includes(termo)) ||
+                (s.categoria && s.categoria.toLowerCase().includes(termo)),
+            );
+
+            if (filtrados.length > 0) {
+              dropdownReserva.classList.remove("hidden");
+              filtrados.forEach((s) => {
+                const li = document.createElement("li");
+                li.className =
+                  "px-3 py-2 cursor-pointer hover:bg-emerald-50 text-xs border-b border-gray-100 flex justify-between";
+                li.innerHTML = `<span><strong class="text-blue-900">${s.categoria || "Geral"}</strong> - ${s.nome}</span> <span class="text-gray-500 font-bold">R$ ${s.preco}</span>`;
+
+                li.onclick = () => {
+                  inputBuscaReserva.value = s.nome;
+                  hiddenCategoria.value = s.categoria || "Geral";
+                  // Preenche automaticamente a Cobrança Cliente (R$)
+                  document.getElementById("modalValueTotal").value = parseFloat(
+                    s.preco || 0,
+                  ).toFixed(2);
+                  dropdownReserva.classList.add("hidden");
+                };
+                dropdownReserva.appendChild(li);
+              });
+            } else {
+              dropdownReserva.classList.add("hidden");
+            }
+          });
+
+          // Fecha a lista se clicar fora dela
+          document.addEventListener("click", function (e) {
+            if (
+              !inputBuscaReserva.contains(e.target) &&
+              dropdownReserva &&
+              !dropdownReserva.contains(e.target)
+            ) {
+              dropdownReserva.classList.add("hidden");
+            }
+          });
+        }
+      });
+      function closeQuickAddModal() {
+        const modal = document.getElementById("quickModal");
+        if (modal) {
+          modal.classList.remove("opacity-100");
+          modal.classList.add("opacity-0", "pointer-events-none");
         }
       }
       function openDbSettingsModal() {
@@ -3154,108 +3520,42 @@
           .toUpperCase();
         const resultBox = document.getElementById("flightResult");
 
-        if (!query) {
-          showToast("Por favor, digite o número do voo.");
-          return;
-        }
+        if (!query) return;
 
         try {
-          showToast("Consultando voo em tempo real...");
-
           const { data, error } = await window.supabaseClient.functions.invoke(
             "verificar-voos",
-            {
-              body: { flight_iata: query },
-            },
+            { body: { flight_iata: query } },
           );
 
-          if (error || !data) {
-            throw new Error("Não foi possível obter dados da Edge Function.");
-          }
+          if (error || !data) throw new Error("Erro na busca");
 
-          function formatarHoraLocal(utcString) {
-            if (!utcString) return "--:--";
-            const dataUtc = new Date(utcString);
-            if (isNaN(dataUtc.getTime())) return utcString;
-
-            return dataUtc.toLocaleTimeString("pt-BR", {
-              timeZone: "America/Argentina/Buenos_Aires",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            });
-          }
-
-          let horarioPrevistoLocal = formatarHoraLocal(
-            data.scheduled || data.dep_time || data.arr_time,
-          );
-          let horarioEstimadoLocal = formatarHoraLocal(
-            data.estimated || data.arr_estimated || data.scheduled,
-          );
-
-          document.getElementById("resFlightCode").innerText = query;
-          document.getElementById("resFlightStatus").innerText =
-            data.status || "CONSULTAR";
-          document.getElementById("resFlightStatus").className =
-            "bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded";
+          document.getElementById("resFlightCode").innerText =
+            data.flight_iata || query;
           document.getElementById("resFlightCarrier").innerText =
-            data.airline || "Aerolineas Argentinas";
+            data.airline || "Companhia Aérea";
+          document.getElementById("resFlightStatus").innerText =
+            data.status || "CONFIRMADO";
 
-          document.getElementById("resFlightScheduled").innerText =
-            horarioPrevistoLocal;
+          // Linha limpa de Chegada (Previsto vs Estimado)
+          document.getElementById("resFlightScheduled").innerHTML =
+            `<b>Chegada:</b> Previsto: ${data.arr_scheduled} | Estimado: ${data.arr_estimated || data.arr_scheduled}`;
 
-          const campoEstimado = document.getElementById("resFlightEstimated");
-          campoEstimado.innerText = horarioEstimadoLocal;
+          // Linha limpa de Partida (Programado vs Real com destaque de atraso)
+          const depText =
+            data.dep_real !== data.dep_scheduled && data.dep_real !== "--:--"
+              ? `Programado: ${data.dep_scheduled} | Real: <span class="text-red-600 font-bold">${data.dep_real}</span>`
+              : `Programado: ${data.dep_scheduled}`;
 
-          const destinoFinal =
-            data.arrival?.airport ||
-            data.arrival?.iata ||
-            data.arrival?.city ||
-            data.destination ||
-            data.arr_iata ||
-            (query.toUpperCase().startsWith("AR")
-              ? "Aeroparque / Ezeiza (BUE)"
-              : "Buenos Aires");
-          const campoDestino = document.getElementById("resFlightDestination");
-          if (campoDestino) {
-            campoDestino.innerText = destinoFinal;
-          }
+          document.getElementById("resFlightEstimated").innerHTML =
+            `<b>Partida:</b> ${depText}`;
 
-          if (
-            horarioEstimadoLocal !== horarioPrevistoLocal &&
-            horarioEstimadoLocal !== "--:--"
-          ) {
-            campoEstimado.className = "font-bold text-red-600";
-            document.getElementById("resFlightStatus").innerText = "ATRASADO";
-            document.getElementById("resFlightStatus").className =
-              "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded";
-
-            atualizarAtencaoOperacional(data);
-          } else {
-            campoEstimado.className = "font-bold text-gray-800";
-          }
+          document.getElementById("resFlightDestination").innerText =
+            data.destination || "Buenos Aires";
 
           resultBox.classList.remove("hidden");
-          showToast("Consulta realizada com sucesso!");
         } catch (err) {
-          console.error("Erro na busca:", err);
-
-          document.getElementById("resFlightCode").innerText = query;
-          document.getElementById("resFlightStatus").innerText =
-            "NÃO ENCONTRADO";
-          document.getElementById("resFlightStatus").className =
-            "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
-          document.getElementById("resFlightCarrier").innerText =
-            "Verifique o código digitado";
-          document.getElementById("resFlightScheduled").innerText = "--:--";
-          document.getElementById("resFlightEstimated").innerText =
-            "Sem dados para este voo hoje";
-          document.getElementById("resFlightEstimated").className =
-            "font-bold text-red-600";
-          document.getElementById("resFlightDestination").innerText = "-";
-
-          resultBox.classList.remove("hidden");
-          showToast("Erro ao buscar dados na API.");
+          console.error("Erro:", err);
         }
       }
 
@@ -3334,27 +3634,6 @@
           `Olá ${client}, passando para confirmar se deu tudo certo com o seu transfer e para alinhar a questão do pagamento pendente de ${value}.`,
         );
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-      }
-
-      function openQuickAddModal() {
-        const modal = document.getElementById("quickModal");
-        const inputData = document.getElementById("modalDate");
-        if (inputData) {
-          inputData.value = selectedDay;
-        }
-        if (modal) {
-          modal.classList.remove("opacity-0", "pointer-events-none");
-          modal.classList.add("opacity-100");
-          carregarMenuCategorias();
-        }
-      }
-
-      function closeQuickAddModal() {
-        const modal = document.getElementById("quickModal");
-        if (modal) {
-          modal.classList.remove("opacity-100");
-          modal.classList.add("opacity-0", "pointer-events-none");
-        }
       }
 
       function gerarDiasAgenda() {
@@ -3895,6 +4174,44 @@
           }
         }
       }
+      // --- SISTEMA DE NOTIFICAÇÕES (TOAST) ---
+      function showToast(message, isError = false) {
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+        const toastIcon = document.getElementById("toast-icon");
+
+        if (!toast || !toastMessage || !toastIcon) return;
+
+        // Define a mensagem
+        toastMessage.innerText = message;
+
+        // Troca as cores dependendo se é sucesso ou erro
+        if (isError) {
+          toastIcon.className = "fas fa-exclamation-circle text-red-400";
+          toast.classList.replace("bg-gray-900", "bg-red-900");
+        } else {
+          toastIcon.className = "fas fa-check-circle text-emerald-400";
+          toast.classList.replace("bg-red-900", "bg-gray-900");
+        }
+
+        // Faz o toast subir na tela
+        toast.classList.remove(
+          "translate-y-20",
+          "opacity-0",
+          "pointer-events-none",
+        );
+        toast.classList.add("translate-y-0", "opacity-100");
+
+        // Esconde o toast após 3.5 segundos
+        setTimeout(() => {
+          toast.classList.remove("translate-y-0", "opacity-100");
+          toast.classList.add(
+            "translate-y-20",
+            "opacity-0",
+            "pointer-events-none",
+          );
+        }, 3500);
+      }
     </script>
 
     <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
@@ -4093,6 +4410,16 @@
         }
       }
 
+      // Função auxiliar para formatar AAAA-MM-DD para DD/MM/AAAA sem problemas de fuso horário
+      function formatarDataBR(dataString) {
+        if (!dataString) return "";
+        const partes = dataString.split("-");
+        if (partes.length === 3) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+        return dataString; // Retorna o original caso venha em outro formato
+      }
+
       async function loadClientTimeline(clientId) {
         const container = document.getElementById("clientTimelineContent");
         if (!container) return;
@@ -4111,7 +4438,7 @@
               .from("reservas")
               .select("*")
               .eq("cliente_id", clientId)
-              .order("dia", { ascending: false });
+              .order("dia", { ascending: true });
 
             if (error) throw error;
 
@@ -4124,12 +4451,15 @@
             let html =
               '<div class="border-l-2 border-blue-200 ml-2 space-y-4 pl-4">';
             reservas.forEach((res) => {
+              // Formatando a data aqui antes de jogar no HTML
+              const dataFormatada = formatarDataBR(res.dia);
+
               html += `
                             <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                                 <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
                                 <div class="flex justify-between items-start">
                                     <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || "Serviço"}</span>
-                                    <span class="text-xs text-gray-400">Dia ${res.dia} às ${res.hora || ""}</span>
+                                    <span class="text-xs text-gray-400">Dia ${dataFormatada} às ${res.hora || ""}</span>
                                 </div>
                                 <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || "Sem descrição"}</p>
                                 <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
@@ -4274,41 +4604,98 @@
         }
       }
 
+      // 1. Otimização da Tabela Geral de Orçamentos
       function carregarTabelaFiltrada(lista) {
         const tbody = document.getElementById("tabela-orcamentos-body");
         if (!tbody) return;
-        tbody.innerHTML = "";
 
-        if (lista.length === 0) {
+        if (!lista || lista.length === 0) {
           tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Nenhum orçamento encontrado.</td></tr>`;
           return;
         }
 
-        lista.forEach((orc) => {
-          const tr = document.createElement("tr");
-          tr.className =
-            "hover:bg-gray-50 transition-colors border-b border-gray-100";
-          const statusAtual = orc.status || "Pendente";
+        // Renderização em lote (Virtual DOM)
+        tbody.innerHTML = lista
+          .map((orc) => {
+            const statusAtual = orc.status || "Pendente";
 
-          tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || "Cliente"}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
-            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${orc.servicos_solicitados}">${orc.servicos_solicitados || "-"}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${statusAtual === "Aprovado" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}">${statusAtual}</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">PDF</button>
-                <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">WhatsApp</button>
-                ${statusAtual !== "Aprovado" ? `<button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>` : ""}
-                <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+            let badgeClass = "bg-yellow-100 text-yellow-800";
+            if (statusAtual === "Aprovado")
+              badgeClass = "bg-green-100 text-green-800";
+            if (statusAtual === "Agendado")
+              badgeClass = "bg-purple-100 text-purple-800"; // Novo status extra
+
+            // Lógica inteligente dos botões com base no status
+            let acoesHtml = `<button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">PDF</button>`;
+
+            if (statusAtual === "Aprovado" || statusAtual === "Agendado") {
+              acoesHtml += `
+            <button onclick="abrirModalAgendamentoOrcamento('${orc.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors"><i class="fas fa-calendar-check mr-1"></i> Agendar</button>
+            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+        `;
+            } else {
+              acoesHtml += `
+            <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">WhatsApp</button>
+            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
+            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
+        `;
+            }
+
+            return `
+      <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || "Cliente"}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
+        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${orc.servicos_solicitados}">${orc.servicos_solicitados || "-"}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${badgeClass}">${statusAtual}</span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+            ${acoesHtml}
+        </td>
+      </tr>
+    `;
+          })
+          .join("");
       }
+      // 2. Otimização do Carrinho de Serviços (Dentro do Modal)
+      function renderizarTabelaItensOrcamento() {
+        const tbody = document.getElementById("orc-tabela-itens");
+        const labelTotal = document.getElementById("orc-label-total");
+        const inputTotalGeral = document.getElementById(
+          "orc-valor-total-geral",
+        );
+        if (!tbody) return;
 
+        if (itensOrcamentoAtual.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-400 italic">Nenhum item adicionado.</td></tr>`;
+          labelTotal.innerText = "R$ 0,00";
+          inputTotalGeral.value = 0;
+          return;
+        }
+
+        let somaTotal = 0;
+
+        // Renderização em lote do carrinho
+        tbody.innerHTML = itensOrcamentoAtual
+          .map((item, index) => {
+            somaTotal += item.valor_total;
+            return `
+      <tr>
+          <td class="p-2 font-medium text-gray-800">${item.servico}</td>
+          <td class="p-2 text-center">${item.quantidade}</td>
+          <td class="p-2 text-right">R$ ${Number(item.valor_unitario).toFixed(2)}</td>
+          <td class="p-2 text-right font-bold text-blue-900">R$ ${Number(item.valor_total).toFixed(2)}</td>
+          <td class="p-2 text-center">
+              <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+          </td>
+      </tr>`;
+          })
+          .join("");
+
+        labelTotal.innerText = `R$ ${somaTotal.toFixed(2)}`;
+        inputTotalGeral.value = somaTotal;
+      }
       function fecharModalOrcamento() {
         const modal = document.getElementById("modal-orcamento");
         if (modal) modal.classList.add("hidden");
@@ -5256,6 +5643,63 @@
             class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition"
           >
             Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Modal: Agendar Serviços do Orçamento Aprovado -->
+    <div
+      id="modal-agendar-orcamento"
+      class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <h3
+            class="text-lg font-bold text-blue-900 flex items-center gap-2"
+            id="titulo-agendar-orcamento"
+          >
+            <i class="fas fa-calendar-alt text-purple-600"></i> Agendar Serviços
+          </h3>
+          <button
+            onclick="fecharModalAgendamento()"
+            class="text-gray-400 hover:text-gray-600 text-xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            class="bg-purple-50 border border-purple-100 p-3 rounded-lg flex items-start gap-2"
+          >
+            <i class="fas fa-info-circle text-purple-600 mt-0.5"></i>
+            <p class="text-xs text-purple-800 font-medium">
+              Defina a data, horário e, se já souber, o motorista para cada
+              serviço contratado. Os itens agendados irão direto para a Linha do
+              Tempo do cliente e para a Agenda Geral.
+            </p>
+          </div>
+
+          <!-- AQUI ENTRARÃO AS LINHAS DINÂMICAS -->
+          <div id="lista-servicos-agendamento" class="space-y-3">
+            <!-- Injetado por JS -->
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+          <button
+            onclick="fecharModalAgendamento()"
+            class="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+          >
+            Cancelar
+          </button>
+          <button
+            onclick="salvarAgendamentosOrcamento()"
+            class="px-5 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition shadow-sm font-bold flex items-center gap-1.5"
+          >
+            <i class="fas fa-check-double"></i> Confirmar na Agenda
           </button>
         </div>
       </div>
