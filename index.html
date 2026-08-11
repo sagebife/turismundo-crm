@@ -3534,21 +3534,71 @@
             data.flight_iata || query;
           document.getElementById("resFlightCarrier").innerText =
             data.airline || "Companhia Aérea";
-          document.getElementById("resFlightStatus").innerText =
-            data.status || "CONFIRMADO";
 
-          // Linha limpa de Chegada (Previsto vs Estimado)
+          // Função auxiliar para calcular atrasos/adiantamentos
+          const getStatusColor = (scheduled, actual) => {
+            if (!actual || actual === "--:--" || actual === scheduled)
+              return "";
+
+            const [sH, sM] = scheduled.split(":").map(Number);
+            const [aH, aM] = actual.split(":").map(Number);
+            let sTotal = sH * 60 + sM;
+            let aTotal = aH * 60 + aM;
+
+            if (sTotal - aTotal > 720) aTotal += 1440;
+            if (aTotal - sTotal > 720) sTotal += 1440;
+
+            if (aTotal > sTotal) return "late"; // Atrasado
+            if (aTotal < sTotal) return "early"; // Adiantado
+            return "ontime";
+          };
+
+          // 1. Lógica do quadro de Status (Badge superior direito)
+          const flightState = getStatusColor(
+            data.arr_scheduled,
+            data.arr_estimated || data.arr_scheduled,
+          );
+          const statusEl = document.getElementById("resFlightStatus");
+
+          // Traduz status ou usa o original
+          statusEl.innerText = data.status || "CONFIRMADO";
+
+          // Aplica as cores no quadro dependendo do estado
+          const badgeBase =
+            "px-2 py-1 rounded text-xs font-bold uppercase tracking-wide ";
+          if (flightState === "early") {
+            statusEl.className = badgeBase + "bg-emerald-100 text-emerald-800"; // Adiantado (Verde)
+          } else if (flightState === "late") {
+            statusEl.className = badgeBase + "bg-red-100 text-red-800"; // Atrasado (Vermelho)
+          } else {
+            statusEl.className = badgeBase + "bg-blue-100 text-blue-800"; // No horário (Azul)
+          }
+
+          // 2. Linha limpa de Chegada (Textos verdes ou vermelhos)
+          const arrActual = data.arr_estimated || data.arr_scheduled;
+          let arrTextHtml = `Previsto: ${data.arr_scheduled} | Estimado: ${arrActual}`;
+
+          if (flightState === "early") {
+            arrTextHtml = `Previsto: ${data.arr_scheduled} | Estimado: <span class="text-emerald-600 font-bold">${arrActual}</span>`;
+          } else if (flightState === "late") {
+            arrTextHtml = `Previsto: ${data.arr_scheduled} | Estimado: <span class="text-red-600 font-bold">${arrActual}</span>`;
+          }
           document.getElementById("resFlightScheduled").innerHTML =
-            `<b>Chegada:</b> Previsto: ${data.arr_scheduled} | Estimado: ${data.arr_estimated || data.arr_scheduled}`;
+            `<b>Chegada:</b> ${arrTextHtml}`;
 
-          // Linha limpa de Partida (Programado vs Real com destaque de atraso)
-          const depText =
-            data.dep_real !== data.dep_scheduled && data.dep_real !== "--:--"
-              ? `Programado: ${data.dep_scheduled} | Real: <span class="text-red-600 font-bold">${data.dep_real}</span>`
-              : `Programado: ${data.dep_scheduled}`;
+          // 3. Linha limpa de Partida (Textos verdes ou vermelhos)
+          const depState = getStatusColor(data.dep_scheduled, data.dep_real);
+          let depTextHtml = `Programado: ${data.dep_scheduled}`;
 
+          if (depState === "early") {
+            depTextHtml += ` | Real: <span class="text-emerald-600 font-bold">${data.dep_real}</span>`;
+          } else if (depState === "late") {
+            depTextHtml += ` | Real: <span class="text-red-600 font-bold">${data.dep_real}</span>`;
+          } else if (data.dep_real && data.dep_real !== "--:--") {
+            depTextHtml += ` | Real: ${data.dep_real}`;
+          }
           document.getElementById("resFlightEstimated").innerHTML =
-            `<b>Partida:</b> ${depText}`;
+            `<b>Partida:</b> ${depTextHtml}`;
 
           document.getElementById("resFlightDestination").innerText =
             data.destination || "Buenos Aires";
