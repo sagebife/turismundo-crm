@@ -3075,14 +3075,13 @@
         let totalLucro = 0;
         let totalPendente = 0;
 
-        // 1. Processamos todas as linhas e a matemática na memória
+        // Processa tudo na memória RAM primeiro e já monta o HTML de uma vez
         const linhasHTML = databaseAgenda
           .map((item) => {
             const valorCliente = Number(item.valorCliente) || 0;
             const valorMotorista = Number(item.valorMotorista) || 0;
             const lucro = valorCliente - valorMotorista;
 
-            // Atualizamos os acumuladores globais
             totalFaturamento += valorCliente;
             totalRepasses += valorMotorista;
             totalLucro += lucro;
@@ -3091,7 +3090,6 @@
               totalPendente += valorCliente;
             }
 
-            // Geração dos botões de status
             const statusClienteBtn = item.pagoCliente
               ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
               : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
@@ -3100,44 +3098,37 @@
               ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
               : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
 
-            // Retorna a linha da tabela
             return `
-        <tr class="hover:bg-gray-50/50 transition">
-          <td class="p-4 font-bold text-gray-900">
-            <div>${item.cliente || "Cliente Não Informado"}</div>
-            <div class="text-[10px] text-gray-400 font-normal mt-0.5">${String(item.tipo).toLowerCase() === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia || "--"}</div>
-          </td>
-          <td class="p-4 font-semibold text-gray-700">${item.motorista || "--"}</td>
-          <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
-          <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
-          <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
-          <td class="p-4 text-center">${statusClienteBtn}</td>
-          <td class="p-4 text-center">${statusMotoristaBtn}</td>
-        </tr>
-      `;
+            <tr class="hover:bg-gray-50/50 transition">
+                <td class="p-4 font-bold text-gray-900">
+                    <div>${item.cliente}</div>
+                    <div class="text-[10px] text-gray-400 font-normal mt-0.5">${item.tipo === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia}/07</div>
+                </td>
+                <td class="p-4 font-semibold text-gray-700">${item.motorista}</td>
+                <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
+                <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
+                <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
+                <td class="p-4 text-center">${statusClienteBtn}</td>
+                <td class="p-4 text-center">${statusMotoristaBtn}</td>
+            </tr>
+          `;
           })
-          .join("");
+          .join(""); // Junta tudo em um bloco só!
 
-        // 2. Injetamos a tabela inteira no DOM de uma só vez!
+        // Injeta no DOM apenas 1 vez (Fim da lentidão)
         tableBody.innerHTML =
           linhasHTML ||
-          `<tr><td colspan="7" class="p-6 text-center text-gray-500 text-sm">Nenhum lançamento financeiro encontrado.</td></tr>`;
+          `<tr><td colspan="7" class="text-center py-4 text-gray-500 text-xs">Nenhuma movimentação financeira.</td></tr>`;
 
-        // 3. Atualizamos os painéis (Cards) superiores
-        const formatarMoeda = (valor) =>
-          valor.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          });
-
+        // Atualiza os cards
         document.getElementById("fin-faturamento").innerText =
-          `R$ ${formatarMoeda(totalFaturamento)}`;
+          `R$ ${totalFaturamento.toLocaleString()}`;
         document.getElementById("fin-repasses").innerText =
-          `R$ ${formatarMoeda(totalRepasses)}`;
+          `R$ ${totalRepasses.toLocaleString()}`;
         document.getElementById("fin-lucro").innerText =
-          `R$ ${formatarMoeda(totalLucro)}`;
+          `R$ ${totalLucro.toLocaleString()}`;
         document.getElementById("fin-pendente").innerText =
-          `R$ ${formatarMoeda(totalPendente)}`;
+          `R$ ${totalPendente.toLocaleString()}`;
       }
       async function toggleFinanceStatus(id, target) {
         const index = databaseAgenda.findIndex(
@@ -4321,6 +4312,124 @@
           });
         }
       });
+      // ==========================================
+      // LÓGICA DO EXTRATO DO MOTORISTA
+      // ==========================================
+      let motoristaExtratoAtual = null;
+
+      function abrirExtratoMotorista(driverId, driverName, driverPhone) {
+        motoristaExtratoAtual = {
+          id: driverId,
+          nome: driverName,
+          telefone: driverPhone,
+        };
+
+        // Atualiza o título do modal
+        document.getElementById("titulo-extrato-motorista").innerHTML = `
+          <i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato: ${driverName}
+        `;
+
+        // 1. Filtra as viagens deste motorista específico
+        const corridasMotorista = databaseAgenda.filter(
+          (item) =>
+            String(item.motorista) === String(driverName) ||
+            String(item.motorista_id) === String(driverId),
+        );
+
+        let repasseTotalPendente = 0;
+
+        // 2. Prepara as linhas da tabela
+        const linhasTabela = corridasMotorista
+          .map((corrida) => {
+            const valorRepasse = Number(corrida.valorMotorista) || 0;
+            const estaPago = corrida.pagoMotorista;
+
+            if (!estaPago) {
+              repasseTotalPendente += valorRepasse;
+            }
+
+            const badgeStatus = estaPago
+              ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Pago</span>`
+              : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-clock"></i> Pendente</span>`;
+
+            return `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-3">
+                        <div class="font-bold text-gray-800">${corrida.dia || "--"}</div>
+                        <div class="text-[10px] text-gray-500">${corrida.hora || "--:--"}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="font-bold text-gray-800">${corrida.cliente || "Cliente Oculto"}</div>
+                        <div class="text-[10px] text-gray-500 truncate max-w-[150px]">${corrida.localizacao || corrida.tipo}</div>
+                    </td>
+                    <td class="p-3 text-right font-black text-red-600">
+                        R$ ${valorRepasse.toFixed(2)}
+                    </td>
+                    <td class="p-3 text-center">
+                        ${badgeStatus}
+                    </td>
+                </tr>
+            `;
+          })
+          .join("");
+
+        // 3. Injeta no DOM
+        const tbody = document.getElementById("extrato-tabela-corridas");
+        if (tbody) {
+          tbody.innerHTML =
+            linhasTabela ||
+            `<tr><td colspan="4" class="text-center p-4 text-gray-500 text-xs">Nenhuma corrida registrada para este motorista.</td></tr>`;
+        }
+
+        // 4. Atualiza o valor total no topo do modal
+        const formatadorMoeda = new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+        document.getElementById("extrato-total-pendente").innerText =
+          formatadorMoeda.format(repasseTotalPendente);
+
+        // 5. Exibe o modal
+        const modal = document.getElementById("modal-extrato-motorista");
+        if (modal) {
+          modal.classList.remove("hidden");
+        }
+      }
+
+      function fecharModalExtrato() {
+        const modal = document.getElementById("modal-extrato-motorista");
+        if (modal) {
+          modal.classList.add("hidden");
+        }
+        motoristaExtratoAtual = null;
+      }
+
+      function enviarExtratoWhatsApp() {
+        if (!motoristaExtratoAtual) return;
+
+        const valorPendenteTexto = document.getElementById(
+          "extrato-total-pendente",
+        ).innerText;
+        let numLimpo = (motoristaExtratoAtual.telefone || "").replace(
+          /[^0-9]/g,
+          "",
+        );
+
+        if (
+          numLimpo &&
+          !numLimpo.startsWith("55") &&
+          !numLimpo.startsWith("54")
+        ) {
+          numLimpo = "55" + numLimpo;
+        }
+
+        const msg = `Olá *${motoristaExtratoAtual.nome}*, segue o resumo atualizado dos seus repasses com a Turismundo:\n\n💰 *Total Pendente a Receber:* ${valorPendenteTexto}\n\nPara conferir os detalhes de cada corrida, por favor acesse seu painel ou responda a esta mensagem.`;
+
+        window.open(
+          `https://wa.me/${numLimpo}?text=${encodeURIComponent(msg)}`,
+          "_blank",
+        );
+      }
     </script>
 
     <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
