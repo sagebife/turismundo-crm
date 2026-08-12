@@ -4471,6 +4471,57 @@
           "_blank",
         );
       }
+      // ==========================================
+      // UX: FORMATAÇÃO AUTOMÁTICA DE NOMES
+      // ==========================================
+      document.addEventListener("input", function (event) {
+        const input = event.target;
+
+        // IDs de todos os campos do sistema onde digitamos nomes de pessoas
+        const camposDeNome = [
+          "driverName",
+          "orc-nome",
+          "modalClient",
+          "tempClient",
+          "editClientName",
+          "searchClientInput",
+        ];
+
+        // Se o campo que o usuário está digitando for um campo de nome...
+        if (camposDeNome.includes(input.id)) {
+          // Salva onde o cursor está piscando pra ele não pular pro final
+          const cursorPosition = input.selectionStart;
+
+          const preposicoes = [
+            "de",
+            "da",
+            "do",
+            "das",
+            "dos",
+            "e",
+            "del",
+            "las",
+            "los",
+          ];
+
+          // Divide o que foi digitado por espaços e joga tudo pra minúsculo
+          let palavras = input.value.toLowerCase().split(" ");
+
+          palavras = palavras.map((palavra) => {
+            if (palavra.length === 0) return "";
+            if (preposicoes.includes(palavra)) return palavra; // Se for "da", "de", etc, deixa minúsculo
+
+            // Pega a primeira letra, joga pra maiúscula, e junta com o resto da palavra
+            return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+          });
+
+          // Devolve pro campo o nome formatado
+          input.value = palavras.join(" ");
+
+          // Devolve o cursor pro lugar exato onde estava
+          input.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      });
     </script>
 
     <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
@@ -5221,25 +5272,19 @@
           const { data: orc, error: errBusca } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .eq("id", id);
+            .eq("id", id)
+            .single();
 
           if (errBusca || !orc) throw new Error("Orçamento não encontrado.");
 
-          // 2. Copia para a tabela clientes com segurança contra valores nulos
-          const { error: errInsert } = await window.supabaseClient
-            .from("clientes")
-            .insert([
-              {
-                nome: orc.nome_lead || orc.nome || "Cliente sem nome",
-                whatsapp: orc.whatsapp || "",
-              },
-            ]);
+          // 2. Usa a nossa Função Especialista Sênior! (Evita duplicidade e garante criação)
+          const clientId = await processarClienteBanco(
+            orc.nome_lead || orc.nome || "Cliente sem nome",
+            orc.whatsapp || "",
+          );
 
-          if (errInsert) {
-            console.error("Erro ao transferir para clientes:", errInsert);
-            alert(
-              "Aviso: O orçamento será aprovado, mas houve um erro ao criar o cliente.",
-            );
+          if (!clientId) {
+            console.warn("Aviso: Cliente não pôde ser verificado ou gerado.");
           }
 
           // 3. Atualiza o status do orçamento
@@ -5250,20 +5295,18 @@
 
           if (errUpdate) throw errUpdate;
 
-          // 4. Atualiza a tela
+          // 4. Atualiza a tela usando as funções com os nomes CORRETOS
           carregarOrcamentos();
-
-          if (typeof carregarClientes === "function") {
-            carregarClientes();
+          if (typeof renderClientes === "function") {
+            renderClientes();
           }
 
-          alert("Orçamento aprovado e cliente gerado com sucesso!");
+          showToast("Orçamento aprovado e cliente sincronizado!", false);
         } catch (err) {
           console.error("Erro na aprovação:", err);
-          alert("Erro ao tentar aprovar o orçamento.");
+          showToast("Erro ao tentar aprovar o orçamento.", true);
         }
       }
-
       async function deletarOrcamento(id) {
         if (!confirm("Excluir este orçamento?")) return;
         try {
@@ -5511,8 +5554,8 @@
         const conteudoLista = document.getElementById("modalConteudoLista");
 
         if (!modal) return;
-        conteudoLista.innerHTML = "";
 
+        // Ajusta os títulos do modal
         if (tipo === "chegada") {
           modalTitulo.innerText = "Chegadas e Voos de Hoje";
           modalIcone.className = "fas fa-plane-arrival text-blue-400 text-lg";
@@ -5522,62 +5565,79 @@
             "fas fa-map-marked-alt text-orange-400 text-lg";
         }
 
-        const cardsIndividuais = document.querySelectorAll(
-          "#\\-prximas-atividades-de-hoje-container > div > div, .bg-white.p-4.rounded-xl, .bg-white.rounded-2xl",
-        );
-        let encontrados = 0;
+        // 1. Filtramos direto do BANCO DE DADOS EM MEMÓRIA (Rápido e Seguro)
+        const selDia = String(selectedDay).trim();
+        const diaApenas = selDia.split("-")[2];
 
-        cardsIndividuais.forEach((card) => {
-          if (
-            card.closest("#modalFiltroDashboard") ||
-            card.querySelector("form") ||
-            card.innerText.includes("PRÓXIMAS ATIVIDADES")
-          )
-            return;
-
-          const texto = card.innerText.toLowerCase();
-          const temHorario = /\d{2}:\d{2}/.test(texto);
-          const ehServico =
-            (texto.includes("confirmado") || texto.includes("pendente")) &&
-            temHorario;
-
-          if (ehServico) {
-            const isChegada =
-              texto.includes("eze") ||
-              texto.includes("aep") ||
-              texto.includes("aeroporto") ||
-              texto.includes("voo") ||
-              texto.includes("cap x eze");
-            const isPasseio =
-              texto.includes("menu") ||
-              texto.includes("platea") ||
-              texto.includes("tango") ||
-              texto.includes("delta") ||
-              texto.includes("tour");
-
-            let atendeFiltro = false;
-            if (tipo === "chegada" && isChegada && !isPasseio)
-              atendeFiltro = true;
-            else if (tipo === "passeio" && isPasseio && !isChegada)
-              atendeFiltro = true;
-
-            if (atendeFiltro) {
-              encontrados++;
-              const clone = card.cloneNode(true);
-              clone.style.display = "block";
-              clone.className =
-                "bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3";
-              conteudoLista.appendChild(clone);
-            }
-          }
+        // Pega as atividades de hoje
+        const hoje = databaseAgenda.filter((item) => {
+          const itemDia = String(item.dia || "").trim();
+          return (
+            itemDia === selDia ||
+            itemDia === String(Number(diaApenas)) ||
+            itemDia === diaApenas
+          );
         });
 
-        if (encontrados === 0) {
-          conteudoLista.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-info-circle text-2xl mb-2"></i><p class="text-sm font-medium">Nenhum registro encontrado.</p></div>`;
+        // Separa a categoria exata com base nos atributos do objeto (e não no HTML)
+        const filtrados = hoje.filter((item) => {
+          const t = String(item.tipo || "").toLowerCase();
+          const loc = String(
+            item.localizacao || item.local || "",
+          ).toLowerCase();
+
+          const isTransfer =
+            t.includes("transfer") ||
+            t.includes("chegada") ||
+            t.includes("translado") ||
+            loc.includes("eze") ||
+            loc.includes("aep") ||
+            loc.includes("aeroporto");
+          const isPasseio =
+            t.includes("passeio") ||
+            t.includes("tango") ||
+            t.includes("tour") ||
+            t.includes("show");
+
+          if (tipo === "chegada") return isTransfer && !isPasseio;
+          if (tipo === "passeio") return isPasseio && !isTransfer;
+          return false;
+        });
+
+        // 2. Renderização instantânea com Virtual DOM
+        if (filtrados.length === 0) {
+          conteudoLista.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-info-circle text-2xl mb-2"></i><p class="text-sm font-medium">Nenhum registro encontrado para hoje.</p></div>`;
+        } else {
+          conteudoLista.innerHTML = filtrados
+            .map((item) => {
+              let badge =
+                '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+              if (
+                String(item.status || "")
+                  .toLowerCase()
+                  .includes("concluido") ||
+                String(item.status || "")
+                  .toLowerCase()
+                  .includes("executado")
+              ) {
+                badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+              }
+
+              return `
+              <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3 flex items-center justify-between text-xs hover:border-blue-300 transition">
+                <div>
+                  <p class="font-bold text-gray-900">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
+                  <p class="text-[11px] text-gray-600">${item.localizacao || "Local não informado"}</p>
+                </div>
+                ${badge}
+              </div>
+            `;
+            })
+            .join("");
         }
+
         modal.classList.remove("hidden");
       }
-
       function fecharModalFiltro() {
         const modal = document.getElementById("modalFiltroDashboard");
         if (modal) modal.classList.add("hidden");
