@@ -2521,12 +2521,14 @@
 
           let itensParaAgendar = orc.dados_detalhados;
 
+          // Fallback caso o orçamento não tenha detalhamento moderno
           if (!itensParaAgendar || itensParaAgendar.length === 0) {
             itensParaAgendar = [
               {
                 servico: orc.servicos_solicitados || "Serviço Geral",
                 quantidade: 1,
-                valor: orc.valor_total || 0,
+                valor_total: orc.valor_total || 0,
+                categoria: "Geral",
               },
             ];
           }
@@ -2536,9 +2538,27 @@
             .join("");
 
           itensParaAgendar.forEach((item) => {
+            // Garante que pega o valor correto do array do orçamento
+            const valorDoItem =
+              item.valor_total !== undefined
+                ? item.valor_total
+                : item.valor || 0;
+            const qtdDoItem = item.quantidade || 1;
+            const catDoItem = item.categoria || "Geral";
+
+            // Injeta os dados corretos no HTML (data-valor, data-qtd, data-categoria)
             container.innerHTML += `
-            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 agendamento-item" data-servico="${item.servico || ""}">
-              <div class="font-semibold text-gray-800 text-sm">${item.servico || "Serviço"} (Qtd: ${item.quantidade || 1})</div>
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 agendamento-item" 
+                 data-servico="${item.servico || ""}"
+                 data-valor="${valorDoItem}"
+                 data-qtd="${qtdDoItem}"
+                 data-categoria="${catDoItem}">
+              
+              <div class="font-semibold text-gray-800 text-sm flex justify-between items-center">
+                <span>${item.servico || "Serviço"} (Qtd: ${qtdDoItem})</span>
+                <span class="text-blue-900 font-bold bg-blue-50 px-2 py-1 rounded">R$ ${Number(valorDoItem).toFixed(2)}</span>
+              </div>
+              
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data *</label>
@@ -2595,8 +2615,8 @@
 
         showToast("Processando integrações...", false);
 
-        // Usa a função de segurança para obter ou criar o cliente
-        const clientId = await buscarOuCriarCliente(
+        // Usa a função Sênior para obter ou criar o cliente
+        const clientId = await processarClienteBanco(
           orcamentoAgendamentoAtual.nome_lead,
           orcamentoAgendamentoAtual.whatsapp,
         );
@@ -3195,126 +3215,147 @@
         });
       }
 
-      // 2. Função Auxiliar: Gerenciar cliente no banco
-      async function buscarOuCriarCliente(nome, whatsapp) {
+      // ==========================================
+      // REGRAS DE NEGÓCIO: RESERVA RÁPIDA (REFATORADA)
+      // ==========================================
+
+      // 1. Função Especialista: Coletar e organizar dados da tela
+      function coletarDadosReserva() {
+        return {
+          clientName: document.getElementById("modalClient").value.trim(),
+          clientPhone: document.getElementById("modalPhone").value.trim(),
+          date:
+            document.getElementById("modalDate").value ||
+            new Date().toISOString().split("T")[0],
+          time: document.getElementById("modalTime").value,
+          cat:
+            document.getElementById("reserva-select-categoria").value ||
+            "Geral",
+          servico: document.getElementById("input-busca-servico-reserva").value,
+          desc: document.getElementById("modalDesc").value,
+          driverId: document.getElementById("modalDriverSelect").value,
+          flight: document.getElementById("modalFlight").value,
+          valCliente:
+            parseFloat(document.getElementById("modalValueTotal").value) || 0,
+          valMotorista:
+            parseFloat(document.getElementById("modalValueDriver").value) || 0,
+        };
+      }
+
+      // 2. Função Especialista: Gerenciar Cliente no Banco de Dados
+      async function processarClienteBanco(nome, whatsapp) {
         if (!window.supabaseClient) return null;
-        const { data: existingClients, error: searchError } =
+
+        // Tenta achar o cliente pelo WhatsApp
+        const { data: clienteExistente, error: erroBusca } =
           await window.supabaseClient
             .from("clientes")
             .select("id")
             .eq("whatsapp", whatsapp)
-            .limit(1); // <--- Isso força o banco a trazer só um, sem dar erro de duplicidade
+            .limit(1)
+            .maybeSingle();
 
-        if (searchError) throw searchError;
+        if (erroBusca) throw erroBusca;
+        if (clienteExistente) return clienteExistente.id;
 
-        // Se achou, retorna o ID do primeiro da lista
-        if (existingClients && existingClients.length > 0) {
-          return existingClients[0].id;
-        }
-        if (searchError) throw searchError;
-        if (existingClient) return existingClient.id;
-
-        const { data: newClientData, error: insertError } =
+        // Se não achou, cria um cliente novo
+        const { data: novoCliente, error: erroInsert } =
           await window.supabaseClient
             .from("clientes")
             .insert([{ nome: nome, whatsapp: whatsapp, biografia: "" }])
-            .select();
-        if (insertError) throw insertError;
-        return newClientData[0].id;
+            .select()
+            .single();
+
+        if (erroInsert) throw erroInsert;
+        return novoCliente.id;
       }
 
-      // 3. Função Principal: Orquestrador da Reserva
+      // 3. A Função "Maestrina": Apenas orquestra o processo
       async function saveQuickReserva(event) {
         event.preventDefault();
 
-        const clientName = document.getElementById("modalClient").value.trim();
-        const clientPhone = document.getElementById("modalPhone").value.trim();
-        const date =
-          document.getElementById("modalDate").value ||
-          new Date().toISOString().split("T")[0];
-        const time = document.getElementById("modalTime").value;
+        // Passo 1: Lê a tela
+        const dados = coletarDadosReserva();
 
-        // Coletando do Novo Autocomplete
-        const cat =
-          document.getElementById("reserva-select-categoria").value || "Geral";
-        const servico = document.getElementById(
-          "input-busca-servico-reserva",
-        ).value;
-
-        const desc = document.getElementById("modalDesc").value;
-        const driverId = document.getElementById("modalDriverSelect").value;
-        const flight = document.getElementById("modalFlight").value;
-        const valCliente =
-          parseFloat(document.getElementById("modalValueTotal").value) || 0;
-        const valMotorista =
-          parseFloat(document.getElementById("modalValueDriver").value) || 0;
-
-        if (!clientName || !clientPhone) {
-          showToast("Preencha o nome e o WhatsApp do cliente.", true);
-          return;
+        // Passo 2: Validações Simples
+        if (!dados.clientName || !dados.clientPhone) {
+          return showToast("Preencha o nome e o WhatsApp do cliente.", true);
         }
-        if (!servico) {
-          showToast("Por favor, selecione um serviço na busca.", true);
-          return;
+        if (!dados.servico) {
+          return showToast("Por favor, selecione um serviço na busca.", true);
         }
 
+        // Passo 3: Salva no Supabase (ou Simulação)
         if (window.isConnectedToSupabase && window.supabaseClient) {
           try {
-            const clientId = await buscarOuCriarCliente(
-              clientName,
-              clientPhone,
+            showToast("Processando reserva...", false);
+
+            // Resolve o cliente
+            const clientId = await processarClienteBanco(
+              dados.clientName,
+              dados.clientPhone,
             );
-            const { error: resErr } = await window.supabaseClient
+
+            // Grava a reserva
+            const { error: erroReserva } = await window.supabaseClient
               .from("reservas")
               .insert([
                 {
                   cliente_id: clientId,
-                  motorista_id: driverId,
-                  dia: date,
-                  hora: time,
-                  tipo: cat,
-                  localizacao: (servico ? servico + " - " : "") + desc,
-                  voo: flight,
-                  valor_total: valCliente,
-                  valor_repasse_motorista: valMotorista,
-                  status: "confirmado",
+                  motorista_id: dados.driverId || null,
+                  dia: dados.date,
+                  hora: dados.time,
+                  tipo: dados.cat,
+                  localizacao:
+                    (dados.servico ? dados.servico + " - " : "") + dados.desc,
+                  voo: dados.flight,
+                  valor_total: dados.valCliente,
+                  valor_repasse_motorista: dados.valMotorista,
+                  status: dados.driverId ? "confirmado" : "pendente", // Status inteligente
+                  pago_cliente: false,
+                  pago_motorista: false,
                 },
               ]);
-            if (resErr) throw resErr;
+
+            if (erroReserva) throw erroReserva;
 
             showToast("Reserva agendada com sucesso!", false);
+
+            // Recarrega todos os dados do banco para atualizar as abas
             if (typeof loadRealData === "function") await loadRealData();
           } catch (err) {
             console.error(err);
-            showToast(
+            return showToast(
               "Erro ao processar reserva: " + (err.message || err),
               true,
             );
-            return;
           }
         } else {
+          // Modo Offline / Simulação
           databaseAgenda.push({
             id: String(Date.now()),
-            dia: date,
-            hora: time,
-            tipo: cat || "transfer",
-            cliente: clientName,
-            localizacao: (servico ? servico + " - " : "") + desc,
-            motorista: driverId,
-            valorCliente: valCliente,
-            valorMotorista: valMotorista,
-            telefone: clientPhone,
-            status: "confirmado",
+            dia: dados.date,
+            hora: dados.time,
+            tipo: dados.cat || "transfer",
+            cliente: dados.clientName,
+            localizacao:
+              (dados.servico ? dados.servico + " - " : "") + dados.desc,
+            motorista: dados.driverId,
+            valorCliente: dados.valCliente,
+            valorMotorista: dados.valMotorista,
+            telefone: dados.clientPhone,
+            status: dados.driverId ? "confirmado" : "pendente",
           });
+
           showToast("Reserva simulada com sucesso!", false);
           renderAgenda();
           renderDashboard();
         }
 
+        // Passo 4: Finaliza (Limpa e fecha modal)
         limparFormularioReserva();
         closeQuickAddModal();
       }
-
       // 4. Abrir Modal de Reserva e Carregar Serviços
       async function openQuickAddModal() {
         const modal = document.getElementById("quickModal");
