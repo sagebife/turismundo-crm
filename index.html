@@ -2300,30 +2300,9 @@
           return;
         }
 
-        // Otimização: Mapeamento em memória em vez de += no DOM
+        // Otimização: Mapeamento em memória usando a UI Factory
         container.innerHTML = hoje
-          .map((item) => {
-            let badge =
-              '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-            const statusStr = String(item.status || "").toLowerCase();
-
-            if (
-              statusStr.includes("concluido") ||
-              statusStr.includes("executado")
-            ) {
-              badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
-            }
-
-            return `
-        <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
-          <div>
-            <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
-            <p class="text-[11px] text-gray-600">${item.localizacao || ""}</p>
-          </div>
-          ${badge}
-        </div>
-      `;
-          })
+          .map((item) => gerarCardAtividade(item))
           .join("");
       }
       async function renderAgenda() {
@@ -2587,12 +2566,6 @@
           console.error("Erro ao abrir painel de agendamento:", err);
           showToast("Erro ao abrir painel de agendamento.", true);
         }
-      }
-      function fecharModalAgendamento() {
-        document
-          .getElementById("modal-agendar-orcamento")
-          .classList.add("hidden");
-        orcamentoAgendamentoAtual = null;
       }
 
       // 2. Dispara tudo para o banco com os totais consolidados
@@ -2866,7 +2839,7 @@
         if (!container) return;
 
         if (!window.supabaseClient) {
-          container.innerHTML = `<p class="text-gray-500">Supabase não conectado.</p>`;
+          container.innerHTML = `<p class="text-gray-500 text-center py-8">Supabase não conectado.</p>`;
           return;
         }
 
@@ -2880,7 +2853,6 @@
           console.error("Erro ao carregar categorias:", catError.message);
         }
 
-        // <-- COLE O BLOCO AQUI -->
         const catSelect = document.getElementById("catSelect");
         if (catSelect) {
           catSelect.innerHTML =
@@ -2900,22 +2872,23 @@
 
         if (servError) {
           console.error("Erro ao carregar serviços:", servError.message);
-          container.innerHTML = `<p class="text-red-500">Erro ao carregar os serviços.</p>`;
+          container.innerHTML = `<p class="text-red-500 text-center py-8">Erro ao carregar os serviços.</p>`;
           return;
         }
 
         const categoriasSet = new Set();
         if (categoriasData)
           categoriasData.forEach((c) => categoriasSet.add(c.nome));
-        if (servicosData)
+        if (servicosData) {
           servicosData.forEach((s) => {
             if (s.categoria) categoriasSet.add(s.categoria);
           });
+        }
 
         const listaCategorias = Array.from(categoriasSet);
 
         if (listaCategorias.length === 0) {
-          container.innerHTML = `<p class="text-gray-500">Nenhuma categoria cadastrada até o momento.</p>`;
+          container.innerHTML = `<div class="text-center py-12 text-gray-400"><i class="fas fa-box-open text-4xl mb-3"></i><p>Nenhuma categoria cadastrada até o momento.</p></div>`;
           return;
         }
 
@@ -2938,56 +2911,54 @@
           .map((categoria) => {
             const itens = servicosPorCategoria[categoria] || [];
 
+            // Desenha a lista de serviços limpa
             const itensHTML =
               itens.length > 0
                 ? itens
                     .map(
                       (servico) => `
-                      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
-                          <div>
-                              <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
-                          </div>
-                          <div class="flex items-center gap-4">
-                              <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
-                              <div class="flex items-center gap-2">
-                                  <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-blue-500 hover:text-blue-700 p-2 rounded transition" title="Editar Serviço">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                      </svg>
-                                  </button>
-                                  <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                      </svg>
-                                  </button>
-                              </div>
-                          </div>
-                      </div>
-                  `,
+                    <div class="px-5 py-4 flex justify-between items-center hover:bg-blue-50/50 transition-colors group">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-800 text-sm">${servico.nome}</h4>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm whitespace-nowrap">
+                                R$ ${parseFloat(servico.preco || 0).toFixed(2)}
+                            </span>
+                            <div class="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded-md hover:bg-blue-100 transition" title="Editar Serviço">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
+                                <button onclick="deletarServico('${servico.id}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-100 transition" title="Excluir Serviço">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `,
                     )
                     .join("")
-                : `<p class="text-gray-400 text-sm italic py-2">Nenhum serviço cadastrado nesta categoria ainda.</p>`;
+                : `<div class="px-5 py-4 text-center text-gray-400 text-sm italic">Nenhum serviço cadastrado nesta categoria.</div>`;
 
+            // Desenha o Card da Categoria envelopando os serviços
             return `
-                      <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-                          <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
-                              <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wide">${categoria}</h3>
-                              <div class="flex items-center gap-2">
-                                  <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                      Editar Categoria
-                                  </button>
-                                  <button onclick="deletarCategoria('${categoria}')" class="text-red-600 hover:text-red-800 text-xs font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                      Excluir Categoria
-                                  </button>
-                              </div>
-                          </div>
-                          <div class="flex flex-col gap-2">
-                              ${itensHTML}
-                          </div>
-                      </div>
-                  `;
+                <div class="mb-5 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center group">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">${categoria}</h3>
+                        <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                            <button onclick="editarCategoria('${categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded transition" title="Editar Categoria">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button onclick="deletarCategoria('${categoria}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded transition" title="Excluir Categoria">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-100 flex flex-col">
+                        ${itensHTML}
+                    </div>
+                </div>
+            `;
           })
           .join("");
       }
@@ -3066,21 +3037,6 @@
 
         if (error) {
           alert("Erro ao atualizar o serviço: " + error.message);
-        } else {
-          renderServicos();
-        }
-      }
-
-      async function deletarServico(id) {
-        if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
-
-        const { error } = await window.supabaseClient
-          .from("servicos")
-          .delete()
-          .eq("id", id);
-
-        if (error) {
-          alert("Erro ao excluir o serviço: " + error.message);
         } else {
           renderServicos();
         }
@@ -3447,13 +3403,7 @@
           });
         }
       });
-      function closeQuickAddModal() {
-        const modal = document.getElementById("quickModal");
-        if (modal) {
-          modal.classList.remove("opacity-100");
-          modal.classList.add("opacity-0", "pointer-events-none");
-        }
-      }
+
       function openDbSettingsModal() {
         const modal = document.getElementById("dbSettingsModal");
         document.getElementById("dbUrlInput").value =
@@ -3465,14 +3415,6 @@
         if (modal) {
           modal.classList.remove("opacity-0", "pointer-events-none");
           modal.classList.add("opacity-100");
-        }
-      }
-
-      function closeDbSettingsModal() {
-        const modal = document.getElementById("dbSettingsModal");
-        if (modal) {
-          modal.classList.remove("opacity-100");
-          modal.classList.add("opacity-0", "pointer-events-none");
         }
       }
 
@@ -3713,14 +3655,6 @@
         document.getElementById("tempBody").value = bodyText;
       }
 
-      function closeMessageTemplate() {
-        const modal = document.getElementById("messageModal");
-        if (modal) {
-          modal.classList.remove("opacity-100");
-          modal.classList.add("opacity-0", "pointer-events-none");
-        }
-      }
-
       function triggerWhatsAppRedirect() {
         const phone = document
           .getElementById("tempWhatsApp")
@@ -3791,18 +3725,6 @@
         return new Promise((resolve) => {
           confirmPromiseResolver = resolve;
         });
-      }
-
-      function closeConfirmModal(result) {
-        const modal = document.getElementById("confirmModal");
-        if (modal) {
-          modal.classList.remove("opacity-100");
-          modal.classList.add("opacity-0", "pointer-events-none");
-        }
-        if (confirmPromiseResolver) {
-          confirmPromiseResolver(result);
-          confirmPromiseResolver = null;
-        }
       }
 
       function copyToClipboard(text) {
@@ -4026,54 +3948,6 @@
         document.getElementById("modalBioCliente").classList.add("hidden");
       }
 
-      async function salvarBio() {
-        const nomeCliente = document
-          .getElementById("modalNomeCliente")
-          .innerText.replace("Dossiê: ", "");
-        const bio = document.getElementById("modalBioInput").value;
-        const tags = document.getElementById("modalTagsInput").value;
-
-        if (!window.supabaseClient) return;
-
-        const { error } = await window.supabaseClient
-          .from("clientes")
-          .update({
-            biografia: bio,
-            tags: tags,
-          })
-          .eq("nome", nomeCliente);
-
-        if (error) {
-          alert("Erro ao salvar: " + error.message);
-        } else {
-          alert("Dossiê salvo com sucesso!");
-          fecharModalBio();
-          renderClientes();
-        }
-      }
-
-      async function deletarCliente(id) {
-        if (
-          !confirm(
-            "Tem certeza que deseja apagar este cliente do banco de dados?",
-          )
-        )
-          return;
-        if (!window.supabaseClient) return;
-
-        const { error } = await window.supabaseClient
-          .from("clientes")
-          .delete()
-          .eq("id", id);
-
-        if (error) {
-          alert("Erro ao deletar: " + error.message);
-        } else {
-          alert("Cliente removido com sucesso!");
-          renderClientes();
-        }
-      }
-
       async function editarCategoria(nomeAntigo) {
         const novoNome = prompt(
           `Digite o novo nome para a categoria "${nomeAntigo}":`,
@@ -4100,31 +3974,81 @@
         }
       }
 
-      async function deletarCategoria(categoriaNome) {
+      // ==========================================
+      // FUNÇÕES DE BANCO ENXUTAS E PODEROSAS
+      // ==========================================
+
+      async function salvarBio() {
+        const nomeCliente = document
+          .getElementById("modalNomeCliente")
+          .innerText.replace("Dossiê: ", "");
+        const bio = document.getElementById("modalBioInput").value;
+        const tags = document.getElementById("modalTagsInput").value;
+
+        // Mandamos a query direto para o nosso envelope
+        const { error } = await dbCall(
+          window.supabaseClient
+            .from("clientes")
+            .update({ biografia: bio, tags: tags })
+            .eq("nome", nomeCliente),
+          "Dossiê salvo com sucesso!",
+        );
+
+        if (!error) {
+          fecharModalBio();
+          renderClientes();
+        }
+      }
+
+      async function deletarCliente(id) {
         if (
           !confirm(
-            `Tem certeza que deseja excluir a categoria "${categoriaNome}" e todos os seus serviços vinculados?`,
+            "Tem certeza que deseja apagar este cliente do banco de dados?",
           )
         )
           return;
 
-        await window.supabaseClient
-          .from("categorias_servicos")
-          .delete()
-          .eq("nome", categoriaNome);
-
-        const { error } = await window.supabaseClient
-          .from("servicos")
-          .delete()
-          .eq("categoria", categoriaNome);
-
-        if (error) {
-          alert("Erro ao excluir categoria: " + error.message);
-        } else {
-          renderServicos();
-        }
+        const { error } = await dbCall(
+          window.supabaseClient.from("clientes").delete().eq("id", id),
+          "Cliente removido com sucesso!",
+        );
+        if (!error) renderClientes();
       }
 
+      async function deletarServico(id) {
+        if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+
+        const { error } = await dbCall(
+          window.supabaseClient.from("servicos").delete().eq("id", id),
+          "Serviço excluído com sucesso!",
+        );
+        if (!error) renderServicos();
+      }
+
+      async function deletarCategoria(categoriaNome) {
+        if (
+          !confirm(
+            `Excluir a categoria "${categoriaNome}" e todos os seus serviços vinculados?`,
+          )
+        )
+          return;
+
+        // Aqui temos duas queries, usamos o envelope nas duas!
+        await dbCall(
+          window.supabaseClient
+            .from("categorias_servicos")
+            .delete()
+            .eq("nome", categoriaNome),
+        );
+        const { error } = await dbCall(
+          window.supabaseClient
+            .from("servicos")
+            .delete()
+            .eq("categoria", categoriaNome),
+          "Categoria excluída com sucesso!",
+        );
+        if (!error) renderServicos();
+      }
       const bairesNoticias = [
         {
           cat: "Trânsito / Alerta",
@@ -4437,14 +4361,6 @@
         }
       }
 
-      function fecharModalExtrato() {
-        const modal = document.getElementById("modal-extrato-motorista");
-        if (modal) {
-          modal.classList.add("hidden");
-        }
-        motoristaExtratoAtual = null;
-      }
-
       function enviarExtratoWhatsApp() {
         if (!motoristaExtratoAtual) return;
 
@@ -4640,12 +4556,15 @@
     <script>
       let currentOpenClientId = null;
 
-      async function openClientDossier(
-        clientId,
-        clientName,
-        clientPhone,
-        clientBio,
-      ) {
+      async function openClientDossier(id, nome, telefone, info) {
+        // Fecha o modal de filtro antes de abrir o dossiê
+        fecharModalFiltro();
+
+        let clientId = id;
+        let clientName = nome;
+        let clientPhone = telefone;
+        let clientBio = info;
+
         currentOpenClientId = clientId;
 
         // Se o ID veio vazio ou nulo, tenta buscar o ID correto no Supabase pelo nome ou WhatsApp
@@ -4693,11 +4612,6 @@
           .classList.remove("hidden");
 
         await loadClientTimeline(currentOpenClientId);
-      }
-
-      function closeClientDossier() {
-        document.getElementById("clientDossierModal").classList.add("hidden");
-        currentOpenClientId = null;
       }
 
       function switchDossierTab(tabName) {
@@ -4761,27 +4675,18 @@
               return;
             }
 
+            // Renderização da Linha do Tempo usando a UI Factory
             let html =
               '<div class="border-l-2 border-blue-200 ml-2 space-y-4 pl-4">';
-            reservas.forEach((res) => {
-              // Formatando a data aqui antes de jogar no HTML
-              const dataFormatada = formatarDataBR(res.dia);
 
-              html += `
-                            <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                                <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
-                                <div class="flex justify-between items-start">
-                                    <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${res.tipo || "Serviço"}</span>
-                                    <span class="text-xs text-gray-400">Dia ${dataFormatada} às ${res.hora || ""}</span>
-                                </div>
-                                <p class="text-sm text-gray-800 mt-2 font-medium">${res.localizacao || "Sem descrição"}</p>
-                                <div class="mt-2 flex justify-between text-xs text-gray-500 border-t pt-2">
-                                    <span>Valor: R$ ${parseFloat(res.valor_total || 0).toFixed(2)}</span>
-                                    <span class="capitalize text-emerald-600 font-semibold">${res.status || "Confirmado"}</span>
-                                </div>
-                            </div>
-                        `;
-            });
+            html += reservas
+              .map((res) => {
+                // Mantém a sua formatação de data BR antes de mandar para a fábrica
+                const itemFormatado = { ...res, dia: formatarDataBR(res.dia) };
+                return gerarCardAtividade(itemFormatado, true); // true = Layout de Timeline
+              })
+              .join("");
+
             html += "</div>";
             container.innerHTML = html;
           } catch (err) {
@@ -4948,33 +4853,33 @@
 
             if (statusAtual === "Aprovado" || statusAtual === "Agendado") {
               acoesHtml += `
-        <button onclick="abrirModalAgendamentoOrcamento('${orc.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs font-medium">Agendar</button>
-        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium">Excluir</button>
-      `;
+              <button onclick="abrirModalAgendamentoOrcamento('${orc.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs font-medium">Agendar</button>
+              <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium">Excluir</button>
+            `;
             } else {
               // Aba Pendentes: exatamente 3 botões (PDF, WhatsApp, Aprovar)
               acoesHtml += `
-        <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium">WhatsApp</button>
-        <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-medium">Aprovar</button>
-      `;
+              <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium">WhatsApp</button>
+              <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-medium">Aprovar</button>
+            `;
             }
 
             return `
-      <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || "Cliente"}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
-        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${orc.servicos_solicitados}">${orc.servicos_solicitados || "-"}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${badgeClass}">${statusAtual}</span>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-    <div class="flex items-center justify-center gap-1.5">
-        ${acoesHtml}
-    </div>
-</td>
-      </tr>
-    `;
+            <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${orc.nome_lead || "Cliente"}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${orc.whatsapp || "-"}</td>
+              <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${orc.servicos_solicitados}">${orc.servicos_solicitados || "-"}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900">R$ ${Number(orc.valor_total || 0).toFixed(2)}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${badgeClass}">${statusAtual}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+          <div class="flex items-center justify-center gap-1.5">
+              ${acoesHtml}
+          </div>
+      </td>
+            </tr>
+          `;
           })
           .join("");
       }
@@ -5001,26 +4906,20 @@
           .map((item, index) => {
             somaTotal += item.valor_total;
             return `
-      <tr>
-          <td class="p-2 font-medium text-gray-800">${item.servico}</td>
-          <td class="p-2 text-center">${item.quantidade}</td>
-          <td class="p-2 text-right">R$ ${Number(item.valor_unitario).toFixed(2)}</td>
-          <td class="p-2 text-right font-bold text-blue-900">R$ ${Number(item.valor_total).toFixed(2)}</td>
-          <td class="p-2 text-center">
-              <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
-          </td>
-      </tr>`;
+            <tr>
+                <td class="p-2 font-medium text-gray-800">${item.servico}</td>
+                <td class="p-2 text-center">${item.quantidade}</td>
+                <td class="p-2 text-right">R$ ${Number(item.valor_unitario).toFixed(2)}</td>
+                <td class="p-2 text-right font-bold text-blue-900">R$ ${Number(item.valor_total).toFixed(2)}</td>
+                <td class="p-2 text-center">
+                    <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>`;
           })
           .join("");
 
         labelTotal.innerText = `R$ ${somaTotal.toFixed(2)}`;
         inputTotalGeral.value = somaTotal;
-      }
-      function fecharModalOrcamento() {
-        const modal = document.getElementById("modal-orcamento");
-        if (modal) modal.classList.add("hidden");
-        document.getElementById("form-orcamento").reset();
-        itensOrcamentoAtual = [];
       }
 
       // ==========================================
@@ -5180,15 +5079,15 @@
         itensOrcamentoAtual.forEach((item, index) => {
           somaTotal += item.valor_total;
           tbody.innerHTML += `
-            <tr>
-                <td class="p-2 font-medium text-gray-800">${item.servico}</td>
-                <td class="p-2 text-center">${item.quantidade}</td>
-                <td class="p-2 text-right">R$ ${item.valor_unitario.toFixed(2)}</td>
-                <td class="p-2 text-right font-bold text-blue-900">R$ ${item.valor_total.toFixed(2)}</td>
-                <td class="p-2 text-center">
-                    <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            </tr>`;
+                  <tr>
+                      <td class="p-2 font-medium text-gray-800">${item.servico}</td>
+                      <td class="p-2 text-center">${item.quantidade}</td>
+                      <td class="p-2 text-right">R$ ${item.valor_unitario.toFixed(2)}</td>
+                      <td class="p-2 text-right font-bold text-blue-900">R$ ${item.valor_total.toFixed(2)}</td>
+                      <td class="p-2 text-center">
+                          <button type="button" onclick="removerItemOrcamento(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
+                      </td>
+                  </tr>`;
         });
         labelTotal.innerText = `R$ ${somaTotal.toFixed(2)}`;
         inputTotalGeral.value = somaTotal;
@@ -5241,12 +5140,6 @@
           console.error("Erro ao salvar:", err);
           alert("Erro ao salvar orçamento.");
         }
-      }
-
-      function fecharModalPosSalvamento() {
-        const modal = document.getElementById("modal-pos-salvamento");
-        if (modal) modal.classList.add("hidden");
-        window.orcamentoAtualSalvo = null;
       }
 
       function executarAcaoWhatsApp() {
@@ -5409,82 +5302,82 @@
           ) {
             orc.dados_detalhados.forEach((item, index) => {
               linhasTabela += `
-                    <tr style="border-bottom: 1px solid #cbd5e1; background-color: ${index % 2 === 0 ? "rgba(255, 255, 255, 0.95)" : "rgba(248, 250, 252, 0.95)"};">
-                        <td style="padding: 10px 12px; font-size: 11px;">
-                            <strong>${item.servico}</strong>
-                        </td>
-                        <td style="padding: 10px 12px; text-align: center; font-size: 11px;">
-                            ${item.quantidade}
-                        </td>
-                        <td style="padding: 10px 12px; text-align: right; font-size: 11px;">
-                            R$ ${Number(item.valor_unitario).toFixed(2)}
-                        </td>
-                        <td style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: bold; color: #047857;">
-                            R$ ${Number(item.valor_total).toFixed(2)}
-                        </td>
-                    </tr>
-                `;
+                          <tr style="border-bottom: 1px solid #cbd5e1; background-color: ${index % 2 === 0 ? "rgba(255, 255, 255, 0.95)" : "rgba(248, 250, 252, 0.95)"};">
+                              <td style="padding: 10px 12px; font-size: 11px;">
+                                  <strong>${item.servico}</strong>
+                              </td>
+                              <td style="padding: 10px 12px; text-align: center; font-size: 11px;">
+                                  ${item.quantidade}
+                              </td>
+                              <td style="padding: 10px 12px; text-align: right; font-size: 11px;">
+                                  R$ ${Number(item.valor_unitario).toFixed(2)}
+                              </td>
+                              <td style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: bold; color: #047857;">
+                                  R$ ${Number(item.valor_total).toFixed(2)}
+                              </td>
+                          </tr>
+                      `;
             });
           }
 
           containerTemp.innerHTML = `
-            <!-- FUNDO -->
-            <div style="position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; z-index: 0; pointer-events: none; overflow: hidden;">
-                <img src="${imagemFundoBase64}" style="width: 100%; height: 100%; object-fit: contain; object-position: center; display: block;">
-            </div>
+                  <!-- FUNDO -->
+                  <div style="position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; z-index: 0; pointer-events: none; overflow: hidden;">
+                      <img src="${imagemFundoBase64}" style="width: 100%; height: 100%; object-fit: contain; object-position: center; display: block;">
+                  </div>
 
-            <!-- CONTEÚDO -->
-            <div style="position: relative; z-index: 1; width: 100%; height: 100%; padding: 12mm 15mm; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
-                
-                <div>
-                    <!-- Espaço do topo aumentado para descer os dados e escapar do título da arte -->
-                    <div style="height: 180px;"></div>
+                  <!-- CONTEÚDO -->
+                  <div style="position: relative; z-index: 1; width: 100%; height: 100%; padding: 12mm 15mm; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
 
-                    <!-- CLIENTE -->
-                    <div style="display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-bottom: 15px; font-size: 11px;">
-                        <div>
-                            <span style="color: #64748b; font-size: 8px; font-weight: bold; display: block;">CLIENTE:</span>
-                            <strong style="font-size: 13px; color: #0f172a;">👤 ${(orc.nome_lead || "Cliente").toUpperCase()}</strong>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: #64748b; font-size: 9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
-                            <div style="color: #64748b; font-size: 9.5px; margin-top: 2px;">📅 <strong>Data:</strong> ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</div>
-                        </div>
-                    </div>
+                      <div>
+                          <!-- Espaço do topo aumentado para descer os dados e escapar do título da arte -->
+                          <div style="height: 180px;"></div>
 
-                    <!-- SERVIÇOS -->
-                    <div style="margin-bottom: 15px;">
-                        <div style="background-color: #1e40af; color: #ffffff; padding: 7px 12px; font-size: 10.5px; font-weight: bold; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-                            🚗 SERVIÇOS SOLICITADOS
-                        </div>
-                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1;">
-                            <thead>
-                                <tr style="background-color: #e2e8f0; color: #334155; text-align: left; font-size: 10px;">
-                                    <th style="padding: 8px 12px; width: 55%;">SERVIÇO</th>
-                                    <th style="padding: 8px 12px; text-align: center; width: 15%;">QTD</th>
-                                    <th style="padding: 8px 12px; text-align: right; width: 15%;">V. UNITÁRIO</th>
-                                    <th style="padding: 8px 12px; text-align: right; width: 15%;">TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>${linhasTabela}</tbody>
-                        </table>
-                    </div>
+                          <!-- CLIENTE -->
+                          <div style="display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; margin-bottom: 15px; font-size: 11px;">
+                              <div>
+                                  <span style="color: #64748b; font-size: 8px; font-weight: bold; display: block;">CLIENTE:</span>
+                                  <strong style="font-size: 13px; color: #0f172a;">👤 ${(orc.nome_lead || "Cliente").toUpperCase()}</strong>
+                              </div>
+                              <div style="text-align: right;">
+                                  <div style="color: #64748b; font-size: 9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
+                                  <div style="color: #64748b; font-size: 9.5px; margin-top: 2px;">📅 <strong>Data:</strong> ${new Date(orc.created_at).toLocaleDateString("pt-BR")}</div>
+                              </div>
+                          </div>
 
-                    <!-- VALOR TOTAL -->
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-                        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 9px 18px; border-radius: 6px; display: flex; align-items: center; gap: 15px;">
-                            <span style="font-size: 10.5px; font-weight: bold;">VALOR TOTAL DA PROPOSTA</span>
-                            <span style="font-size: 16px; font-weight: bold;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
-                        </div>
-                    </div>
+                          <!-- SERVIÇOS -->
+                          <div style="margin-bottom: 15px;">
+                              <div style="background-color: #1e40af; color: #ffffff; padding: 7px 12px; font-size: 10.5px; font-weight: bold; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                                  🚗 SERVIÇOS SOLICITADOS
+                              </div>
+                              <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1;">
+                                  <thead>
+                                      <tr style="background-color: #e2e8f0; color: #334155; text-align: left; font-size: 10px;">
+                                          <th style="padding: 8px 12px; width: 55%;">SERVIÇO</th>
+                                          <th style="padding: 8px 12px; text-align: center; width: 15%;">QTD</th>
+                                          <th style="padding: 8px 12px; text-align: right; width: 15%;">V. UNITÁRIO</th>
+                                          <th style="padding: 8px 12px; text-align: right; width: 15%;">TOTAL</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>${linhasTabela}</tbody>
+                              </table>
+                          </div>
 
-                </div>
+                          <!-- VALOR TOTAL -->
+                          <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                              <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; padding: 9px 18px; border-radius: 6px; display: flex; align-items: center; gap: 15px;">
+                                  <span style="font-size: 10.5px; font-weight: bold;">VALOR TOTAL DA PROPOSTA</span>
+                                  <span style="font-size: 16px; font-weight: bold;">R$ ${Number(orc.valor_total || 0).toFixed(2)}</span>
+                              </div>
+                          </div>
 
-                <!-- Espaço inferior para preservar a área dos ícones e rodapé da arte -->
-                <div style="height: 40px;"></div>
+                      </div>
 
-            </div>
-        `;
+                      <!-- Espaço inferior para preservar a área dos ícones e rodapé da arte -->
+                      <div style="height: 40px;"></div>
+
+                  </div>
+              `;
 
           document.body.appendChild(containerTemp);
 
@@ -5604,43 +5497,16 @@
           return false;
         });
 
-        // 2. Renderização instantânea com Virtual DOM
+        // 2. Renderização instantânea com Virtual DOM e Fábrica de Cards
         if (filtrados.length === 0) {
           conteudoLista.innerHTML = `<div class="text-center py-8 text-gray-400"><i class="fas fa-info-circle text-2xl mb-2"></i><p class="text-sm font-medium">Nenhum registro encontrado para hoje.</p></div>`;
         } else {
           conteudoLista.innerHTML = filtrados
-            .map((item) => {
-              let badge =
-                '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-              if (
-                String(item.status || "")
-                  .toLowerCase()
-                  .includes("concluido") ||
-                String(item.status || "")
-                  .toLowerCase()
-                  .includes("executado")
-              ) {
-                badge = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
-              }
-
-              return `
-              <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3 flex items-center justify-between text-xs hover:border-blue-300 transition">
-                <div>
-                  <p class="font-bold text-gray-900">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
-                  <p class="text-[11px] text-gray-600">${item.localizacao || "Local não informado"}</p>
-                </div>
-                ${badge}
-              </div>
-            `;
-            })
+            .map((item) => gerarCardAtividade(item))
             .join("");
         }
 
         modal.classList.remove("hidden");
-      }
-      function fecharModalFiltro() {
-        const modal = document.getElementById("modalFiltroDashboard");
-        if (modal) modal.classList.add("hidden");
       }
 
       let acaoSenhaCallback = null;
@@ -5708,14 +5574,90 @@
         document.getElementById("input-senha-modal").focus();
         acaoSenhaCallback = callback;
       }
+      // ==========================================
+      // MOTOR UNIVERSAL DE MODAIS (DRY)
+      // ==========================================
 
+      // A função inteligente que faz o trabalho sujo por todas as outras
+      function toggleModal(modalId, mostrar) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        // Detecta automaticamente se o modal usa transição suave ou display:none (hidden)
+        const hasTransition =
+          modal.classList.contains("transition") ||
+          modal.classList.contains("duration-200");
+
+        if (mostrar) {
+          if (hasTransition) {
+            modal.classList.remove("opacity-0", "pointer-events-none");
+            modal.classList.add("opacity-100");
+          } else {
+            modal.classList.remove("hidden");
+          }
+        } else {
+          if (hasTransition) {
+            modal.classList.remove("opacity-100");
+            modal.classList.add("opacity-0", "pointer-events-none");
+          } else {
+            modal.classList.add("hidden");
+          }
+        }
+      }
+
+      // ==========================================
+      // FUNÇÕES DE FECHAR ENXUTAS (1 LINHA CADA)
+      // ==========================================
+      function closeDbSettingsModal() {
+        toggleModal("dbSettingsModal", false);
+      }
+      function closeMessageTemplate() {
+        toggleModal("messageModal", false);
+      }
+      function closeQuickAddModal() {
+        toggleModal("quickModal", false);
+      }
+      function fecharModalBio() {
+        toggleModal("modalBioCliente", false);
+      }
+      function fecharModalFiltro() {
+        toggleModal("modalFiltroDashboard", false);
+      }
+
+      // Fechamentos que também limpam dados da memória
+      function fecharModalOrcamento() {
+        toggleModal("modal-orcamento", false);
+        document.getElementById("form-orcamento").reset();
+        itensOrcamentoAtual = [];
+      }
+      function fecharModalPosSalvamento() {
+        toggleModal("modal-pos-salvamento", false);
+        window.orcamentoAtualSalvo = null;
+      }
+      function fecharModalAgendamento() {
+        toggleModal("modal-agendar-orcamento", false);
+        orcamentoAgendamentoAtual = null;
+      }
+      function closeClientDossier() {
+        toggleModal("clientDossierModal", false);
+        currentOpenClientId = null;
+      }
+      function fecharModalExtrato() {
+        toggleModal("modal-extrato-motorista", false);
+        motoristaExtratoAtual = null;
+      }
       function fecharModalSenha() {
-        document
-          .getElementById("modal-senha-financeiro")
-          .classList.add("hidden");
+        toggleModal("modal-senha-financeiro", false);
         acaoSenhaCallback = null;
       }
 
+      function closeConfirmModal(result) {
+        toggleModal("confirmModal", false);
+        if (confirmPromiseResolver) {
+          confirmPromiseResolver(result);
+          confirmPromiseResolver = null;
+        }
+      }
       function confirmarSenhaModal() {
         if (typeof acaoSenhaCallback === "function") {
           const callbackTemp = acaoSenhaCallback;
@@ -5796,6 +5738,75 @@
           dropdown.classList.add("hidden");
         }
       });
+      // ==========================================
+      // SERVICE LAYER: ENVELOPE DO SUPABASE (DRY)
+      // ==========================================
+      async function dbCall(queryPromise, msgSucesso = null) {
+        if (!window.supabaseClient) {
+          showToast("Modo offline: Ação simulada.", false);
+          return { data: null, error: "offline" };
+        }
+        try {
+          const { data, error } = await queryPromise;
+          if (error) throw error;
+          if (msgSucesso) showToast(msgSucesso, false);
+          return { data, error: null };
+        } catch (err) {
+          console.error("Erro no Banco de Dados:", err);
+          showToast("Erro: " + (err.message || "Falha na operação"), true);
+          return { data: null, error: err };
+        }
+      }
+      // ==========================================
+      // UI FACTORY: COMPONENTES REUTILIZÁVEIS (DRY)
+      // ==========================================
+
+      function gerarCardAtividade(item, isTimeline = false) {
+        // Lógica universal de Badges de Status
+        let badgeHtml =
+          '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
+        const statusStr = String(item.status || "").toLowerCase();
+
+        if (
+          statusStr.includes("concluido") ||
+          statusStr.includes("executado")
+        ) {
+          badgeHtml = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
+        } else if (statusStr.includes("atrasado")) {
+          badgeHtml = `<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>`;
+        } else if (statusStr.includes("pendente")) {
+          badgeHtml = `<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>`;
+        }
+
+        // Layout Específico para a Linha do Tempo (Dossiê do Cliente)
+        if (isTimeline) {
+          return `
+                    <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                        <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${item.tipo || "Serviço"}</span>
+                            <span class="text-xs text-gray-400">Dia ${item.dia} às ${item.hora || ""}</span>
+                        </div>
+                        <p class="text-sm text-gray-800 mt-2 font-medium">${item.localizacao || "Sem descrição"}</p>
+                        <div class="mt-2 flex justify-between items-center text-xs text-gray-500 border-t pt-2">
+                            <span>Valor: R$ ${parseFloat(item.valor_total || 0).toFixed(2)}</span>
+                            ${badgeHtml}
+                        </div>
+                    </div>
+                `;
+        }
+
+        // Layout Padrão (Dashboard, Filtros e Resumos)
+        return `
+                <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm mb-3 flex items-center justify-between text-xs hover:border-blue-300 cursor-pointer transition group">
+                  <div>
+                    <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
+                    <p class="text-[11px] text-gray-600">${item.localizacao || "Local não informado"}</p>
+                  </div>
+                  ${badgeHtml}
+                </div>
+              `;
+      }
     </script>
     <!-- Template PDF Oculto -->
     <div
