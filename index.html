@@ -283,7 +283,7 @@
                 <th class="px-6 py-4">Serviços Solicitados</th>
                 <th class="px-6 py-4">Valor Total</th>
                 <th class="px-6 py-4">Status</th>
-                <th class="px-6 py-4">Ações</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody
@@ -2295,14 +2295,14 @@
             }
 
             return `
-      <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
-        <div>
-          <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
-          <p class="text-[11px] text-gray-600">${item.localizacao || ""}</p>
+        <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-300 cursor-pointer transition flex items-center justify-between text-xs group">
+          <div>
+            <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
+            <p class="text-[11px] text-gray-600">${item.localizacao || ""}</p>
+          </div>
+          ${badge}
         </div>
-        ${badge}
-      </div>
-    `;
+      `;
           })
           .join("");
       }
@@ -2328,11 +2328,11 @@
           if (window.isConnectedToSupabase && window.supabaseClient) {
             let { data, error } = await window.supabaseClient.from("reservas")
               .select(`
-                    *,
-                    clientes (
-                        nome
-                    )
-                `);
+                      *,
+                      clientes (
+                          nome
+                      )
+                  `);
             if (error) throw error;
 
             // Mapeia os dados para garantir que a propriedade 'cliente' receba o nome vindo da tabela relacionada
@@ -2404,10 +2404,10 @@
 
           if (displayList.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${selectedDay}).</p>
-                    <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
-                </div>`;
+                  <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                      <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${selectedDay}).</p>
+                      <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
+                  </div>`;
             return;
           }
 
@@ -2443,25 +2443,25 @@
                 "Cliente";
 
               return `
-            <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
-                <div class="flex items-start gap-3">
-                    <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
-                        <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
-                        <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || "Serviço"}</span>
-                    </div>
-                    <div class="space-y-1 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors">
-                                ${nomeClienteFinal}
-                            </h4>
-                            ${statusBadge}
-                        </div>
-                        <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
-                            <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || "Local não informado"}
-                        </p>
-                    </div>
-                </div>
-            </div>`;
+              <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
+                  <div class="flex items-start gap-3">
+                      <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
+                          <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
+                          <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || "Serviço"}</span>
+                      </div>
+                      <div class="space-y-1 flex-1">
+                          <div class="flex items-center gap-2 flex-wrap">
+                              <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors">
+                                  ${nomeClienteFinal}
+                              </h4>
+                              ${statusBadge}
+                          </div>
+                          <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
+                              <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || "Local não informado"}
+                          </p>
+                      </div>
+                  </div>
+              </div>`;
             })
             .join("");
         } catch (err) {
@@ -2473,79 +2473,81 @@
 
       let orcamentoAgendamentoAtual = null;
 
-      // 1. Abre a tela e exibe os serviços agrupados
       async function abrirModalAgendamentoOrcamento(id) {
         if (!window.supabaseClient) return;
         showToast("Carregando serviços...", false);
 
         try {
-          const { data: orc, error } = await window.supabaseClient
+          const { data: resSupabase, error } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .eq("id", id)
-            .single();
-          if (error || !orc) throw new Error("Orçamento não encontrado.");
+            .eq("id", id);
 
+          if (error || !resSupabase || resSupabase.length === 0) {
+            throw new Error("Orçamento não encontrado.");
+          }
+
+          const orc = resSupabase[0];
           orcamentoAgendamentoAtual = orc;
-          document.getElementById("titulo-agendar-orcamento").innerHTML =
-            `<i class="fas fa-calendar-alt text-purple-600"></i> Agendar Serviços - ${orc.nome_lead}`;
+
+          document.getElementById("titulo-agendar-orcamento").innerHTML = `
+          <i class="fas fa-calendar-alt text-purple-600"></i> Agendar Serviços - ${orc.nome_lead || "Cliente"}
+        `;
 
           const container = document.getElementById(
             "lista-servicos-agendamento",
           );
           container.innerHTML = "";
 
-          if (!orc.dados_detalhados || orc.dados_detalhados.length === 0) {
-            container.innerHTML = `<p class="text-sm text-gray-500 italic text-center py-4">Nenhum detalhe de serviço estruturado foi encontrado neste orçamento antigo.</p>`;
-          } else {
-            // Puxa as opções de motoristas para selecionar
-            const driverOptions = drivers
-              .map((d) => `<option value="${d.id}">${d.nome}</option>`)
-              .join("");
+          let itensParaAgendar = orc.dados_detalhados;
 
-            orc.dados_detalhados.forEach((item) => {
-              // Agora geramos UMA única linha por serviço, independentemente da quantidade comprada.
-              // Guardamos o 'valor_total' daquele grupo e a 'quantidade' nos atributos data-*
-              container.innerHTML += `
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-wrap lg:flex-nowrap gap-3 items-end agendamento-item shadow-sm" 
-                         data-servico="${item.servico}" 
-                         data-categoria="${item.categoria}" 
-                         data-valor="${item.valor_total}" 
-                         data-qtd="${item.quantidade}">
-                        
-                        <div class="flex-1 min-w-[200px]">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Serviço (Qtd)</label>
-                            <input type="text" value="${item.quantidade}x ${item.servico}" disabled class="w-full p-2 bg-gray-200 border border-gray-300 rounded-lg text-xs font-bold text-gray-700" />
-                        </div>
-                        <div class="w-full sm:w-36">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data *</label>
-                            <input type="date" class="agendamento-data w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500" required />
-                        </div>
-                        <div class="w-full sm:w-28">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Hora *</label>
-                            <input type="time" class="agendamento-hora w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500" required />
-                        </div>
-                        <div class="w-full sm:w-48">
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Motorista (Opcional)</label>
-                            <select class="agendamento-motorista w-full p-2 bg-white border border-gray-300 rounded-lg text-xs focus:ring-purple-500 focus:border-purple-500">
-                                <option value="">A definir depois...</option>
-                                ${driverOptions}
-                            </select>
-                        </div>
-                    </div>
-                 `;
-            });
+          if (!itensParaAgendar || itensParaAgendar.length === 0) {
+            itensParaAgendar = [
+              {
+                servico: orc.servicos_solicitados || "Serviço Geral",
+                quantidade: 1,
+                valor: orc.valor_total || 0,
+              },
+            ];
           }
+
+          const driverOptions = drivers
+            .map((d) => `<option value="${d.id}">${d.nome}</option>`)
+            .join("");
+
+          itensParaAgendar.forEach((item) => {
+            container.innerHTML += `
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3 agendamento-item" data-servico="${item.servico || ""}">
+              <div class="font-semibold text-gray-800 text-sm">${item.servico || "Serviço"} (Qtd: ${item.quantidade || 1})</div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Data *</label>
+                  <input type="date" class="agendamento-data w-full p-2 bg-white border border-gray-300 rounded-lg text-sm">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Hora *</label>
+                  <input type="time" class="agendamento-hora w-full p-2 bg-white border border-gray-300 rounded-lg text-sm">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Motorista (Opcional)</label>
+                  <select class="agendamento-motorista w-full p-2 bg-white border border-gray-300 rounded-lg text-sm">
+                    <option value="">A definir depois...</option>
+                    ${driverOptions}
+                  </select>
+                </div>
+              </div>
+            </div>
+          `;
+          });
 
           document
             .getElementById("modal-agendar-orcamento")
             .classList.remove("hidden");
         } catch (err) {
-          console.error(err);
+          console.error("Erro ao abrir painel de agendamento:", err);
           showToast("Erro ao abrir painel de agendamento.", true);
         }
       }
-
       function fecharModalAgendamento() {
         document
           .getElementById("modal-agendar-orcamento")
@@ -2640,70 +2642,70 @@
             }
 
             return `
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
-        <div>
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
-                ${driver.nome.charAt(0)}${driver.nome.split(" ")[1] ? driver.nome.split(" ")[1].charAt(0) : ""}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
+                  ${driver.nome.charAt(0)}${driver.nome.split(" ")[1] ? driver.nome.split(" ")[1].charAt(0) : ""}
+                </div>
+                <div>
+                  <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
+                  <div class="flex gap-1 mt-1">${stars}</div>
+                </div>
               </div>
-              <div>
-                <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
-                <div class="flex gap-1 mt-1">${stars}</div>
+              <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
+              <p class="flex justify-between">
+                <span class="font-medium">🚗 Veículo:</span>
+                <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
+              </p>
+              <p class="flex justify-between">
+                <span class="font-medium">🔢 Placa:</span>
+                <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
+              </p>
+              <p class="flex justify-between">
+                <span class="font-medium">👥 Cap. Max:</span>
+                <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
+              </p>
+            </div>
+
+            <div class="space-y-1 text-xs mb-4">
+              <p class="flex justify-between items-center">
+                <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
+                <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
+              </p>
+              <div class="flex justify-between items-center gap-2">
+                <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
+                  <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
+                    <i class="fas fa-copy text-xs"></i>
+                  </button>
+                </div>
               </div>
             </div>
-            <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
-              <i class="fas fa-trash-alt"></i>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
+            <a href="https://wa.me/${driver.telefone}" target="_blank"
+              class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
+              <i class="fab fa-whatsapp"></i> Chamar
+            </a>
+            <button onclick="abrirExtratoMotorista('${driver.id}', '${driver.nome}', '${driver.telefone}')"
+              class="py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
+              <i class="fas fa-file-invoice"></i> Extrato
             </button>
-          </div>
-
-          <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
-            <p class="flex justify-between">
-              <span class="font-medium">🚗 Veículo:</span> 
-              <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
-            </p>
-            <p class="flex justify-between">
-              <span class="font-medium">🔢 Placa:</span> 
-              <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
-            </p>
-            <p class="flex justify-between">
-              <span class="font-medium">👥 Cap. Max:</span> 
-              <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
-            </p>
-          </div>
-
-          <div class="space-y-1 text-xs mb-4">
-            <p class="flex justify-between items-center">
-              <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
-              <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
-            </p>
-            <div class="flex justify-between items-center gap-2">
-              <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
-              <div class="flex items-center gap-1.5">
-                <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
-                <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
-                  <i class="fas fa-copy text-xs"></i>
-                </button>
-              </div>
+            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1">
+              <i class="fas fa-route text-blue-500"></i> ${driver.corridas}v
             </div>
           </div>
         </div>
-
-        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
-          <a href="https://wa.me/${driver.telefone}" target="_blank" 
-            class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
-            <i class="fab fa-whatsapp"></i> Chamar
-          </a>
-          <button onclick="abrirExtratoMotorista('${driver.id}', '${driver.nome}', '${driver.telefone}')" 
-            class="py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
-            <i class="fas fa-file-invoice"></i> Extrato
-          </button>
-          <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1">
-            <i class="fas fa-route text-blue-500"></i> ${driver.corridas}v
-          </div>
-        </div>
-      </div>
-    `;
+      `;
           })
           .join("");
 
@@ -2901,51 +2903,51 @@
                 ? itens
                     .map(
                       (servico) => `
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
-                        <div>
-                            <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-blue-500 hover:text-blue-700 p-2 rounded transition" title="Editar Serviço">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
-                                <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `,
+                      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center mb-2 last:mb-0 hover:bg-gray-50 transition">
+                          <div>
+                              <h4 class="font-bold text-gray-800 text-base">${servico.nome}</h4>
+                          </div>
+                          <div class="flex items-center gap-4">
+                              <span class="text-green-600 font-bold text-lg">R$ ${servico.preco}</span>
+                              <div class="flex items-center gap-2">
+                                  <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-blue-500 hover:text-blue-700 p-2 rounded transition" title="Editar Serviço">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                  </button>
+                                  <button onclick="deletarServico('${servico.id}')" class="text-red-500 hover:text-red-700 p-2 rounded transition" title="Excluir Serviço">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
+                  `,
                     )
                     .join("")
                 : `<p class="text-gray-400 text-sm italic py-2">Nenhum serviço cadastrado nesta categoria ainda.</p>`;
 
             return `
-                    <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-                        <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
-                            <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wide">${categoria}</h3>
-                            <div class="flex items-center gap-2">
-                                <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Editar Categoria
-                                </button>
-                                <button onclick="deletarCategoria('${categoria}')" class="text-red-600 hover:text-red-800 text-xs font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Excluir Categoria
-                                </button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            ${itensHTML}
-                        </div>
-                    </div>
-                `;
+                      <div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
+                          <div class="flex justify-between items-center mb-3 border-b pb-2 border-gray-200">
+                              <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wide">${categoria}</h3>
+                              <div class="flex items-center gap-2">
+                                  <button onclick="editarCategoria('${categoria}')" class="text-blue-600 hover:text-blue-800 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                      Editar Categoria
+                                  </button>
+                                  <button onclick="deletarCategoria('${categoria}')" class="text-red-600 hover:text-red-800 text-xs font-bold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                      Excluir Categoria
+                                  </button>
+                              </div>
+                          </div>
+                          <div class="flex flex-col gap-2">
+                              ${itensHTML}
+                          </div>
+                      </div>
+                  `;
           })
           .join("");
       }
@@ -2977,19 +2979,19 @@
           container.innerHTML = data
             .map(
               (cliente) => `
-      <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ""}', '${cliente.whatsapp || ""}', '${cliente.biografia || ""}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
-        <div>
-          <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || "Cliente sem nome"}</h3>
-          <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
-          ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-1">${cliente.biografia}</p>` : ""}
+        <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ""}', '${cliente.whatsapp || ""}', '${cliente.biografia || ""}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
+          <div>
+            <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || "Cliente sem nome"}</h3>
+            <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
+            ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-1">${cliente.biografia}</p>` : ""}
+          </div>
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+              Deletar
+            </button>
+          </div>
         </div>
-        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-          <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
-            Deletar
-          </button>
-        </div>
-      </div>
-    `,
+      `,
             )
             .join("");
         } catch (err) {
@@ -3080,19 +3082,19 @@
 
             // Retorna a linha da tabela
             return `
-      <tr class="hover:bg-gray-50/50 transition">
-        <td class="p-4 font-bold text-gray-900">
-          <div>${item.cliente || "Cliente Não Informado"}</div>
-          <div class="text-[10px] text-gray-400 font-normal mt-0.5">${String(item.tipo).toLowerCase() === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia || "--"}</div>
-        </td>
-        <td class="p-4 font-semibold text-gray-700">${item.motorista || "--"}</td>
-        <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
-        <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
-        <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
-        <td class="p-4 text-center">${statusClienteBtn}</td>
-        <td class="p-4 text-center">${statusMotoristaBtn}</td>
-      </tr>
-    `;
+        <tr class="hover:bg-gray-50/50 transition">
+          <td class="p-4 font-bold text-gray-900">
+            <div>${item.cliente || "Cliente Não Informado"}</div>
+            <div class="text-[10px] text-gray-400 font-normal mt-0.5">${String(item.tipo).toLowerCase() === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia || "--"}</div>
+          </td>
+          <td class="p-4 font-semibold text-gray-700">${item.motorista || "--"}</td>
+          <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
+          <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
+          <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
+          <td class="p-4 text-center">${statusClienteBtn}</td>
+          <td class="p-4 text-center">${statusMotoristaBtn}</td>
+        </tr>
+      `;
           })
           .join("");
 
@@ -3185,12 +3187,19 @@
       // 2. Função Auxiliar: Gerenciar cliente no banco
       async function buscarOuCriarCliente(nome, whatsapp) {
         if (!window.supabaseClient) return null;
-        const { data: existingClient, error: searchError } =
+        const { data: existingClients, error: searchError } =
           await window.supabaseClient
             .from("clientes")
             .select("id")
             .eq("whatsapp", whatsapp)
-            .maybeSingle();
+            .limit(1); // <--- Isso força o banco a trazer só um, sem dar erro de duplicidade
+
+        if (searchError) throw searchError;
+
+        // Se achou, retorna o ID do primeiro da lista
+        if (existingClients && existingClients.length > 0) {
+          return existingClients[0].id;
+        }
         if (searchError) throw searchError;
         if (existingClient) return existingClient.id;
 
@@ -3709,11 +3718,11 @@
           const isSelected = diaStr === selectedDay;
 
           containerDias.innerHTML += `
-                <div data-date="${diaStr}" onclick="selectDay('${diaStr}')" class="day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition ${isSelected ? "bg-blue-900 text-white shadow-md border border-blue-900" : "bg-white hover:bg-gray-100 text-gray-700 border border-gray-100"}">
-                    <span class="block text-xs uppercase ${isSelected ? "text-blue-200" : "text-gray-500"}">${diaSemana}</span>
-                    <span class="text-lg font-bold ${isSelected ? "text-white" : "text-gray-800"}">${diaNumero}</span>
-                </div>
-                `;
+                  <div data-date="${diaStr}" onclick="selectDay('${diaStr}')" class="day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition ${isSelected ? "bg-blue-900 text-white shadow-md border border-blue-900" : "bg-white hover:bg-gray-100 text-gray-700 border border-gray-100"}">
+                      <span class="block text-xs uppercase ${isSelected ? "text-blue-200" : "text-gray-500"}">${diaSemana}</span>
+                      <span class="text-lg font-bold ${isSelected ? "text-white" : "text-gray-800"}">${diaNumero}</span>
+                  </div>
+                  `;
         }
       }
 
@@ -3779,9 +3788,9 @@
           select.innerHTML += `<option value="${nome}">${nome}</option>`;
         if (catalog)
           catalog.innerHTML += `<div class="p-4 border rounded-xl" id="cat_${nome}">
-                <h3 class="text-sm font-bold text-blue-900 border-b pb-2 mb-2">${nome}</h3>
-                <div class="space-y-1"></div>
-            </div>`;
+                  <h3 class="text-sm font-bold text-blue-900 border-b pb-2 mb-2">${nome}</h3>
+                  <div class="space-y-1"></div>
+              </div>`;
 
         document.getElementById("catName").value = "";
         alert("Categoria criada com sucesso!");
@@ -3911,21 +3920,21 @@
 
         data.forEach((cliente) => {
           container.innerHTML += `
-                    <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
-                        <div>
-                            <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
-                            <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="abrirModalBio('${cliente.nome}')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
-                                Editar Dossiê
-                            </button>
-                            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
-                                Deletar
-                            </button>
-                        </div>
-                    </div>
-                `;
+                      <div class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition flex items-center justify-between">
+                          <div>
+                              <h3 class="font-bold text-gray-900">${cliente.nome}</h3>
+                              <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
+                          </div>
+                          <div class="flex items-center gap-2">
+                              <button onclick="abrirModalBio('${cliente.nome}')" class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+                                  Editar Dossiê
+                              </button>
+                              <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
+                                  Deletar
+                              </button>
+                          </div>
+                      </div>
+                  `;
         });
       }
 
@@ -3937,16 +3946,24 @@
           "Dossiê: " + nome;
 
         if (window.supabaseClient) {
-          const { data } = await window.supabaseClient
-            .from("clientes")
-            .select("biografia, tags")
-            .eq("nome", nome)
-            .maybeSingle();
+          if (window.supabaseClient) {
+            const { data: resSupabase } = await window.supabaseClient
+              .from("clientes")
+              .select("biografia, tags")
+              .eq("nome", nome)
+              .limit(1);
 
-          if (data) {
-            document.getElementById("modalBioInput").value =
-              data.biografia || "";
-            document.getElementById("modalTagsInput").value = data.tags || "";
+            const data =
+              resSupabase && resSupabase.length > 0 ? resSupabase[0] : null;
+
+            if (data) {
+              document.getElementById("modalBioInput").value =
+                data.biografia || "";
+              document.getElementById("modalTagsInput").value = data.tags || "";
+            } else {
+              document.getElementById("modalBioInput").value = "";
+              document.getElementById("modalTagsInput").value = "";
+            }
           }
         }
 
@@ -4143,30 +4160,30 @@
 
           if (alerta.type === "flight") {
             cardHtml = `
-                        <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
-                            <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
-                            <div>
-                                <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
-                                <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
-                                <button onclick="sendQuickWhatsApp('${alerta.action_data.phone}', '${alerta.action_data.driver}', '${alerta.action_data.flight}', '${alerta.action_data.time}')" class="text-[10px] text-red-600 font-bold mt-1.5 flex items-center gap-1 hover:underline">
-                                    <i class="fab fa-whatsapp"></i> Avisar Motorista ${alerta.action_data.driver}
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                          <div class="p-2.5 bg-red-50/50 rounded-xl border border-red-100 flex items-start gap-2.5">
+                              <span class="text-red-600 mt-0.5"><i class="fas fa-plane-departure text-xs"></i></span>
+                              <div>
+                                  <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                                  <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                                  <button onclick="sendQuickWhatsApp('${alerta.action_data.phone}', '${alerta.action_data.driver}', '${alerta.action_data.flight}', '${alerta.action_data.time}')" class="text-[10px] text-red-600 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                                      <i class="fab fa-whatsapp"></i> Avisar Motorista ${alerta.action_data.driver}
+                                  </button>
+                              </div>
+                          </div>
+                      `;
           } else if (alerta.type === "payment") {
             cardHtml = `
-                        <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
-                            <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
-                            <div>
-                                <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
-                                <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
-                                <button onclick="sendPaymentCobranca('${alerta.action_data.phone}', '${alerta.action_data.client}', '${alerta.action_data.amount}')" class="text-[10px] text-amber-700 font-bold mt-1.5 flex items-center gap-1 hover:underline">
-                                    <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
-                                </button>
-                            </div>
-                        </div>
-                    `;
+                          <div class="p-2.5 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2.5">
+                              <span class="text-amber-600 mt-0.5"><i class="fas fa-dollar-sign text-xs"></i></span>
+                              <div>
+                                  <p class="text-xs font-bold text-gray-900 leading-tight">${alerta.title}</p>
+                                  <p class="text-[10px] text-gray-600 mt-0.5">${alerta.description}</p>
+                                  <button onclick="sendPaymentCobranca('${alerta.action_data.phone}', '${alerta.action_data.client}', '${alerta.action_data.amount}')" class="text-[10px] text-amber-700 font-bold mt-1.5 flex items-center gap-1 hover:underline">
+                                      <i class="fab fa-whatsapp"></i> Cobrar via WhatsApp
+                                  </button>
+                              </div>
+                          </div>
+                      `;
           }
           container.insertAdjacentHTML("beforeend", cardHtml);
         });
@@ -4210,16 +4227,16 @@
 
           if (containerAlertas) {
             const alertaHTML = `
-                        <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 rounded shadow-sm mt-2">
-                            <p class="text-xs font-bold text-red-700">⚠️ Voo Atrasado: ${data.flight_iata || "AR1461"}</p>
-                            <p class="text-xs text-gray-600">Previsto: ${horarioPrevisto} | Novo Horário: ${horarioEstimado}</p>
-                            <a href="https://wa.me/?text=Olá,%20notamos%20um%20atraso%20no%20seu%20voo%20(${data.flight_iata}).%20Estamos%20ajustando%20o%20transfer!" 
-                               target="_blank" 
-                               class="text-xs text-red-600 font-semibold underline mt-1 inline-block">
-                                📱 Avisar Cliente / Motorista via WhatsApp
-                            </a>
-                        </div>
-                    `;
+                          <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2 rounded shadow-sm mt-2">
+                              <p class="text-xs font-bold text-red-700">⚠️ Voo Atrasado: ${data.flight_iata || "AR1461"}</p>
+                              <p class="text-xs text-gray-600">Previsto: ${horarioPrevisto} | Novo Horário: ${horarioEstimado}</p>
+                              <a href="https://wa.me/?text=Olá,%20notamos%20um%20atraso%20no%20seu%20voo%20(${data.flight_iata}).%20Estamos%20ajustando%20o%20transfer!"
+                                 target="_blank"
+                                 class="text-xs text-red-600 font-semibold underline mt-1 inline-block">
+                                  📱 Avisar Cliente / Motorista via WhatsApp
+                              </a>
+                          </div>
+                      `;
             containerAlertas.insertAdjacentHTML("afterbegin", alertaHTML);
           }
         }
@@ -4404,7 +4421,10 @@
             } else if (clientName) {
               query = query.eq("nome", clientName);
             }
-            const { data: foundClient } = await query.maybeSingle();
+            const { data: resSupabase } = await query.limit(1);
+            const foundClient =
+              resSupabase && resSupabase.length > 0 ? resSupabase[0] : null;
+
             if (foundClient) {
               currentOpenClientId = foundClient.id;
               clientName = foundClient.nome || clientName;
@@ -4604,13 +4624,16 @@
         if (!window.supabaseClient) return;
         const tbody = document.getElementById("tabela-orcamentos-body");
         if (!tbody) return;
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
+
+        // Removemos a linha do Carregando para evitar a piscada na tela
+        // tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Carregando orçamentos...</td></tr>`;
 
         try {
           const { data, error } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(50);
 
           if (error) throw error;
           carregarTabelaFiltrada(data || []);
@@ -4642,7 +4665,9 @@
           let query = window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(50); // <--- Limita também na filtragem para manter a leveza
+
           if (status.toLowerCase() !== "todos") {
             query = query.eq("status", status);
           }
@@ -4675,20 +4700,20 @@
             if (statusAtual === "Agendado")
               badgeClass = "bg-purple-100 text-purple-800"; // Novo status extra
 
-            // Lógica inteligente dos botões com base no status
-            let acoesHtml = `<button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">PDF</button>`;
+            // Lógica rigorosa de exatamente 3 botões por tela e tamanho compacto
+            let acoesHtml = `<button onclick="gerarPDFOrcamentoDinamico('${orc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium">PDF</button>`;
 
             if (statusAtual === "Aprovado" || statusAtual === "Agendado") {
               acoesHtml += `
-            <button onclick="abrirModalAgendamentoOrcamento('${orc.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors"><i class="fas fa-calendar-check mr-1"></i> Agendar</button>
-            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-        `;
+        <button onclick="abrirModalAgendamentoOrcamento('${orc.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs font-medium">Agendar</button>
+        <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium">Excluir</button>
+      `;
             } else {
+              // Aba Pendentes: exatamente 3 botões (PDF, WhatsApp, Aprovar)
               acoesHtml += `
-            <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">WhatsApp</button>
-            <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Aprovar</button>
-            <button onclick="deletarOrcamento('${orc.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">Excluir</button>
-        `;
+        <button onclick="enviarOrcamentoWhatsAppDinamico('${orc.id}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium">WhatsApp</button>
+        <button onclick="aprovarOrcamento('${orc.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-medium">Aprovar</button>
+      `;
             }
 
             return `
@@ -4700,9 +4725,11 @@
         <td class="px-6 py-4 whitespace-nowrap">
             <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${badgeClass}">${statusAtual}</span>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-            ${acoesHtml}
-        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+    <div class="flex items-center justify-center gap-1.5">
+        ${acoesHtml}
+    </div>
+</td>
       </tr>
     `;
           })
@@ -5002,18 +5029,17 @@
           const { data: orc, error: errBusca } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .eq("id", id)
-            .single();
+            .eq("id", id);
 
           if (errBusca || !orc) throw new Error("Orçamento não encontrado.");
 
-          // 2. Copia para a tabela Clientes (apenas nome e whatsapp, que existem na sua base)
+          // 2. Copia para a tabela clientes com segurança contra valores nulos
           const { error: errInsert } = await window.supabaseClient
             .from("clientes")
             .insert([
               {
-                nome: orc.nome_lead,
-                whatsapp: orc.whatsapp,
+                nome: orc.nome_lead || orc.nome || "Cliente sem nome",
+                whatsapp: orc.whatsapp || "",
               },
             ]);
 
@@ -5066,8 +5092,7 @@
           const { data, error } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .eq("id", id)
-            .single();
+            .eq("id", id);
           if (error || !data) return alert("Orçamento não encontrado.");
           orc = data;
         }
@@ -5104,9 +5129,7 @@
           const { data: orc, error } = await window.supabaseClient
             .from("orcamentos")
             .select("*")
-            .eq("id", orcamentoId)
-            .single();
-
+            .eq("id", orcamentoId);
           if (error || !orc) {
             throw new Error("Orçamento não encontrado.");
           }
