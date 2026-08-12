@@ -246,28 +246,48 @@
           </button>
         </div>
         <!-- Filtros de Status -->
-        <div class="flex items-center space-x-2 mb-4">
-          <button
-            onclick="filtrarOrcamentos('todos')"
-            id="btn-filtro-todos"
-            class="px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition"
-          >
-            Todos
-          </button>
-          <button
-            onclick="filtrarOrcamentos('Pendente')"
-            id="btn-filtro-pendente"
-            class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-          >
-            Pendentes
-          </button>
-          <button
-            onclick="filtrarOrcamentos('Aprovado')"
-            id="btn-filtro-aprovado"
-            class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-          >
-            Aprovados
-          </button>
+        <!-- Filtros de Status e Busca Alinhados -->
+        <!-- Filtros e Busca coladinhos (Estilo Taylor: eficiência de movimento) -->
+        <div class="flex flex-wrap items-center gap-4 mb-4">
+          <!-- Grupo de Botões -->
+          <div class="flex items-center space-x-2">
+            <button
+              onclick="filtrarOrcamentos('todos')"
+              id="btn-filtro-todos"
+              class="px-4 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg shadow-sm transition"
+            >
+              Todos
+            </button>
+            <button
+              onclick="filtrarOrcamentos('Pendente')"
+              id="btn-filtro-pendente"
+              class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            >
+              Pendentes
+            </button>
+            <button
+              onclick="filtrarOrcamentos('Aprovado')"
+              id="btn-filtro-aprovado"
+              class="px-4 py-2 text-sm font-medium bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            >
+              Aprovados
+            </button>
+          </div>
+
+          <!-- Campo de Busca Logo ao Lado -->
+          <div class="relative w-full sm:w-72">
+            <span
+              class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400"
+            >
+              <i class="fas fa-search text-xs"></i>
+            </span>
+            <input
+              type="text"
+              id="input-busca-orcamentos"
+              placeholder="Buscar por cliente..."
+              class="w-full pl-9 pr-4 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+            />
+          </div>
         </div>
 
         <div
@@ -4279,6 +4299,28 @@
           );
         }, 3500);
       }
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputBuscaOrcamentos = document.getElementById(
+          "input-busca-orcamentos",
+        );
+        if (inputBuscaOrcamentos) {
+          inputBuscaOrcamentos.addEventListener("input", function () {
+            const termo = this.value.toLowerCase().trim();
+            const linhas = document.querySelectorAll(
+              "#tabela-orcamentos-body tr",
+            );
+
+            linhas.forEach((linha) => {
+              const textoLinha = linha.innerText.toLowerCase();
+              if (textoLinha.includes(termo)) {
+                linha.style.display = "";
+              } else {
+                linha.style.display = "none";
+              }
+            });
+          });
+        }
+      });
     </script>
 
     <!-- MODAL / PAINEL DO DOSSIÊ DO CLIENTE -->
