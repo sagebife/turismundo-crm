@@ -3629,12 +3629,20 @@
 
             if (isSelected) {
               btn.className =
-                "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
+                "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md ..."; // (suas classes continuam aqui)
               if (spans[0])
                 spans[0].className = "block text-xs uppercase text-blue-200";
               if (spans[1]) spans[1].className = "text-lg font-bold text-white";
+
+              // COLOQUE A LINHA AQUI, ANTES DO ELSE! 👇
+              btn.scrollIntoView({
+                behavior: "smooth",
+                inline: "center",
+                block: "nearest",
+              });
             } else {
               btn.className =
+                // ... resto do seu código
                 "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
               if (spans[0])
                 spans[0].className = "block text-xs uppercase text-gray-500";
