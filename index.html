@@ -3621,6 +3621,9 @@
       function selectDay(day) {
         selectedDay = day;
 
+        const container = document.getElementById("containerDiasAgenda");
+
+        // Atualiza visualmente os dias
         document
           .querySelectorAll("#containerDiasAgenda > div")
           .forEach((btn) => {
@@ -3628,52 +3631,78 @@
             const spans = btn.querySelectorAll("span");
 
             if (isSelected) {
-              // Classes visuais do botão selecionado (Azul)
               btn.className =
                 "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
-              if (spans[0])
-                spans[0].className = "block text-xs uppercase text-blue-200";
-              if (spans[1]) spans[1].className = "text-lg font-bold text-white";
 
-              // O Truque do Mobile: Atraso de 200ms para o celular não se confundir
-              setTimeout(() => {
-                btn.scrollIntoView({
-                  behavior: "smooth",
-                  inline: "center",
-                  block: "nearest",
-                });
-              }, 200);
+              if (spans[0]) {
+                spans[0].className = "block text-xs uppercase text-blue-200";
+              }
+
+              if (spans[1]) {
+                spans[1].className = "text-lg font-bold text-white";
+              }
             } else {
-              // Classes visuais do botão não selecionado (Branco/Cinza)
               btn.className =
                 "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
-              if (spans[0])
+
+              if (spans[0]) {
                 spans[0].className = "block text-xs uppercase text-gray-500";
-              if (spans[1])
+              }
+
+              if (spans[1]) {
                 spans[1].className = "text-lg font-bold text-gray-800";
+              }
             }
           });
 
+        // Atualiza o título
         const labelEl = document.getElementById("tituloDiaSelecionado");
+
         if (labelEl) {
           const [ano, mes, d] = String(selectedDay).split("-");
+
           if (ano && mes && d) {
-            const dataObj = new Date(ano, mes - 1, d);
+            const dataObj = new Date(Number(ano), Number(mes) - 1, Number(d));
+
             const nomeFormatado = dataObj.toLocaleDateString("pt-BR", {
               weekday: "long",
               day: "numeric",
               month: "long",
             });
-            labelEl.innerText = `Agenda: ${nomeFormatado.charAt(0).toUpperCase() + nomeFormatado.slice(1)}`;
+
+            labelEl.innerText = `Agenda: ${
+              nomeFormatado.charAt(0).toUpperCase() + nomeFormatado.slice(1)
+            }`;
           } else {
             labelEl.innerText = `Agenda: ${selectedDay}`;
           }
         }
 
+        // Renderiza o restante
         if (typeof renderAgenda === "function") renderAgenda();
         if (typeof renderDashboard === "function") renderDashboard();
-      }
 
+        // Centraliza o dia DEPOIS de toda a renderização
+        setTimeout(() => {
+          const container = document.getElementById("containerDiasAgenda");
+
+          if (!container) return;
+
+          const btn = container.querySelector(`[data-date="${day}"]`);
+
+          if (!btn) return;
+
+          const containerWidth = container.clientWidth;
+          const btnWidth = btn.offsetWidth;
+
+          const scrollLeft = btn.offsetLeft - containerWidth / 2 + btnWidth / 2;
+
+          container.scrollTo({
+            left: Math.max(0, scrollLeft),
+            behavior: "smooth",
+          });
+        }, 100);
+      }
       function filterCategory(category) {
         selectedCategory = category;
         document.querySelectorAll(".filter-btn").forEach((btn) => {
