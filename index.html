@@ -77,55 +77,59 @@
         </div>
 
         <!-- CENTRO: Menu Desktop (A mágica: hidden lg:flex esconde no celular/tablet) -->
+        <!-- CENTRO: Menu Desktop -->
         <nav
           class="hidden lg:flex items-center space-x-4 xl:space-x-6 text-sm font-medium"
         >
           <button
             onclick="switchTab('dashboard')"
             id="nav-dashboard"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Dashboard
           </button>
           <button
             onclick="switchTab('agenda')"
             id="nav-agenda"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Agenda
           </button>
           <button
             onclick="switchTab('motoristas')"
             id="nav-motoristas"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Motoristas
           </button>
           <button
             onclick="switchTab('servicos')"
             id="nav-servicos"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Serviços
           </button>
+
+          <!-- Botão do Financeiro com o Cofre Trancado Novamente -->
           <button
-            onclick="switchTab('financeiro')"
+            onclick="protegerFinanceiro(event)"
             id="nav-financeiro"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Financeiro
           </button>
+
           <button
             onclick="switchTab('clientes')"
             id="nav-clientes"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Clientes
           </button>
           <button
             onclick="switchTab('orcamentos')"
             id="nav-orcamentos"
-            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
+            class="opacity-80 hover:opacity-100 transition-opacity"
           >
             Orçamentos
           </button>
