@@ -138,7 +138,7 @@
         <!-- DIREITA: Botão Nova Reserva -->
         <div>
           <button
-            onclick="abrirModalNovaReserva()"
+            onclick="openQuickAddModal()"
             class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 px-3 md:px-4 rounded-lg shadow-lg flex items-center gap-1 md:gap-2 transition-transform hover:scale-105 active:scale-95 text-xs md:text-sm"
           >
             <i class="fas fa-plus"></i>
@@ -719,9 +719,9 @@
 
           <div
             id="timelineContainer"
-            class="space-y-4 relative border-l-2 border-gray-200 pl-4 ml-3"
+            class="w-full flex flex-col space-y-3 mt-4"
           >
-            <!-- Gerado dinamicamente -->
+            <!-- Os cards vão aparecer aqui dentro -->
           </div>
         </div>
       </div>
@@ -2508,20 +2508,27 @@
                 "Cliente";
 
               return `
-              <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
-                  <div class="flex items-start gap-3">
-                      <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100">
+              <!-- Adicionamos w-full na caixa principal -->
+              <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
+                  
+                  <!-- Adicionamos w-full e garantimos que o flex respeite as bordas -->
+                  <div class="flex items-start gap-3 w-full">
+                      
+                      <!-- shrink-0 garante que o relógio não seja esmagado -->
+                      <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 shrink-0">
                           <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
                           <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || "Serviço"}</span>
                       </div>
-                      <div class="space-y-1 flex-1">
+                      
+                      <!-- flex-1 e min-w-0 forçam essa área a preencher o espaço vazio -->
+                      <div class="space-y-1 flex-1 min-w-0">
                           <div class="flex items-center gap-2 flex-wrap">
-                              <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors">
+                              <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
                                   ${nomeClienteFinal}
                               </h4>
                               ${statusBadge}
                           </div>
-                          <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5">
+                          <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
                               <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || "Local não informado"}
                           </p>
                       </div>
@@ -2733,9 +2740,17 @@
                   <div class="flex gap-1 mt-1">${stars}</div>
                 </div>
               </div>
-              <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1">
-                <i class="fas fa-trash-alt"></i>
-              </button>
+              
+              <!-- AQUI ESTÁ A MUDANÇA CIRÚRGICA: Os dois botões alinhados sem quebrar as caixas -->
+              <div class="flex items-center gap-2">
+                <button onclick="editDriver('${driver.id}')" class="text-gray-300 hover:text-blue-500 transition text-sm p-1" title="Editar">
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1" title="Excluir">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+
             </div>
 
             <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
@@ -2804,8 +2819,51 @@
           totalTripsEl.innerText = totalTrips;
         }
       }
+      // A MEMÓRIA DO SISTEMA: Lembra qual motorista estamos editando
+      let motoristaEmEdicaoId = null;
+
+      // 1. Função Edit atualizada (agora ela avisa o sistema que estamos editando)
+      function editDriver(id) {
+        const motorista = drivers.find((d) => String(d.id) === String(id));
+        if (!motorista) return;
+
+        motoristaEmEdicaoId = id; // Trava o ID na memória!
+
+        const preencherCampo = (idDoCampo, valor) => {
+          const campo = document.getElementById(idDoCampo);
+          if (campo) campo.value = valor;
+        };
+
+        preencherCampo("driverName", motorista.nome || "");
+        preencherCampo("driverPhone", motorista.telefone || "");
+        preencherCampo("driverVehicle", motorista.veiculo || "");
+        preencherCampo("driverPlate", motorista.placa || "");
+        preencherCampo("driverCapacity", motorista.capacidade || "4");
+        preencherCampo(
+          "driverValue",
+          motorista.valor || motorista.valor_combinado || "",
+        );
+        preencherCampo("driverCurrency", motorista.moeda || "R$ ($)");
+        preencherCampo("driverPix", motorista.pix || "");
+
+        // Troca o texto do botão para você saber que é uma edição
+        const btnSubmit =
+          document.querySelector("#driverForm button[type='submit']") ||
+          document.querySelector("#driverForm button");
+        if (btnSubmit)
+          btnSubmit.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (typeof showToast === "function")
+          showToast("Modo de edição ativado!", false);
+      }
+
+      // 2. O Botão Inteligente (Sabe se é para Criar ou Atualizar)
       async function addDriver(event) {
-        event.preventDefault();
+        // ISSO AQUI MATA A PISCADINHA DA TELA (Bloqueia o recarregamento)
+        if (event) {
+          event.preventDefault();
+        }
 
         const name = document.getElementById("driverName").value;
         const phone = document.getElementById("driverPhone").value;
@@ -2820,10 +2878,11 @@
 
         if (window.isConnectedToSupabase && window.supabaseClient) {
           try {
-            const { error } = await window.supabaseClient
-              .from("motoristas")
-              .insert([
-                {
+            if (motoristaEmEdicaoId) {
+              // ----- MODO EDIÇÃO (ATUALIZAR) -----
+              const { error } = await window.supabaseClient
+                .from("motoristas")
+                .update({
                   nome: name,
                   telefone: phone,
                   veiculo: vehicle,
@@ -2832,64 +2891,115 @@
                   valor_combinado: parseFloat(value),
                   moeda: currency,
                   capacidade: parseInt(capacity),
-                },
-              ]);
+                })
+                .eq("id", motoristaEmEdicaoId); // Garante que altera só o cara certo
 
-            // Tratamento Inteligente de Erros do Supabase
-            if (error) {
-              if (error.code === "23505") {
-                throw new Error(
-                  `A placa ${plate} já está cadastrada no sistema!`,
-                );
+              if (error) throw error;
+              showToast("Motorista atualizado com sucesso!", false);
+            } else {
+              // ----- MODO CRIAR (NOVO) -----
+              const { error } = await window.supabaseClient
+                .from("motoristas")
+                .insert([
+                  {
+                    nome: name,
+                    telefone: phone,
+                    veiculo: vehicle,
+                    placa: plate,
+                    pix: pix,
+                    valor_combinado: parseFloat(value),
+                    moeda: currency,
+                    capacidade: parseInt(capacity),
+                  },
+                ]);
+
+              if (error) {
+                if (error.code === "23505")
+                  throw new Error(
+                    `A placa ${plate} já está cadastrada no sistema!`,
+                  );
+                throw error;
               }
-              throw error;
+              showToast("Motorista cadastrado com sucesso!", false);
             }
 
-            showToast("Motorista cadastrado com sucesso!", false);
+            // Atualiza a tela e limpa a memória
             loadRealData();
-
-            // Limpa o formulário apenas se deu certo
-            document.getElementById("driverForm").reset();
-            document.getElementById("driverCapacity").value = "4";
+            resetarFormularioMotorista();
           } catch (err) {
             console.error("Erro no Supabase:", err);
-            // Dispara o Toast de Erro (o 'true' no final ativa a cor vermelha)
             showToast(
               err.message || "Erro ao salvar motorista no banco.",
               true,
             );
           }
         } else {
-          // --- Lógica do Modo Simulação Local (Mantida) ---
-          const newDriver = {
-            id: String(Date.now()),
-            nome: name,
-            telefone: phone,
-            veiculo: vehicle,
-            placa: plate,
-            pix: pix,
-            valor: value,
-            moeda: currency,
-            capacidade: capacity,
-            avaliacao: 5,
-            corridas: 0,
-          };
-
-          // Verifica duplicidade no mock local
-          const exists = drivers.find((d) => d.placa === plate);
-          if (exists) {
-            showToast(`A placa ${plate} já existe no sistema local!`, true);
-            return;
+          // ----- MODO SIMULAÇÃO LOCAL (SEM BANCO DE DADOS) -----
+          if (motoristaEmEdicaoId) {
+            // Atualiza localmente
+            const index = drivers.findIndex(
+              (d) => String(d.id) === String(motoristaEmEdicaoId),
+            );
+            if (index > -1) {
+              drivers[index] = {
+                ...drivers[index],
+                nome: name,
+                telefone: phone,
+                veiculo: vehicle,
+                placa: plate,
+                pix: pix,
+                valor: value,
+                moeda: currency,
+                capacidade: capacity,
+              };
+              showToast("Alterações salvas na simulação!", false);
+            }
+          } else {
+            // Cria localmente
+            const exists = drivers.find((d) => d.placa === plate);
+            if (exists) {
+              showToast(`A placa ${plate} já existe no sistema local!`, true);
+              return;
+            }
+            const newDriver = {
+              id: String(Date.now()),
+              nome: name,
+              telefone: phone,
+              veiculo: vehicle,
+              placa: plate,
+              pix: pix,
+              valor: value,
+              moeda: currency,
+              capacidade: capacity,
+              avaliacao: 5,
+              corridas: 0,
+            };
+            drivers.unshift(newDriver);
+            showToast("Motorista adicionado na simulação!", false);
           }
 
-          drivers.unshift(newDriver);
           renderDrivers();
-          showToast("Motorista ativado na simulação!", false);
-
-          document.getElementById("driverForm").reset();
-          document.getElementById("driverCapacity").value = "4";
+          resetarFormularioMotorista();
         }
       }
+
+      // 3. Função para limpar a casa depois de salvar
+      function resetarFormularioMotorista() {
+        const form = document.getElementById("driverForm");
+        if (form) form.reset();
+        document.getElementById("driverCapacity").value = "4";
+
+        motoristaEmEdicaoId = null; // Apaga a memória
+
+        // Devolve o botão ao normal
+        const btnSubmit =
+          document.querySelector("#driverForm button[type='submit']") ||
+          document.querySelector("#driverForm button");
+        if (btnSubmit)
+          btnSubmit.innerHTML =
+            '<i class="fas fa-plus-circle"></i> Cadastrar e Ativar';
+      }
+
       function updateDriverDropdowns() {
         const select = document.getElementById("modalDriverSelect");
         if (!select) return;
@@ -5872,6 +5982,62 @@
                   ${badgeHtml}
                 </div>
               `;
+      }
+      // ==========================================
+      // FUNÇÕES DO MOTORISTA (EXCLUIR E EDITAR)
+      // ==========================================
+
+      // Função Excluir com comunicação direta com o Banco de Dados (Supabase)
+      async function deleteDriver(id) {
+        if (
+          confirm(
+            "Tem certeza que deseja excluir permanentemente este motorista da sua base?",
+          )
+        ) {
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            // --- MODO PROFISSIONAL (DELETA DO BANCO) ---
+            try {
+              const { error } = await window.supabaseClient
+                .from("motoristas")
+                .delete()
+                .eq("id", id); // Acha o ID exato no banco e destrói
+
+              if (error) throw error;
+
+              if (typeof showToast === "function") {
+                showToast("Motorista excluído com sucesso!", false);
+              } else {
+                alert("Motorista excluído com sucesso!");
+              }
+
+              // Puxa os dados atualizados do banco para redesenhar a tela
+              if (typeof loadRealData === "function") {
+                loadRealData();
+              } else {
+                renderDrivers();
+              }
+            } catch (err) {
+              console.error("Erro ao excluir no Supabase:", err);
+              if (typeof showToast === "function") {
+                showToast("Erro ao excluir motorista no banco.", true);
+              } else {
+                alert("Erro ao excluir motorista.");
+              }
+            }
+          } else {
+            // --- MODO SIMULAÇÃO LOCAL ---
+            const index = drivers.findIndex((d) => String(d.id) === String(id));
+            if (index > -1) {
+              drivers.splice(index, 1);
+              renderDrivers();
+              if (typeof showToast === "function") {
+                showToast("Motorista excluído da simulação!", false);
+              } else {
+                alert("Motorista excluído com sucesso!");
+              }
+            }
+          }
+        }
       }
     </script>
     <!-- Template PDF Oculto -->
