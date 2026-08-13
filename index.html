@@ -3635,23 +3635,14 @@
                 spans[0].className = "block text-xs uppercase text-blue-200";
               if (spans[1]) spans[1].className = "text-lg font-bold text-white";
 
-              // Matemática pura para centralizar perfeitamente no Mobile e no PC
+              // O Truque do Mobile: Atraso de 200ms para o celular não se confundir
               setTimeout(() => {
-                const container = document.getElementById(
-                  "containerDiasAgenda",
-                );
-                if (container) {
-                  // Calcula o meio da tela exato menos a metade do botão
-                  const posicaoCentro =
-                    btn.offsetLeft -
-                    container.offsetWidth / 2 +
-                    btn.offsetWidth / 2;
-                  container.scrollTo({
-                    left: posicaoCentro,
-                    behavior: "smooth",
-                  });
-                }
-              }, 50); // O atraso de 50ms impede o bug do celular
+                btn.scrollIntoView({
+                  behavior: "smooth",
+                  inline: "center",
+                  block: "nearest",
+                });
+              }, 200);
             } else {
               // Classes visuais do botão não selecionado (Branco/Cinza)
               btn.className =
