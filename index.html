@@ -48,95 +48,98 @@
     class="bg-gray-50 text-gray-950 pb-24 lg:pb-0 min-h-screen flex flex-col"
   >
     <!-- Header Principal -->
-    <header class="bg-blue-900 text-white p-4 sticky top-0 z-40 shadow-md">
+    <header
+      class="bg-blue-900 text-white p-3 md:p-4 sticky top-0 z-40 shadow-md"
+    >
       <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <!-- LOGO TURISMUNDO EM VERDE ESMERALDA -->
+        <!-- ESQUERDA: Logo e Nome -->
         <div
-          class="flex items-center space-x-4 cursor-pointer"
+          class="flex items-center space-x-2 md:space-x-4 cursor-pointer"
           onclick="switchTab('dashboard')"
         >
-          <!-- Mantivemos o tamanho gigante, mas tiramos o -my-10 -->
           <img
             src="logo.png"
             alt="Turismundo Logo"
-            class="h-20 w-20 md:h-24 md:w-24 -my-13 object-contain transition-transform hover:scale-110 drop-shadow-xl"
+            class="h-14 w-14 md:h-20 md:w-20 object-contain transition-transform hover:scale-110 drop-shadow-xl"
           />
           <span
-            class="text-xl font-black tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors hidden md:block"
+            class="text-lg md:text-xl font-black tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors hidden sm:block"
           >
             Turismundo
           </span>
+          <!-- Badge Supabase (Escondido no mobile para não poluir) -->
+          <div
+            id="statusSupabase"
+            class="hidden md:flex items-center gap-1 bg-blue-950/50 text-emerald-400 text-[10px] px-2 py-1 rounded border border-blue-800 ml-2"
+          >
+            <i class="fas fa-cloud text-xs"></i> Conectado
+          </div>
         </div>
 
-        <!-- Botão de Status do Banco de Dados (Supabase) -->
-        <button
-          onclick="openDbSettingsModal()"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-dashed border-blue-400 text-blue-200 hover:border-white hover:text-white"
-          id="db-status-btn"
+        <!-- CENTRO: Menu Desktop (A mágica: hidden lg:flex esconde no celular/tablet) -->
+        <nav
+          class="hidden lg:flex items-center space-x-4 xl:space-x-6 text-sm font-medium"
         >
-          <i class="fas fa-database" id="db-icon"></i>
-          <span id="db-status-text">Conectar Banco</span>
-        </button>
-
-        <!-- Menu Desktop -->
-        <div class="hidden md:flex space-x-6">
           <button
             onclick="switchTab('dashboard')"
-            id="nav-dash"
-            class="text-white font-bold border-b-2 border-white pb-1 transition"
+            id="nav-dashboard"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Dashboard
           </button>
           <button
             onclick="switchTab('agenda')"
             id="nav-agenda"
-            class="text-blue-200 hover:text-white font-semibold transition"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Agenda
           </button>
           <button
             onclick="switchTab('motoristas')"
-            id="nav-moto"
-            class="text-blue-200 hover:text-white font-semibold transition"
+            id="nav-motoristas"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Motoristas
           </button>
           <button
             onclick="switchTab('servicos')"
-            id="nav-serv"
-            class="text-blue-200 hover:text-white font-semibold transition"
+            id="nav-servicos"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Serviços
           </button>
           <button
-            onclick="protegerFinanceiro(event)"
-            id="nav-fin"
-            class="text-blue-200 hover:text-white font-semibold transition"
+            onclick="switchTab('financeiro')"
+            id="nav-financeiro"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Financeiro
           </button>
           <button
             onclick="switchTab('clientes')"
             id="nav-clientes"
-            class="text-blue-200 hover:text-white font-semibold transition"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Clientes
           </button>
           <button
             onclick="switchTab('orcamentos')"
             id="nav-orcamentos"
-            class="text-blue-200 hover:text-white font-semibold transition-colors"
+            class="hover:text-emerald-400 border-b-2 border-transparent hover:border-emerald-400 pb-1 transition-all"
           >
             Orçamentos
           </button>
-        </div>
-        <div class="flex items-center space-x-2">
+        </nav>
+
+        <!-- DIREITA: Botão Nova Reserva -->
+        <div>
           <button
-            onclick="openQuickAddModal()"
-            class="bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl font-bold text-sm flex items-center gap-1.5 transition"
+            onclick="abrirModalNovaReserva()"
+            class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 px-3 md:px-4 rounded-lg shadow-lg flex items-center gap-1 md:gap-2 transition-transform hover:scale-105 active:scale-95 text-xs md:text-sm"
           >
             <i class="fas fa-plus"></i>
             <span class="hidden sm:inline">Nova Reserva</span>
+            <span class="sm:hidden">Reserva</span>
           </button>
         </div>
       </div>
