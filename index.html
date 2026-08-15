@@ -1630,6 +1630,33 @@
               />
             </div>
           </div>
+          <!-- Linha Extra: Hotel e Telefone 2 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                >📍 Endereço / Hotel</label
+              >
+              <input
+                type="text"
+                id="modalHotel"
+                placeholder="Ex: Hotel NH Tango..."
+                class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                >📱 Telefone 2 (Opcional)</label
+              >
+              <input
+                type="tel"
+                id="modalPhone2"
+                placeholder="Apenas números..."
+                class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition"
+              />
+            </div>
+          </div>
 
           <!-- Linha 2: Data e Hora -->
           <div class="grid grid-cols-2 gap-3">
@@ -3364,6 +3391,12 @@
         return {
           clientName: document.getElementById("modalClient").value.trim(),
           clientPhone: document.getElementById("modalPhone").value.trim(),
+          phone2: document.getElementById("modalPhone2")
+            ? document.getElementById("modalPhone2").value
+            : "",
+          hotel: document.getElementById("modalHotel")
+            ? document.getElementById("modalHotel").value
+            : "",
           date:
             document.getElementById("modalDate").value ||
             new Date().toISOString().split("T")[0],
@@ -3446,8 +3479,10 @@
                   dia: dados.date,
                   hora: dados.time,
                   tipo: dados.cat,
-                  localizacao:
-                    (dados.servico ? dados.servico + " - " : "") + dados.desc,
+                  // O endereço do hotel vem primeiro, depois a descrição (se tiver)
+                  localizacao: dados.hotel
+                    ? `Hotel/Endereço: ${dados.hotel} | ${dados.desc}`
+                    : (dados.servico ? dados.servico + " - " : "") + dados.desc,
                   voo: dados.flight,
                   valor_total: dados.valCliente,
                   valor_repasse_motorista: dados.valMotorista,
@@ -4657,21 +4692,33 @@
       <div
         class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
+        <!-- Cabeçalho do Dossiê -->
         <div
           class="bg-blue-900 text-white p-4 flex justify-between items-center"
         >
           <div>
             <h3 id="dossierClientName" class="text-lg font-bold">
-              Nome do Cliente
+              Nome do cliente
             </h3>
             <p id="dossierClientPhone" class="text-xs text-blue-200">+55 ...</p>
           </div>
-          <button
-            onclick="closeClientDossier()"
-            class="text-white hover:text-gray-200 text-xl font-bold px-2"
-          >
-            &times;
-          </button>
+
+          <div class="flex items-center gap-3">
+            <!-- BOTÃO MÁGICO DE COPIAR -->
+            <button
+              onclick="copiarServicoMotorista()"
+              class="flex items-center gap-1.5 bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition border border-blue-700 shadow-sm"
+            >
+              <i class="fab fa-whatsapp"></i> Copiar Serviço
+            </button>
+
+            <button
+              onclick="closeClientDossier()"
+              class="text-white hover:text-gray-200 text-2xl font-bold px-2 leading-none"
+            >
+              &times;
+            </button>
+          </div>
         </div>
 
         <div class="flex border-b border-gray-200 bg-gray-50">
@@ -4821,6 +4868,81 @@
           .classList.remove("hidden");
 
         await loadClientTimeline(currentOpenClientId);
+      }
+      async function copiarServicoMotorista() {
+        // Pega o nome e o telefone que já estão na tela do dossiê
+        const clientName =
+          document.getElementById("dossierClientName").innerText;
+        const clientPhone =
+          document.getElementById("dossierClientPhone").innerText;
+
+        // Pega a data bonita ("Sábado, 15 de Agosto")
+        const titleEl = document.getElementById("tituloDiaSelecionado");
+        const dataTexto = titleEl
+          ? titleEl.innerText.replace("Agenda: ", "")
+          : selectedDay;
+
+        // Limpa o telefone para o link do WhatsApp
+        const phoneLimpo = clientPhone.replace(/\D/g, "");
+        const linkWhats = phoneLimpo
+          ? `https://wa.me/${phoneLimpo}`
+          : "Não informado";
+
+        showToast("Gerando rota...", false);
+
+        let reserva = null;
+
+        try {
+          // Busca a reserva deste cliente específico neste dia específico
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            const { data } = await window.supabaseClient
+              .from("reservas")
+              .select("*")
+              .eq("cliente_id", currentOpenClientId)
+              .eq("dia", selectedDay)
+              .limit(1);
+
+            if (data && data.length > 0) reserva = data[0];
+          } else {
+            reserva = databaseAgenda.find(
+              (r) =>
+                (r.cliente_id === currentOpenClientId ||
+                  r.cliente === clientName) &&
+                r.dia === selectedDay,
+            );
+          }
+
+          if (!reserva) {
+            return showToast(
+              "Nenhuma reserva encontrada para este cliente no dia de hoje.",
+              true,
+            );
+          }
+
+          // Monta os dados
+          const tipo = reserva.tipo || "SERVIÇO";
+          const hora = reserva.hora || "--:--";
+          const local =
+            reserva.localizacao || reserva.local || "Endereço não informado";
+
+          // Formatação final exigida
+          const textoFinal = `🚐 *SERVIÇO TURISMUNDO* 🚐
+📅 Data: ${dataTexto}
+⏰ Hora: ${hora} | ${tipo.toUpperCase()}
+👤 Pax: ${clientName}
+📍 Local: ${local}
+📱 Whats Pax: ${linkWhats}`;
+
+          // Copia para a área de transferência
+          await navigator.clipboard.writeText(textoFinal);
+          showToast(
+            "✅ Serviço copiado! Pode colar no WhatsApp do motorista.",
+            false,
+          );
+        } catch (err) {
+          console.error("Erro ao copiar serviço:", err);
+          showToast("Erro ao copiar os dados.", true);
+        }
       }
 
       function switchDossierTab(tabName) {
