@@ -3689,28 +3689,25 @@
         if (typeof renderAgenda === "function") renderAgenda();
         if (typeof renderDashboard === "function") renderDashboard();
 
-        // Matemática à prova de falhas: mede os pixels exatos da tela!
+        // --- O TRATOR DO MOBILE (Matemática Raiz) ---
         setTimeout(() => {
-          const container = document.getElementById("containerDiasAgenda");
           if (container) {
-            // Tira as medidas reais da caixa e do botão na tela
-            const cRect = container.getBoundingClientRect();
-            const bRect = btn.getBoundingClientRect();
+            // Procura exatamente qual botão recebeu a cor azul
+            const btnAtivo = container.querySelector(".bg-blue-900");
 
-            // O cálculo supremo de centralização
-            const posicaoCentro =
-              bRect.left -
-              cRect.left +
-              container.scrollLeft -
-              cRect.width / 2 +
-              bRect.width / 2;
+            if (btnAtivo) {
+              // Mede a distância física do botão até o começo da caixa
+              const posicaoCentro =
+                btnAtivo.offsetLeft -
+                container.clientWidth / 2 +
+                btnAtivo.clientWidth / 2;
 
-            container.scrollTo({
-              left: posicaoCentro,
-              behavior: "smooth",
-            });
+              // Força o comportamento de rolagem e aplica os pixels diretamente
+              container.style.scrollBehavior = "smooth";
+              container.scrollLeft = posicaoCentro;
+            }
           }
-        }, 150); // 150ms para garantir que o celular já desenhou o azul
+        }, 300); // 300ms de respiro para a tela desenhar tudo antes de empurrar
       }
       function filterCategory(category) {
         selectedCategory = category;
