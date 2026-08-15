@@ -2515,28 +2515,30 @@
                 "Cliente";
 
               return `
-              <!-- Adicionamos w-full na caixa principal -->
               <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:border-blue-300 cursor-pointer transition group">
                   
-                  <!-- Adicionamos w-full e garantimos que o flex respeite as bordas -->
-                  <div class="flex items-start gap-3 w-full">
+                  <div class="flex items-center gap-3 w-full">
                       
-                      <!-- shrink-0 garante que o relógio não seja esmagado -->
-                      <div class="text-center min-w-[50px] bg-gray-50 px-2 py-1.5 rounded-lg border border-gray-100 shrink-0">
+                      <!-- LARGURA FIXA DO HORÁRIO -->
+                      <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-gray-50 px-2 py-2 rounded-lg border border-gray-100">
                           <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
-                          <span class="text-[9px] font-bold text-gray-400 uppercase">${item.tipo || "Serviço"}</span>
+                          <span class="text-[9px] font-bold text-gray-400 uppercase truncate w-full block mt-0.5" title="${item.tipo || "Serviço"}">${item.tipo || "Serviço"}</span>
                       </div>
                       
-                      <!-- flex-1 e min-w-0 forçam essa área a preencher o espaço vazio -->
                       <div class="space-y-1 flex-1 min-w-0">
-                          <div class="flex items-center gap-2 flex-wrap">
+                          <!-- MÁGICA AQUI: O 'justify-between w-full' empurra o selo para o final -->
+                          <div class="flex items-center justify-between gap-2 w-full">
                               <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
                                   ${nomeClienteFinal}
                               </h4>
-                              ${statusBadge}
+                              <div class="shrink-0 mt-0.5">
+                                  ${statusBadge}
+                              </div>
                           </div>
+                          
                           <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
-                              <i class="fas fa-map-marker-alt text-gray-400"></i> ${item.localizacao || item.local || "Local não informado"}
+                              <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
+                              <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
                           </p>
                       </div>
                   </div>
@@ -2549,7 +2551,6 @@
             '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
         }
       }
-
       let orcamentoAgendamentoAtual = null;
 
       async function abrirModalAgendamentoOrcamento(id) {
