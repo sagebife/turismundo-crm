@@ -670,10 +670,17 @@
           <!-- Carrossel de Dias Horizontal Dinâmico -->
           <div
             id="containerDiasAgenda"
-            class="flex gap-2 overflow-x-auto pb-2 justify-between"
+            class="flex gap-3 overflow-x-auto pb-2 px-2 scroll-smooth md:justify-between"
+            style="scrollbar-width: none; -ms-overflow-style: none"
           >
             <!-- Gerado via JavaScript -->
           </div>
+          <style>
+            /* Esconde a barrinha feia de rolagem no celular e PC */
+            #containerDiasAgenda::-webkit-scrollbar {
+              display: none;
+            }
+          </style>
         </div>
         <!-- Filtros Rápidos -->
         <div class="flex gap-2">
