@@ -3689,26 +3689,28 @@
         if (typeof renderAgenda === "function") renderAgenda();
         if (typeof renderDashboard === "function") renderDashboard();
 
-        // Centraliza o dia DEPOIS de toda a renderização
+        // Matemática à prova de falhas: mede os pixels exatos da tela!
         setTimeout(() => {
           const container = document.getElementById("containerDiasAgenda");
+          if (container) {
+            // Tira as medidas reais da caixa e do botão na tela
+            const cRect = container.getBoundingClientRect();
+            const bRect = btn.getBoundingClientRect();
 
-          if (!container) return;
+            // O cálculo supremo de centralização
+            const posicaoCentro =
+              bRect.left -
+              cRect.left +
+              container.scrollLeft -
+              cRect.width / 2 +
+              bRect.width / 2;
 
-          const btn = container.querySelector(`[data-date="${day}"]`);
-
-          if (!btn) return;
-
-          const containerWidth = container.clientWidth;
-          const btnWidth = btn.offsetWidth;
-
-          const scrollLeft = btn.offsetLeft - containerWidth / 2 + btnWidth / 2;
-
-          container.scrollTo({
-            left: Math.max(0, scrollLeft),
-            behavior: "smooth",
-          });
-        }, 100);
+            container.scrollTo({
+              left: posicaoCentro,
+              behavior: "smooth",
+            });
+          }
+        }, 150); // 150ms para garantir que o celular já desenhou o azul
       }
       function filterCategory(category) {
         selectedCategory = category;
