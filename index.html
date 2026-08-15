@@ -3689,33 +3689,21 @@
         if (typeof renderAgenda === "function") renderAgenda();
         if (typeof renderDashboard === "function") renderDashboard();
 
-        // --- A FITA MÉTRICA (Definitivo) ---
+        // --- O CORTE SECO (Sem animação para o celular não bugar) ---
         setTimeout(() => {
-          const scrollContainer = document.getElementById(
-            "containerDiasAgenda",
-          );
-          if (!scrollContainer) return;
-
-          const btnAtivo = scrollContainer.querySelector(".bg-blue-900");
-          if (btnAtivo) {
-            // Tira uma "foto" física das posições exatas na tela do celular
-            const cRect = scrollContainer.getBoundingClientRect();
-            const bRect = btnAtivo.getBoundingClientRect();
-
-            // Calcula o centro absoluto da tela e o centro absoluto do botão
-            const centroContainer = cRect.left + cRect.width / 2;
-            const centroBotao = bRect.left + bRect.width / 2;
-
-            // Descobre exatamente quantos pixels de diferença existem entre os dois
-            const diferenca = centroBotao - centroContainer;
-
-            // Empurra a barra de rolagem exatamente essa quantidade de pixels
-            scrollContainer.scrollBy({
-              left: diferenca,
-              behavior: "smooth",
-            });
+          const container = document.getElementById("containerDiasAgenda");
+          if (container) {
+            const btnAtivo = container.querySelector(".bg-blue-900");
+            if (btnAtivo) {
+              // 'auto' faz o pulo ser instantâneo, impossível do navegador cancelar
+              btnAtivo.scrollIntoView({
+                behavior: "auto",
+                inline: "center",
+                block: "nearest",
+              });
+            }
           }
-        }, 300);
+        }, 50);
       }
       function filterCategory(category) {
         selectedCategory = category;
