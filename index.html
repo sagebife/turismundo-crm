@@ -670,7 +670,7 @@
           <!-- Carrossel de Dias Horizontal Dinâmico -->
           <div
             id="containerDiasAgenda"
-            class="flex gap-3 overflow-x-auto pb-2 px-2 scroll-smooth md:justify-between"
+            class="flex gap-3 overflow-x-auto pb-2 px-2 md:justify-between snap-x snap-mandatory"
             style="scrollbar-width: none; -ms-overflow-style: none"
           >
             <!-- Gerado via JavaScript -->
@@ -3628,8 +3628,6 @@
       function selectDay(day) {
         selectedDay = day;
 
-        const container = document.getElementById("containerDiasAgenda");
-
         // Atualiza visualmente os dias
         document
           .querySelectorAll("#containerDiasAgenda > div")
@@ -3638,27 +3636,22 @@
             const spans = btn.querySelectorAll("span");
 
             if (isSelected) {
+              // ADICIONAMOS O 'snap-center' AQUI PARA O ÍMÃ FUNCIONAR
               btn.className =
-                "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
+                "day-btn snap-center cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
 
-              if (spans[0]) {
+              if (spans[0])
                 spans[0].className = "block text-xs uppercase text-blue-200";
-              }
-
-              if (spans[1]) {
-                spans[1].className = "text-lg font-bold text-white";
-              }
+              if (spans[1]) spans[1].className = "text-lg font-bold text-white";
             } else {
+              // ADICIONAMOS O 'snap-center' AQUI TAMBÉM
               btn.className =
-                "day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
+                "day-btn snap-center cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
 
-              if (spans[0]) {
+              if (spans[0])
                 spans[0].className = "block text-xs uppercase text-gray-500";
-              }
-
-              if (spans[1]) {
+              if (spans[1])
                 spans[1].className = "text-lg font-bold text-gray-800";
-              }
             }
           });
 
@@ -3670,13 +3663,11 @@
 
           if (ano && mes && d) {
             const dataObj = new Date(Number(ano), Number(mes) - 1, Number(d));
-
             const nomeFormatado = dataObj.toLocaleDateString("pt-BR", {
               weekday: "long",
               day: "numeric",
               month: "long",
             });
-
             labelEl.innerText = `Agenda: ${
               nomeFormatado.charAt(0).toUpperCase() + nomeFormatado.slice(1)
             }`;
@@ -3689,21 +3680,20 @@
         if (typeof renderAgenda === "function") renderAgenda();
         if (typeof renderDashboard === "function") renderDashboard();
 
-        // --- O CORTE SECO (Sem animação para o celular não bugar) ---
+        // O comando limpo agora funciona porque o CSS vai puxar como um ímã
         setTimeout(() => {
           const container = document.getElementById("containerDiasAgenda");
           if (container) {
             const btnAtivo = container.querySelector(".bg-blue-900");
             if (btnAtivo) {
-              // 'auto' faz o pulo ser instantâneo, impossível do navegador cancelar
               btnAtivo.scrollIntoView({
-                behavior: "auto",
+                behavior: "smooth",
                 inline: "center",
                 block: "nearest",
               });
             }
           }
-        }, 50);
+        }, 100);
       }
       function filterCategory(category) {
         selectedCategory = category;
