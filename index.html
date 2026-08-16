@@ -155,15 +155,17 @@
       class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm"
     >
       <div
-        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative max-h-[90vh] overflow-y-auto"
+        class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative max-h-[90vh] flex flex-col"
       >
-        <div class="flex justify-between items-center mb-4 border-b pb-3">
+        <div
+          class="flex justify-between items-center mb-4 border-b pb-3 shrink-0"
+        >
           <h3
             class="text-lg font-bold text-blue-900 flex items-center gap-2"
             id="titulo-extrato-motorista"
           >
             <i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato
-            do Motorista
+            de Repasses
           </h3>
           <button
             onclick="fecharModalExtrato()"
@@ -173,40 +175,78 @@
           </button>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
+          <!-- NOVO: Controle de Fechamento Semanal -->
           <div
-            class="bg-blue-50 border border-blue-100 p-3 rounded-lg flex justify-between items-center"
+            class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100"
+          >
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-bold text-gray-500 uppercase"
+                >Período:</label
+              >
+              <input
+                type="week"
+                id="filtro-semana-extrato"
+                class="border border-gray-200 rounded-lg px-2 py-1 text-sm font-bold text-gray-700 outline-none focus:border-blue-500 transition shadow-sm"
+                onchange="carregarExtratoMotorista()"
+              />
+            </div>
+            <span class="text-[10px] text-gray-400 font-medium"
+              ><i class="fas fa-info-circle"></i> O fechamento considera de
+              Segunda a Domingo.</span
+            >
+          </div>
+
+          <!-- Card de Resumo e Botões de Ação -->
+          <div
+            class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm"
           >
             <div>
-              <p class="text-[10px] uppercase font-bold text-blue-800">
-                Total a Pagar (Pendente)
+              <p
+                class="text-[10px] uppercase font-bold text-blue-800 tracking-wider"
+              >
+                Total Pendente na Semana
               </p>
               <p
-                class="text-xl font-black text-emerald-600"
+                class="text-2xl font-black text-emerald-600"
                 id="extrato-total-pendente"
               >
                 R$ 0,00
               </p>
             </div>
-            <button
-              onclick="enviarExtratoWhatsApp()"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-sm"
-            >
-              <i class="fab fa-whatsapp text-sm"></i> Enviar Resumo via WhatsApp
-            </button>
+
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+              <!-- O BOTÃO MÁGICO DE PAGAMENTO EM LOTE -->
+              <button
+                onclick="pagarSemanaMotorista()"
+                id="btn-pagar-semana"
+                class="flex-1 sm:flex-none px-4 py-2 bg-blue-900 hover:bg-blue-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-check-double"></i> Pagar Semana
+              </button>
+
+              <button
+                onclick="enviarExtratoWhatsApp()"
+                class="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+              >
+                <i class="fab fa-whatsapp text-sm"></i> WhatsApp
+              </button>
+            </div>
           </div>
 
           <!-- Tabela de Viagens do Motorista -->
-          <div class="border border-gray-100 rounded-xl overflow-hidden">
+          <div
+            class="border border-gray-100 rounded-xl overflow-hidden shadow-sm"
+          >
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr
-                  class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase border-b"
+                  class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase border-b border-gray-100"
                 >
-                  <th class="p-3">Data / Hora</th>
+                  <th class="p-3">Data</th>
                   <th class="p-3">Cliente / Serviço</th>
                   <th class="p-3 text-right">Repasse</th>
-                  <th class="p-3 text-center">Status</th>
+                  <th class="p-3 text-center">Status Pagamento</th>
                 </tr>
               </thead>
               <tbody
@@ -219,10 +259,10 @@
           </div>
         </div>
 
-        <div class="flex justify-end mt-6 pt-4 border-t">
+        <div class="flex justify-end mt-4 pt-3 border-t shrink-0">
           <button
             onclick="fecharModalExtrato()"
-            class="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+            class="px-5 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
           >
             Fechar
           </button>
@@ -3328,70 +3368,200 @@
         }
       }
 
-      function renderFinanceiro() {
+      async function renderFinanceiro() {
         const tableBody = document.getElementById("financeTableBody");
         if (!tableBody) return;
+
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Calculando caixa...</td></tr>`;
 
         let totalFaturamento = 0;
         let totalRepasses = 0;
         let totalLucro = 0;
         let totalPendente = 0;
 
-        // Processa tudo na memória RAM primeiro e já monta o HTML de uma vez
-        const linhasHTML = databaseAgenda
-          .map((item) => {
-            const valorCliente = Number(item.valorCliente) || 0;
-            const valorMotorista = Number(item.valorMotorista) || 0;
-            const lucro = valorCliente - valorMotorista;
+        const extrairNumero = (valor) => {
+          if (!valor) return 0;
+          if (typeof valor === "number") return valor;
+          let limpo = String(valor)
+            .replace(/R\$/gi, "")
+            .replace(/USD/gi, "")
+            .trim();
+          if (limpo.includes(",")) {
+            limpo = limpo.replace(/\./g, "").replace(",", ".");
+          }
+          return Number(limpo) || 0;
+        };
 
-            totalFaturamento += valorCliente;
-            totalRepasses += valorMotorista;
-            totalLucro += lucro;
+        try {
+          let list = [];
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            // A MÁGICA AQUI: Pedimos os dados da tabela clientes e da tabela motoristas!
+            let { data, error } = await window.supabaseClient
+              .from("reservas")
+              .select("*, clientes(*), motoristas(*)");
+            if (error) throw error;
 
-            if (!item.pagoCliente) {
-              totalPendente += valorCliente;
-            }
+            list = data || [];
+          } else {
+            list = [...databaseAgenda];
+          }
 
-            const statusClienteBtn = item.pagoCliente
-              ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
-              : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
+          list.sort((a, b) =>
+            String(b.dia || b.data || b.date || "").localeCompare(
+              String(a.dia || a.data || a.date || ""),
+            ),
+          );
 
-            const statusMotoristaBtn = item.pagoMotorista
-              ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
-              : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista')" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
+          const linhasHTML = list
+            .map((item) => {
+              const rawValorCliente =
+                item.valor_total || item.valorCliente || 0;
+              const rawValorMotorista =
+                item.valor_repasse_motorista || item.valorMotorista || 0;
 
-            return `
-            <tr class="hover:bg-gray-50/50 transition">
-                <td class="p-4 font-bold text-gray-900">
-                    <div>${item.cliente}</div>
-                    <div class="text-[10px] text-gray-400 font-normal mt-0.5">${item.tipo === "transfer" ? "🚐 Transfer" : "📸 Passeio"} • Dia ${item.dia}/07</div>
-                </td>
-                <td class="p-4 font-semibold text-gray-700">${item.motorista}</td>
-                <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
-                <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
-                <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
-                <td class="p-4 text-center">${statusClienteBtn}</td>
-                <td class="p-4 text-center">${statusMotoristaBtn}</td>
-            </tr>
-          `;
-          })
-          .join(""); // Junta tudo em um bloco só!
+              const valorCliente = extrairNumero(rawValorCliente);
+              const valorMotorista = extrairNumero(rawValorMotorista);
+              const lucro = valorCliente - valorMotorista;
 
-        // Injeta no DOM apenas 1 vez (Fim da lentidão)
-        tableBody.innerHTML =
-          linhasHTML ||
-          `<tr><td colspan="7" class="text-center py-4 text-gray-500 text-xs">Nenhuma movimentação financeira.</td></tr>`;
+              totalFaturamento += valorCliente;
+              totalRepasses += valorMotorista;
+              totalLucro += lucro;
 
-        // Atualiza os cards
-        document.getElementById("fin-faturamento").innerText =
-          `R$ ${totalFaturamento.toLocaleString()}`;
-        document.getElementById("fin-repasses").innerText =
-          `R$ ${totalRepasses.toLocaleString()}`;
-        document.getElementById("fin-lucro").innerText =
-          `R$ ${totalLucro.toLocaleString()}`;
-        document.getElementById("fin-pendente").innerText =
-          `R$ ${totalPendente.toLocaleString()}`;
+              const isPagoCliente =
+                item.pago_cliente === true ||
+                item.pago_cliente === "true" ||
+                item.pagoCliente === true;
+              const isPagoMotorista =
+                item.pago_motorista === true ||
+                item.pago_motorista === "true" ||
+                item.pagoMotorista === true;
+
+              if (!isPagoCliente) {
+                totalPendente += valorCliente;
+              }
+
+              let dataFormatada = "--/--";
+              const dataOriginal = item.dia || item.data || item.date;
+              if (dataOriginal && dataOriginal.includes("-")) {
+                const partes = dataOriginal.split("-");
+                dataFormatada = `${partes[2]}/${partes[1]}`;
+              } else {
+                dataFormatada = dataOriginal || "--/--";
+              }
+
+              const tipoServico = String(
+                item.tipo || item.category || "",
+              ).toLowerCase();
+              let iconeServico =
+                tipoServico.includes("transfer") ||
+                tipoServico.includes("translado")
+                  ? "🚐 Transfer"
+                  : "📸 Passeio";
+
+              // BUSCANDO OS NOMES REAIS (traduzindo os IDs)
+              const nomeDoCliente =
+                (item.clientes
+                  ? item.clientes.nome || item.clientes.nome_completo
+                  : null) ||
+                item.cliente ||
+                item.nome ||
+                "Cliente Sem Nome";
+              const nomeDoMotorista =
+                (item.motoristas
+                  ? item.motoristas.nome || item.motoristas.nome_completo
+                  : null) ||
+                item.motorista ||
+                "Não alocado";
+
+              const statusClienteBtn = isPagoCliente
+                ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente', false)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-emerald-200 transition"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
+                : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente', true)" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
+
+              const statusMotoristaBtn = isPagoMotorista
+                ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista', false)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-emerald-200 transition"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
+                : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista', true)" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
+
+              return `
+                <tr class="hover:bg-gray-50/50 transition">
+                    <td class="p-4 font-bold text-gray-900">
+                        <div>${nomeDoCliente}</div>
+                        <div class="text-[10px] text-gray-400 font-normal mt-0.5">${iconeServico} • Dia ${dataFormatada}</div>
+                    </td>
+                    <td class="p-4 font-semibold text-gray-700">${nomeDoMotorista}</td>
+                    <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
+                    <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
+                    <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
+                    <td class="p-4 text-center">${statusClienteBtn}</td>
+                    <td class="p-4 text-center">${statusMotoristaBtn}</td>
+                </tr>
+              `;
+            })
+            .join("");
+
+          tableBody.innerHTML =
+            linhasHTML ||
+            `<tr><td colspan="7" class="text-center py-6 text-gray-500 text-xs">Nenhuma movimentação financeira encontrada.</td></tr>`;
+
+          const formatadorBR = new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          });
+          document.getElementById("fin-faturamento").innerText =
+            formatadorBR.format(totalFaturamento);
+          document.getElementById("fin-repasses").innerText =
+            formatadorBR.format(totalRepasses);
+          document.getElementById("fin-lucro").innerText =
+            formatadorBR.format(totalLucro);
+          document.getElementById("fin-pendente").innerText =
+            formatadorBR.format(totalPendente);
+        } catch (error) {
+          console.error("Erro ao carregar o Financeiro:", error);
+          tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500 text-xs">Erro ao carregar os dados financeiros.</td></tr>`;
+        }
       }
+      window.toggleFinanceStatus = async function (
+        idReserva,
+        tipo,
+        novoStatus,
+      ) {
+        if (!idReserva || idReserva === "undefined")
+          return showToast("ID da reserva não encontrado.", true);
+
+        try {
+          // Define qual campo será atualizado no banco ('pagoCliente' ou 'pagoMotorista')
+          const campoAtualizar =
+            tipo === "cliente" ? "pagoCliente" : "pagoMotorista";
+          const objAtualizacao = {};
+          objAtualizacao[campoAtualizar] = novoStatus;
+
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            const { error } = await window.supabaseClient
+              .from("reservas")
+              .update(objAtualizacao)
+              .eq("id", idReserva);
+
+            if (error) throw error;
+          } else {
+            // Se estiver rodando offline/banco local
+            const index = databaseAgenda.findIndex(
+              (r) => String(r.id) === String(idReserva),
+            );
+            if (index !== -1)
+              databaseAgenda[index][campoAtualizar] = novoStatus;
+          }
+
+          const mensagemAcao = novoStatus
+            ? "marcado como pago"
+            : "marcado como pendente";
+          showToast(`Status financeiro ${mensagemAcao}! 💸`, false);
+
+          // Recarrega os painéis e tabelas para os números baterem instantaneamente
+          renderFinanceiro();
+        } catch (error) {
+          console.error("Erro ao atualizar status financeiro:", error);
+          showToast("Erro ao atualizar cobrança.", true);
+        }
+      };
       async function toggleFinanceStatus(id, target) {
         const index = databaseAgenda.findIndex(
           (item) => String(item.id) === String(id),
@@ -6289,6 +6459,312 @@
         // Devolve o cursor para o lugar certo
         elemento.setSelectionRange(inicio, fim);
       }
+      // Variáveis globais para controlar quem estamos pagando
+      window.motoristaAtualExtrato = "";
+      window.idsCorridasPendentesSemana = [];
+
+      // Função para formatar a data para o padrão de semana do HTML (YYYY-Www)
+      function obterSemanaAtualInput() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        // Cálculo ISO da semana (Segunda a Domingo)
+        const diaNum = (hoje.getDay() + 6) % 7;
+        hoje.setDate(hoje.getDate() - diaNum + 3);
+        const primeiraQuinta = hoje.valueOf();
+        hoje.setMonth(0, 1);
+        if (hoje.getDay() !== 4)
+          hoje.setMonth(0, 1 + ((4 - hoje.getDay() + 7) % 7));
+        const semana = 1 + Math.ceil((primeiraQuinta - hoje) / 604800000);
+        return `${ano}-W${semana.toString().padStart(2, "0")}`;
+      }
+
+      // Variáveis globais blindadas
+      window.motoristaAtualExtrato = "";
+      window.idsCorridasPendentesSemana = [];
+
+      // 1. DATA E SEMANA (Matemática à prova de Fuso Horário da Argentina)
+      function obterSemanaAtualInput() {
+        const hoje = new Date();
+        const d = new Date(
+          Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()),
+        );
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+        return `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, "0")}`;
+      }
+      // =======================================================================
+      // MÓDULO EXTRATO DO MOTORISTA (BLINDADO E SEM VARIÁVEL GLOBAL DE NOME)
+      // =======================================================================
+
+      window.idsCorridasPendentesSemana = [];
+
+      // 1. AJUDANTES DE DATA
+      window.obterSemanaAtualInput = function () {
+        const hoje = new Date();
+        const d = new Date(
+          Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()),
+        );
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+        return `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, "0")}`;
+      };
+
+      window.formatarDataLocal = function (dataObj) {
+        const y = dataObj.getFullYear();
+        const m = String(dataObj.getMonth() + 1).padStart(2, "0");
+        const d = String(dataObj.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      };
+
+      // ABRIR O MODAL (Com injeção atrasada para corrigir o bug visual do Chrome)
+      window.abrirModalExtrato = function (nomeMotorista) {
+        if (nomeMotorista) {
+          window.motoristaAtualExtrato = nomeMotorista;
+        }
+
+        document.getElementById("titulo-extrato-motorista").innerHTML =
+          `<i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato: ${window.motoristaAtualExtrato}`;
+
+        // 1. PRIMEIRO nós removemos o "hidden" para a caixinha nascer fisicamente na tela
+        document
+          .getElementById("modal-extrato-motorista")
+          .classList.remove("hidden");
+
+        // 2. Esperamos um milissegundo para o Chrome terminar de desenhar a tela...
+        setTimeout(() => {
+          // 3. AGORA SIM injetamos a semana (ele será forçado a exibir o texto visualmente)
+          document.getElementById("filtro-semana-extrato").value =
+            window.obterSemanaAtualInput();
+
+          // 4. E carregamos as viagens
+          carregarExtratoMotorista();
+        }, 50); // 50 milissegundos de atraso estratégico
+      };
+      window.fecharModalExtrato = function () {
+        document
+          .getElementById("modal-extrato-motorista")
+          .classList.add("hidden");
+      };
+
+      // 3. CARREGAR AS VIAGENS
+      window.carregarExtratoMotorista = async function () {
+        const tbody = document.getElementById("extrato-tabela-corridas");
+        const btnPagar = document.getElementById("btn-pagar-semana");
+
+        // A MÁGICA AQUI: Lê o nome direto do texto do título que você está vendo na tela!
+        const tituloTexto =
+          document.getElementById("titulo-extrato-motorista").innerText || "";
+        const motoristaDaVez = tituloTexto.replace("Extrato:", "").trim();
+        const motoristaAlvo = motoristaDaVez.toLowerCase();
+
+        const valorSemana = document.getElementById(
+          "filtro-semana-extrato",
+        ).value;
+
+        // Travas de segurança (ANTES de escrever calculando)
+        if (!motoristaDaVez || motoristaDaVez === "undefined") {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500">Erro: Motorista não identificado.</td></tr>`;
+          return;
+        }
+        if (!valorSemana) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">Por favor, selecione uma semana válida.</td></tr>`;
+          return;
+        }
+
+        // Agora sim mostramos o "Calculando" com segurança
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Calculando viagens de ${motoristaDaVez}...</td></tr>`;
+
+        try {
+          const [anoStr, semanaStr] = valorSemana.split("-W");
+          const ano = parseInt(anoStr);
+          const semana = parseInt(semanaStr);
+
+          const simpleDate = new Date(ano, 0, 1 + (semana - 1) * 7);
+          const dow = simpleDate.getDay();
+          const dataInicio = new Date(simpleDate);
+          if (dow <= 4)
+            dataInicio.setDate(simpleDate.getDate() - simpleDate.getDay() + 1);
+          else
+            dataInicio.setDate(simpleDate.getDate() + 8 - simpleDate.getDay());
+
+          const dataFim = new Date(dataInicio);
+          dataFim.setDate(dataInicio.getDate() + 6);
+
+          const inicioSemanaStr = window.formatarDataLocal(dataInicio);
+          const fimSemanaStr = window.formatarDataLocal(dataFim);
+
+          let totalPendente = 0;
+          window.idsCorridasPendentesSemana = [];
+
+          let list = [];
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            let { data, error } = await window.supabaseClient
+              .from("reservas")
+              .select("*, clientes(*), motoristas(*)")
+              .gte("dia", inicioSemanaStr)
+              .lte("dia", fimSemanaStr)
+              .order("dia", { ascending: true });
+
+            if (error) throw error;
+
+            list = (data || []).filter((item) => {
+              let nomeDB = "";
+              if (item.motoristas && item.motoristas.nome) {
+                nomeDB = item.motoristas.nome;
+              } else if (item.motorista) {
+                nomeDB = item.motorista;
+              }
+              return String(nomeDB).toLowerCase().trim() === motoristaAlvo;
+            });
+          } else {
+            list = databaseAgenda.filter(
+              (r) =>
+                String(r.motorista).toLowerCase().trim() === motoristaAlvo &&
+                r.dia >= inicioSemanaStr &&
+                r.dia <= fimSemanaStr,
+            );
+          }
+
+          if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">Nenhuma viagem de <b>${motoristaDaVez}</b> na semana selecionada.</td></tr>`;
+            document.getElementById("extrato-total-pendente").innerText =
+              "R$ 0,00";
+            btnPagar.disabled = true;
+            return;
+          }
+
+          const linhasHTML = list
+            .map((item) => {
+              const rawValorMotorista =
+                item.valor_repasse_motorista || item.valorMotorista || 0;
+              let valorMotorista =
+                typeof rawValorMotorista === "number"
+                  ? rawValorMotorista
+                  : Number(
+                      String(rawValorMotorista)
+                        .replace(/R\$/gi, "")
+                        .replace(/USD/gi, "")
+                        .trim()
+                        .replace(/\./g, "")
+                        .replace(",", "."),
+                    ) || 0;
+
+              const isPago =
+                item.pago_motorista === true ||
+                item.pago_motorista === "true" ||
+                item.pagoMotorista === true;
+
+              if (!isPago && valorMotorista > 0) {
+                totalPendente += valorMotorista;
+                window.idsCorridasPendentesSemana.push(item.id);
+              }
+
+              const nomeCliente =
+                (item.clientes
+                  ? item.clientes.nome || item.clientes.nome_completo
+                  : null) ||
+                item.cliente ||
+                item.nome ||
+                "Cliente";
+
+              let badgePagamento = isPago
+                ? `<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px]"><i class="fas fa-check-double mr-1"></i> Pago</span>`
+                : `<span class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px]"><i class="fas fa-clock mr-1"></i> A Pagar</span>`;
+
+              const dataBr = item.dia
+                ? item.dia.split("-").reverse().join("/")
+                : "--/--";
+
+              return `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-3 font-bold text-gray-700 text-[11px]">${dataBr}</td>
+                    <td class="p-3 font-semibold text-gray-900">${nomeCliente} <span class="block text-[10px] text-gray-400 font-normal">${item.tipo || "Serviço"}</span></td>
+                    <td class="p-3 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
+                    <td class="p-3 text-center">${badgePagamento}</td>
+                </tr>
+            `;
+            })
+            .join("");
+
+          tbody.innerHTML = linhasHTML;
+          document.getElementById("extrato-total-pendente").innerText =
+            new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(totalPendente);
+
+          btnPagar.disabled = window.idsCorridasPendentesSemana.length === 0;
+        } catch (error) {
+          console.error("Erro ao carregar extrato:", error);
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500">Erro ao processar as datas ou buscar viagens.</td></tr>`;
+        }
+      };
+
+      // 4. PAGAR A SEMANA EM LOTE
+      window.pagarSemanaMotorista = async function () {
+        if (window.idsCorridasPendentesSemana.length === 0) return;
+
+        const btn = document.getElementById("btn-pagar-semana");
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Pagando...`;
+        btn.disabled = true;
+
+        try {
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            const { error } = await window.supabaseClient
+              .from("reservas")
+              .update({ pago_motorista: true })
+              .in("id", window.idsCorridasPendentesSemana);
+
+            if (error) throw error;
+          }
+
+          showToast("Semana paga com sucesso! ✅", false);
+
+          await carregarExtratoMotorista();
+          if (typeof renderFinanceiro === "function") renderFinanceiro();
+        } catch (error) {
+          console.error("Erro ao pagar semana:", error);
+          showToast("Erro ao processar o pagamento.", true);
+        } finally {
+          btn.innerHTML = `<i class="fas fa-check-double"></i> Pagar Semana`;
+        }
+      };
+      // 3. A MÁGICA DE DAR BAIXA NA SEMANA INTEIRA
+      window.pagarSemanaMotorista = async function () {
+        if (window.idsCorridasPendentesSemana.length === 0) return;
+
+        // Trava o botão para não clicar duas vezes
+        const btn = document.getElementById("btn-pagar-semana");
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processando...`;
+        btn.disabled = true;
+
+        try {
+          if (window.isConnectedToSupabase && window.supabaseClient) {
+            // Atualiza todas as corridas listadas para "Pago" numa tacada só
+            const { error } = await window.supabaseClient
+              .from("reservas")
+              .update({ pago_motorista: true })
+              .in("id", window.idsCorridasPendentesSemana);
+
+            if (error) throw error;
+          }
+
+          showToast("Repasses da semana marcados como Pagos! ✅", false);
+
+          // Recarrega o extrato para ficar tudo verde e recarrega o financeiro principal
+          await carregarExtratoMotorista();
+          if (typeof renderFinanceiro === "function") renderFinanceiro();
+        } catch (error) {
+          console.error("Erro ao pagar semana:", error);
+          showToast("Erro ao processar o pagamento em lote.", true);
+        } finally {
+          btn.innerHTML = `<i class="fas fa-check-double"></i> Pagar Semana`;
+        }
+      };
     </script>
     <!-- Template PDF Oculto -->
     <div
