@@ -796,10 +796,10 @@
                   >
                   <input
                     type="text"
-                    id="driverVehicle"
-                    required
+                    id="driverVeiculo"
+                    oninput="capitalizarInput(this)"
                     placeholder="Ex: Chevrolet Spin"
-                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
+                    class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:ring-blue-500 focus:border-blue-500 transition"
                   />
                 </div>
               </div>
@@ -952,9 +952,10 @@
               </h3>
               <input
                 type="text"
-                id="catName"
-                placeholder="Nome da Categoria"
-                class="w-full p-1.5 text-sm rounded-lg border mb-2"
+                id="inputNovaCategoria"
+                oninput="capitalizarInput(this)"
+                placeholder="ex: Translado"
+                class="w-full p-2.5 text-sm border-2 border-blue-900 rounded-lg text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
               <button
                 onclick="addCategoria()"
@@ -977,9 +978,10 @@
               </select>
               <input
                 type="text"
-                id="nomeItemInput"
+                id="inputNovaRota"
+                oninput="capitalizarInput(this)"
                 placeholder="Rota (ex: Centro x Aeroparque)"
-                class="w-full p-1.5 text-sm rounded-lg border mb-2"
+                class="w-full p-2.5 text-sm border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-emerald-500 transition"
               />
               <input
                 type="number"
@@ -1610,10 +1612,11 @@
               >
               <input
                 type="text"
-                id="modalClient"
+                id="modalclient"
+                oninput="capitalizarInput(this)"
                 required
                 placeholder="Ex: Lucas Ramos"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="..."
               />
             </div>
             <div>
@@ -1640,6 +1643,7 @@
               <input
                 type="text"
                 id="modalHotel"
+                oninput="capitalizarInput(this)"
                 placeholder="Ex: Hotel NH Tango..."
                 class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition"
               />
@@ -1695,9 +1699,9 @@
             <input
               type="text"
               id="input-busca-servico-reserva"
+              oninput="capitalizarInput(this)"
               placeholder="Digite o nome ou categoria do serviço..."
-              class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition"
-              autocomplete="off"
+              class="..."
             />
             <input type="hidden" id="reserva-select-categoria" />
 
@@ -4747,7 +4751,8 @@
               <input
                 type="text"
                 id="editClientName"
-                class="w-full mt-1 p-2 border rounded-lg bg-gray-50 text-gray-800"
+                oninput="capitalizarInput(this)"
+                class="..."
               />
             </div>
             <div>
@@ -6193,6 +6198,25 @@
             }
           }
         }
+      }
+      function capitalizarInput(elemento) {
+        // Salva a posição do cursor para ele não pular pro final da frase sozinho
+        let inicio = elemento.selectionStart;
+        let fim = elemento.selectionEnd;
+
+        // Transforma a primeira letra de cada palavra em maiúscula
+        let valor = elemento.value;
+        let valorFormatado = valor.replace(/\b\w/g, function (letra) {
+          return letra.toUpperCase();
+        });
+
+        // Atualiza o valor no campo apenas se houver mudança
+        if (valor !== valorFormatado) {
+          elemento.value = valorFormatado;
+        }
+
+        // Devolve o cursor para o lugar certo
+        elemento.setSelectionRange(inicio, fim);
       }
     </script>
     <!-- Template PDF Oculto -->
