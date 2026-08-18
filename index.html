@@ -321,18 +321,17 @@
             </button>
           </div>
 
-          <!-- Campo de Busca Logo ao Lado -->
-          <div class="relative w-full sm:w-72">
-            <span
-              class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400"
-            >
-              <i class="fas fa-search text-xs"></i>
+          <!-- Barra de Busca Orçamentos (Com Iniciais Maiúsculas) -->
+          <div class="relative w-full md:w-64 ml-4">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+              <i class="fas fa-search text-gray-400"></i>
             </span>
             <input
               type="text"
-              oninput="capitalizarInput(this)"
+              id="input-busca-orcamentos"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all capitalize placeholder-gray-400 shadow-sm"
               placeholder="Buscar..."
-              class="SUAS_CLASSES_ATUAIS_CONTINUAM_AQUI..."
+              onkeyup="filtrarOrcamentos()"
             />
           </div>
         </div>
@@ -1627,7 +1626,7 @@
       class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200"
     >
       <div
-        class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+        class="bg-white w-full max-w-4xl rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
       >
         <div
           class="flex justify-between items-center border-b border-gray-100 pb-3"
@@ -1641,21 +1640,21 @@
           </button>
         </div>
 
-        <form onsubmit="saveQuickReserva(event)" class="space-y-4">
-          <!-- Linha 1: Cliente e WhatsApp -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
+        <form onsubmit="saveQuickReserva(event)" class="space-y-3">
+          <!-- Linha 1: Cliente e Telefones (4 colunas) -->
+          <div class="grid grid-cols-4 gap-3">
+            <div class="col-span-2">
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
                 >Cliente</label
               >
               <input
                 type="text"
-                id="modalclient"
+                id="modalClient"
                 oninput="capitalizarInput(this)"
                 required
                 placeholder="Ex: Lucas Ramos"
-                class="..."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
             <div>
@@ -1668,13 +1667,26 @@
                 id="modalPhone"
                 required
                 placeholder="Ex: 5511..."
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                >Tel 2 (Opcional)</label
+              >
+              <input
+                type="tel"
+                id="modalPhone2"
+                placeholder="Opcional..."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
           </div>
-          <!-- Linha Extra: Hotel e Telefone 2 -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
+
+          <!-- Linha 2: Endereço/Hotel junto com Pax e Malas (4 colunas) -->
+          <div class="grid grid-cols-4 gap-3">
+            <div class="col-span-2 relative">
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
                 >📍 Endereço / Hotel</label
@@ -1684,25 +1696,69 @@
                 id="modalHotel"
                 oninput="capitalizarInput(this)"
                 placeholder="Ex: Hotel NH Tango..."
-                class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >📱 Telefone 2 (Opcional)</label
+                >Pax</label
               >
               <input
-                type="tel"
-                id="modalPhone2"
-                placeholder="Apenas números..."
-                class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 transition"
+                type="number"
+                id="modalPax"
+                min="1"
+                value="1"
+                class="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm text-center focus:border-blue-500 outline-none shadow-sm"
               />
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                >Malas 10k / 23k</label
+              >
+              <div class="grid grid-cols-2 gap-1">
+                <input
+                  type="number"
+                  id="modalBag10"
+                  min="0"
+                  value="0"
+                  title="Malas 10kg"
+                  class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
+                />
+                <input
+                  type="number"
+                  id="modalBag23"
+                  min="0"
+                  value="0"
+                  title="Malas 23kg"
+                  class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
+                />
+              </div>
             </div>
           </div>
 
-          <!-- Linha 2: Data e Hora -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Linha 3: Serviço/Rota junto com Data e Hora (4 colunas) -->
+          <div class="grid grid-cols-4 gap-3">
+            <div class="col-span-2 relative">
+              <label
+                class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
+                >Serviço / Rota</label
+              >
+              <input
+                type="text"
+                id="input-busca-servico-reserva"
+                oninput="capitalizarInput(this)"
+                placeholder="Digite o serviço..."
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
+                required
+              />
+              <input type="hidden" id="reserva-select-categoria" />
+              <ul
+                id="dropdown-servicos-reserva"
+                class="absolute z-[100] w-full left-0 top-[100%] mt-1 bg-white border border-gray-200 rounded-md shadow-2xl max-h-56 overflow-y-auto hidden"
+              ></ul>
+            </div>
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
@@ -1711,7 +1767,7 @@
               <input
                 type="date"
                 id="modalDate"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
             <div>
@@ -1724,35 +1780,13 @@
                 id="modalTime"
                 required
                 value="12:00"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
           </div>
 
-          <!-- Linha 3: Busca Dinâmica de Serviço -->
-          <div class="relative w-full">
-            <label
-              class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-              >Buscar Serviço / Rota</label
-            >
-            <input
-              type="text"
-              id="input-busca-servico-reserva"
-              oninput="capitalizarInput(this)"
-              placeholder="Digite o nome ou categoria do serviço..."
-              class="..."
-            />
-            <input type="hidden" id="reserva-select-categoria" />
-
-            <!-- Lista Suspensa Inteligente -->
-            <ul
-              id="dropdown-servicos-reserva"
-              class="absolute z-[100] w-full left-0 top-[100%] mt-1 bg-white border border-gray-200 rounded-md shadow-2xl max-h-56 overflow-y-auto hidden"
-            ></ul>
-          </div>
-
-          <!-- Linha 4: Motorista e Voo -->
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Linha 4: Motorista, Voo e Valores (4 colunas) -->
+          <div class="grid grid-cols-4 gap-3">
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
@@ -1760,7 +1794,7 @@
               >
               <select
                 id="modalDriverSelect"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               ></select>
             </div>
             <div>
@@ -1772,40 +1806,36 @@
                 type="text"
                 id="modalFlight"
                 placeholder="Ex: AR1250"
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
-          </div>
-
-          <!-- Linha 5: Cobrança e Repasse -->
-          <div class="grid grid-cols-2 gap-3">
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >Cobrança Cliente ($)</label
+                >Cobrança ($)</label
               >
               <input
                 type="number"
                 id="modalValueTotal"
                 required
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >Custo Repasse ($)</label
+                >Custo ($)</label
               >
               <input
                 type="number"
                 id="modalValueDriver"
                 required
-                class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
           </div>
 
-          <!-- Linha 6: Descrição -->
+          <!-- Linha 5: Descrição -->
           <div>
             <label
               class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
@@ -1813,15 +1843,15 @@
             >
             <textarea
               id="modalDesc"
-              rows="2"
+              rows="1"
               placeholder="Ex: Aeroparque -> Hotel NH..."
-              class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
             ></textarea>
           </div>
 
           <button
             type="submit"
-            class="w-full py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md"
+            class="w-full py-2.5 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md"
           >
             Confirmar e Agendar
           </button>
@@ -3633,6 +3663,31 @@
 
       // 1. Função Especialista: Coletar e organizar dados da tela
       function coletarDadosReserva() {
+        // --- Lógica inteligente das Malas ---
+        let qtd10 = document.getElementById("modalBag10")
+          ? parseInt(document.getElementById("modalBag10").value) || 0
+          : 0;
+        let qtd23 = document.getElementById("modalBag23")
+          ? parseInt(document.getElementById("modalBag23").value) || 0
+          : 0;
+
+        let textoBagagem = "";
+        if (qtd10 > 0 && qtd23 > 0) {
+          textoBagagem = `${qtd10}x de 10kg + ${qtd23}x de 23kg`;
+        } else if (qtd10 > 0) {
+          textoBagagem = `${qtd10}x de 10kg`;
+        } else if (qtd23 > 0) {
+          textoBagagem = `${qtd23}x de 23kg`;
+        }
+
+        // Pega o valor digitado no campo de busca de serviço
+        const inputServicoEl = document.getElementById(
+          "input-busca-servico-reserva",
+        );
+        const nomeServicoReal = inputServicoEl
+          ? inputServicoEl.value.trim()
+          : "";
+
         return {
           clientName: document.getElementById("modalClient").value.trim(),
           clientPhone: document.getElementById("modalPhone").value.trim(),
@@ -3649,7 +3704,15 @@
           cat:
             document.getElementById("reserva-select-categoria").value ||
             "Geral",
-          servico: document.getElementById("input-busca-servico-reserva").value,
+
+          // --- GARANTE QUE O NOME DO PASSEIO VAI CORRETAMENTE ---
+          servico: nomeServicoReal,
+
+          pax: document.getElementById("modalPax")
+            ? document.getElementById("modalPax").value + " pax"
+            : "1 pax",
+          bagagens: textoBagagem,
+
           desc: document.getElementById("modalDesc").value,
           driverId: document.getElementById("modalDriverSelect").value,
           flight: document.getElementById("modalFlight").value,
@@ -3659,7 +3722,6 @@
             parseFloat(document.getElementById("modalValueDriver").value) || 0,
         };
       }
-
       // 2. Função Especialista: Gerenciar Cliente no Banco de Dados
       async function processarClienteBanco(nome, whatsapp) {
         if (!window.supabaseClient) return null;
@@ -5115,46 +5177,57 @@
 
         await loadClientTimeline(currentOpenClientId);
       }
-      async function copiarServicoMotorista() {
-        // Pega o nome e o telefone que já estão na tela do dossiê
-        const clientName =
-          document.getElementById("dossierClientName").innerText;
-        const clientPhone =
-          document.getElementById("dossierClientPhone").innerText;
-
-        // Pega a data bonita ("Sábado, 15 de Agosto")
-        const titleEl = document.getElementById("tituloDiaSelecionado");
-        const dataTexto = titleEl
-          ? titleEl.innerText.replace("Agenda: ", "")
-          : selectedDay;
-
-        // Limpa o telefone para o link do WhatsApp
-        const phoneLimpo = clientPhone.replace(/\D/g, "");
-        const linkWhats = phoneLimpo
-          ? `https://wa.me/${phoneLimpo}`
-          : "Não informado";
-
+      window.copiarServicoMotorista = async function () {
         showToast("Gerando rota...", false);
 
-        let reserva = null;
-
         try {
-          // Busca a reserva deste cliente específico neste dia específico
+          // 1. Pega os dados básicos da tela
+          const clientNameEl = document.getElementById("dossierClientName");
+          const clientPhoneEl = document.getElementById("dossierClientPhone");
+          const clientName = clientNameEl
+            ? clientNameEl.innerText.trim()
+            : "Cliente";
+          const clientPhoneTela = clientPhoneEl
+            ? clientPhoneEl.innerText.trim()
+            : "";
+
+          // 2. Formata a data (À prova de falhas: pega a data e cria um texto elegante)
+          let dataTexto = typeof selectedDay !== "undefined" ? selectedDay : "";
+          if (dataTexto && dataTexto.includes("-")) {
+            const [ano, mes, dia] = dataTexto.split("-");
+            const dataObj = new Date(ano, mes - 1, dia);
+            const diaSemana = dataObj.toLocaleDateString("pt-BR", {
+              weekday: "long",
+            });
+            const mesNome = dataObj.toLocaleDateString("pt-BR", {
+              month: "long",
+            });
+            dataTexto = `${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)}, ${dia} de ${mesNome.charAt(0).toUpperCase() + mesNome.slice(1)}`;
+          }
+
+          let reserva = null;
+          let idCliente =
+            typeof currentOpenClientId !== "undefined"
+              ? currentOpenClientId
+              : null;
+          let diaSelecionado =
+            typeof selectedDay !== "undefined" ? selectedDay : "";
+
+          // 3. Busca a reserva no banco de dados
           if (window.isConnectedToSupabase && window.supabaseClient) {
             const { data } = await window.supabaseClient
               .from("reservas")
-              .select("*")
-              .eq("cliente_id", currentOpenClientId)
-              .eq("dia", selectedDay)
+              .select("*, clientes(*)") // Traz os dados do cliente junto para garantir o telefone!
+              .eq("cliente_id", idCliente)
+              .eq("dia", diaSelecionado)
               .limit(1);
 
             if (data && data.length > 0) reserva = data[0];
           } else {
             reserva = databaseAgenda.find(
               (r) =>
-                (r.cliente_id === currentOpenClientId ||
-                  r.cliente === clientName) &&
-                r.dia === selectedDay,
+                (r.cliente_id === idCliente || r.cliente === clientName) &&
+                r.dia === diaSelecionado,
             );
           }
 
@@ -5165,32 +5238,83 @@
             );
           }
 
-          // Monta os dados
-          const tipo = reserva.tipo || "SERVIÇO";
-          const hora = reserva.hora || "--:--";
-          const local =
-            reserva.localizacao || reserva.local || "Endereço não informado";
+          // 4. Trata o Serviço (Garante que pega o nome específico e evita categorias genéricas)
+          let servicoReal =
+            reserva.servico || reserva.nome_servico || reserva.rota || "";
 
-          // Formatação final exigida
+          // Se o que veio na reserva for igual a uma categoria (ou muito genérico), tenta buscar na descrição ou usa o tipo
+          if (
+            !servicoReal ||
+            servicoReal === "TRANSLADOS AEP" ||
+            servicoReal === "PASSEIOS" ||
+            servicoReal === "RECORRIDOS"
+          ) {
+            if (reserva.tipo && reserva.tipo !== servicoReal) {
+              servicoReal = reserva.tipo;
+            }
+          }
+
+          // Se ainda tiver vazio, pega o que estiver no campo
+          if (!servicoReal) servicoReal = reserva.tipo || "SERVIÇO";
+
+          servicoReal = servicoReal.toUpperCase();
+
+          // 5. Trata a Hora
+          const hora = reserva.hora || "--:--";
+
+          // 6. Trata o Local (Limpa palavras como "Hotel/Endereço:" e barras sobrando)
+          let local =
+            reserva.localizacao ||
+            reserva.local ||
+            reserva.hotel ||
+            "Endereço não informado";
+          local = local
+            .replace(/Hotel\/Endereço:\s*/gi, "")
+            .replace(/\|\s*$/g, "")
+            .trim();
+          if (local.endsWith("-")) local = local.slice(0, -1).trim();
+
+          // Se tiver voo, adiciona na frente do local
+          if (reserva.voo && reserva.voo.trim() !== "") {
+            local += ` (Voo: ${reserva.voo})`;
+          }
+
+          // 7. Trata o WhatsApp
+          let telefoneSujo = "";
+          if (reserva.clientes && reserva.clientes.whatsapp)
+            telefoneSujo = reserva.clientes.whatsapp;
+          else if (reserva.whatsapp_cliente)
+            telefoneSujo = reserva.whatsapp_cliente;
+          else if (reserva.whatsapp) telefoneSujo = reserva.whatsapp;
+          else telefoneSujo = clientPhoneTela;
+
+          const phoneLimpo = telefoneSujo.replace(/\D/g, "");
+          const linkWhats =
+            phoneLimpo.length >= 8 ? `wa.me/${phoneLimpo}` : "Não informado";
+
+          // 8. TRATA O PAX E AS MALAS (O nosso toque de Mestre!)
+          let infoPax = reserva.pax ? ` (${reserva.pax})` : "";
+          let infoBagagens =
+            reserva.bagagens && reserva.bagagens !== ""
+              ? ` | 🧳 ${reserva.bagagens}`
+              : "";
+
+          // 9. Monta a mensagem final padronizada
           const textoFinal = `🚐 *SERVIÇO TURISMUNDO* 🚐
 📅 Data: ${dataTexto}
-⏰ Hora: ${hora} | ${tipo.toUpperCase()}
-👤 Pax: ${clientName}
+⏰ Hora: ${hora} | ${servicoReal}
+👤 Pax: ${clientName}${infoPax}${infoBagagens}
 📍 Local: ${local}
 📱 Whats Pax: ${linkWhats}`;
 
-          // Copia para a área de transferência
+          // 10. Copia para a área de transferência
           await navigator.clipboard.writeText(textoFinal);
-          showToast(
-            "✅ Serviço copiado! Pode colar no WhatsApp do motorista.",
-            false,
-          );
+          showToast("✅ Serviço copiado! Pode colar no WhatsApp.", false);
         } catch (err) {
           console.error("Erro ao copiar serviço:", err);
-          showToast("Erro ao copiar os dados.", true);
+          showToast("Erro ao copiar os dados. Tente novamente.", true);
         }
-      }
-
+      };
       function switchDossierTab(tabName) {
         const tabCadastral = document.getElementById("dossierTabCadastral");
         const tabTimeline = document.getElementById("dossierTabTimeline");
