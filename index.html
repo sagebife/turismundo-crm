@@ -872,6 +872,8 @@
                   />
                 </div>
               </div>
+              <div>
+
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -928,39 +930,31 @@
 
           <!-- LISTA DE MOTORISTAS -->
           <section class="lg:col-span-2 space-y-4">
-            <!-- Barra de Busca e Filtros -->
-            <div
-              class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-3 justify-between items-center"
-            >
-              <div class="relative w-full md:w-72">
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"
-                >
-                  <i class="fas fa-search"></i>
-                </span>
-                <input
-                  type="text"
-                  oninput="capitalizarInput(this)"
-                  placeholder="Buscar motorista ou veículo..."
-                  class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                />
-              </div>
+           <!-- Barra de Busca e Filtros -->
+    <div class="flex items-center justify-between gap-4 mb-2">
+      
+      <!-- BARRA DE PESQUISA -->
+      <div class="relative w-full max-w-md">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+        <input 
+          type="text" 
+          placeholder="Buscar motorista ou veículo..." 
+          class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm transition capitalize"
+          oninput="buscarMotorista(this.value)"
+        >
+      </div>
 
-              <div class="flex gap-2 w-full md:w-auto">
-                <span
-                  class="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 w-full md:w-auto justify-center"
-                >
-                  <i class="fas fa-users"></i>
-                  <span id="activeCount">0</span> Ativos
-                </span>
-                <span
-                  class="text-xs bg-blue-50 text-blue-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 w-full md:w-auto justify-center"
-                >
-                  <i class="fas fa-car"></i>
-                  <span id="totalTripsCount">0</span> Viagens total
-                </span>
-              </div>
-            </div>
+      <!-- CONTADORES VERDE E AZUL -->
+      <div class="flex items-center gap-3 whitespace-nowrap">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-100">
+          <i class="fas fa-users"></i> <span id="activeCount">0</span> Ativos
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
+          <i class="fas fa-car-side"></i> <span id="totalTripsCount">0</span> Viagens total
+        </div>
+      </div>
+
+    </div>
 
             <!-- Container Dinâmico -->
             <div id="driversList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2895,19 +2889,81 @@
           if (typeof loadRealData === "function") await loadRealData();
         }
       }
-      function renderDrivers(dataToRender = drivers) {
-        const container = document.getElementById("driversList");
-        if (!container) return;
+      // Função para atualizar as estrelas direto no clique do card
+      async function atualizarNotaMotorista(driverId, novaNota) {
+        if (window.isConnectedToSupabase && window.supabaseClient) {
+          try {
+            // Atualiza direto no banco de dados
+            const { error } = await window.supabaseClient
+              .from("motoristas")
+              .update({ avaliacao: novaNota })
+              .eq("id", driverId);
 
-        // 1. Processamos todo o HTML na memória de forma ultrarrápida
-        const driversHTML = dataToRender
-          .map((driver) => {
-            let stars = "";
-            for (let i = 0; i < 5; i++) {
-              stars += `<i class="fas fa-star ${i < driver.avaliacao ? "text-amber-400" : "text-gray-200"} text-xs"></i>`;
-            }
+            if (error) throw error;
 
-            return `
+            // Recarrega os dados silenciosamente para a tela atualizar
+            loadRealData();
+          } catch (err) {
+            console.error("Erro ao atualizar nota:", err);
+            showToast("Erro ao atualizar a avaliação.", true);
+          }
+        } else {
+          // Se estiver offline/simulação, atualiza localmente
+          const index = drivers.findIndex(
+            (d) => String(d.id) === String(driverId),
+          );
+          if (index > -1) {
+            drivers[index].avaliacao = novaNota;
+            renderDrivers(); // Re-renderiza a tela local
+          }
+        }
+      }
+   function renderDrivers(dataToRender = drivers) {
+    const container = document.getElementById("driversList");
+    if (!container) return;
+
+    let totalViagensTodos = 0; // Para o contador geral do topo da página
+
+    // --- ANTÍDOTO ANTI-DANÇA & ORDEM DE ELITE (ESTRELAS) ---
+    const motoristasOrdenados = [...dataToRender].sort((a, b) => {
+        // Pega a nota de cada um (se não tiver, assume 5)
+        const notaA = a.avaliacao !== undefined ? Number(a.avaliacao) : 5;
+        const notaB = b.avaliacao !== undefined ? Number(b.avaliacao) : 5;
+        
+        // 1ª Regra: Quem tem mais estrelas fica no topo (Ordem Decrescente)
+        if (notaB !== notaA) {
+            return notaB - notaA; 
+        }
+        
+        // 2ª Regra (Desempate): Se tiverem a mesma quantidade de estrelas, organiza por ordem alfabética
+        return String(a.nome).localeCompare(String(b.nome));
+    });
+
+    // 1. Processamos todo o HTML na memória
+    const driversHTML = motoristasOrdenados.map((driver) => {
+        // --- Contadores Reais ---
+        const corridasReais = typeof databaseAgenda !== "undefined"
+            ? databaseAgenda.filter(
+                (item) => String(item.motorista) === String(driver.nome) || String(item.motorista_id) === String(driver.id)
+            ) : [];
+
+        const qtdCorridas = corridasReais.length;
+        totalViagensTodos += qtdCorridas;
+
+        const repasseTotalGerado = corridasReais.reduce(
+            (sum, item) => sum + (Number(item.valorMotorista) || 0), 0
+        );
+
+        // --- SISTEMA DE ESTRELAS CLICÁVEIS ---
+        const nota = driver.avaliacao !== undefined ? Number(driver.avaliacao) : 5;
+        let stars = "";
+        for (let i = 1; i <= 5; i++) {
+            stars += `<i onclick="atualizarNotaMotorista('${driver.id}', ${i})" 
+                         class="fas fa-star cursor-pointer transition-transform hover:scale-125 ${i <= nota ? "text-amber-400" : "text-gray-200"} text-xs" 
+                         title="Dar nota ${i}"></i>`;
+        }
+
+        return `
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
           <div>
             <div class="flex items-start justify-between mb-3">
@@ -2917,11 +2973,10 @@
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
-                  <div class="flex gap-1 mt-1">${stars}</div>
+                  <div class="flex gap-1 mt-1" title="Avaliação: ${nota} Estrelas">${stars}</div>
                 </div>
               </div>
               
-              <!-- AQUI ESTÁ A MUDANÇA CIRÚRGICA: Os dois botões alinhados sem quebrar as caixas -->
               <div class="flex items-center gap-2">
                 <button onclick="editDriver('${driver.id}')" class="text-gray-300 hover:text-blue-500 transition text-sm p-1" title="Editar">
                   <i class="fas fa-pen"></i>
@@ -2930,7 +2985,6 @@
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </div>
-
             </div>
 
             <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
@@ -2950,10 +3004,10 @@
 
             <div class="space-y-1 text-xs mb-4">
               <p class="flex justify-between items-center">
-                <span class="text-gray-500 font-medium">💵 Valor Combinado:</span>
-                <span class="font-bold text-emerald-600 text-sm">${driver.valor} ${driver.moeda}</span>
+                <span class="text-gray-500 font-medium">💰 Repasse Histórico:</span>
+                <span class="font-bold text-emerald-600 text-sm">R$ ${repasseTotalGerado.toFixed(2)}</span>
               </p>
-              <div class="flex justify-between items-center gap-2">
+              <div class="flex justify-between items-center gap-2 mt-1">
                 <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
                 <div class="flex items-center gap-1.5">
                   <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
@@ -2974,34 +3028,49 @@
               class="py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
               <i class="fas fa-file-invoice"></i> Extrato
             </button>
-            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1">
-              <i class="fas fa-route text-blue-500"></i> ${driver.corridas}v
+            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1" title="${qtdCorridas} Viagens Realizadas">
+              <i class="fas fa-route text-blue-500"></i> ${qtdCorridas}v
             </div>
           </div>
         </div>
-      `;
-          })
-          .join("");
+        `;
+    }).join("");
 
-        // 2. Injetamos no DOM apenas UMA única vez (Otimização Extrema)
-        container.innerHTML = driversHTML;
+    // 2. Injeta no DOM
+    container.innerHTML = driversHTML;
 
-        // 3. Atualizamos as métricas da aba
-        const activeCountEl = document.getElementById("activeCount");
-        const totalTripsEl = document.getElementById("totalTripsCount");
+    // 3. Atualizamos as métricas gerais
+    const activeCountEl = document.getElementById("activeCount");
+    const totalTripsEl = document.getElementById("totalTripsCount");
 
-        if (activeCountEl) activeCountEl.innerText = dataToRender.length;
-        if (totalTripsEl) {
-          const totalTrips = dataToRender.reduce(
-            (sum, d) => sum + Number(d.corridas || 0),
-            0,
-          );
-          totalTripsEl.innerText = totalTrips;
+    if (activeCountEl) activeCountEl.innerText = dataToRender.length;
+    if (totalTripsEl) totalTripsEl.innerText = totalViagensTodos;
+}
+async function atualizarNotaMotorista(driverId, novaNota) {
+    // 1. Atualização Visual Instantânea (UX de Alta Performance)
+    // Achamos o motorista na lista atual e mudamos a nota dele localmente na mesma hora
+    const motoristaLocal = drivers.find((d) => String(d.id) === String(driverId));
+    if (motoristaLocal) {
+        motoristaLocal.avaliacao = novaNota;
+        renderDrivers(); // Re-renderiza na hora, sem esperar a internet
+    }
+
+    // 2. Atualiza no Banco de Dados em Background
+    if (window.isConnectedToSupabase && window.supabaseClient) {
+        try {
+            const { error } = await window.supabaseClient
+                .from("motoristas")
+                .update({ avaliacao: novaNota })
+                .eq("id", driverId);
+
+            if (error) throw error;
+            // Retiramos o loadRealData() daqui para a tela não dar "refresh" desnecessário e piscar.
+        } catch (err) {
+            console.error("Erro ao atualizar nota:", err);
+            showToast("Erro ao sincronizar a nova avaliação.", true);
         }
-      }
-      // A MEMÓRIA DO SISTEMA: Lembra qual motorista estamos editando
-      let motoristaEmEdicaoId = null;
-
+    }
+}
       // 1. Função Edit atualizada (agora ela avisa o sistema que estamos editando)
       function editDriver(id) {
         const motorista = drivers.find((d) => String(d.id) === String(id));
@@ -3071,6 +3140,7 @@
                   valor_combinado: parseFloat(value),
                   moeda: currency,
                   capacidade: parseInt(capacity),
+                  // NOTA INTOCADA: Não mexemos na avaliação aqui para não resetar as estrelas!
                 })
                 .eq("id", motoristaEmEdicaoId); // Garante que altera só o cara certo
 
@@ -3090,6 +3160,7 @@
                     valor_combinado: parseFloat(value),
                     moeda: currency,
                     capacidade: parseInt(capacity),
+                    avaliacao: 5, // <--- Todo parceiro novo nasce com 5 estrelas!
                   },
                 ]);
 
@@ -3131,6 +3202,7 @@
                 valor: value,
                 moeda: currency,
                 capacidade: capacity,
+                // Avaliação intocada na edição local também
               };
               showToast("Alterações salvas na simulação!", false);
             }
@@ -3151,7 +3223,7 @@
               valor: value,
               moeda: currency,
               capacidade: capacity,
-              avaliacao: 5,
+              avaliacao: 5, // <--- Nasce com 5 estrelas na simulação
               corridas: 0,
             };
             drivers.unshift(newDriver);
@@ -3162,7 +3234,6 @@
           resetarFormularioMotorista();
         }
       }
-
       // 3. Função para limpar a casa depois de salvar
       function resetarFormularioMotorista() {
         const form = document.getElementById("driverForm");
@@ -4833,85 +4904,174 @@
       // ==========================================
       let motoristaExtratoAtual = null;
 
-      function abrirExtratoMotorista(driverId, driverName, driverPhone) {
-        motoristaExtratoAtual = {
-          id: driverId,
-          nome: driverName,
-          telefone: driverPhone,
-        };
+   // 1. Função Matemática Auxiliar (Descobre os dias da semana selecionada)
+function getExtremosDaSemanaISO(semanaISO) {
+    if (!semanaISO) return null;
+    const [anoStr, semanaStr] = semanaISO.split('-W');
+    const ano = parseInt(anoStr, 10);
+    const semana = parseInt(semanaStr, 10);
 
-        // Atualiza o título do modal
-        document.getElementById("titulo-extrato-motorista").innerHTML = `
-          <i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato: ${driverName}
+    const jan4 = new Date(ano, 0, 4);
+    const diaJan4 = jan4.getDay() || 7;
+    const segundaSemana1 = new Date(ano, 0, 4 - diaJan4 + 1);
+    
+    const inicioSemana = new Date(segundaSemana1);
+    inicioSemana.setDate(segundaSemana1.getDate() + (semana - 1) * 7);
+    
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 6);
+
+    const pad = (n) => n.toString().padStart(2, '0');
+    return {
+        inicio: `${inicioSemana.getFullYear()}-${pad(inicioSemana.getMonth() + 1)}-${pad(inicioSemana.getDate())}`,
+        fim: `${fimSemana.getFullYear()}-${pad(fimSemana.getMonth() + 1)}-${pad(fimSemana.getDate())}`
+    };
+}
+
+// 2. O "Motor" que refaz a tabela sempre que a semana muda
+function renderizarFiltroSemanaExtrato() {
+    const inputFiltroSemana = document.querySelector("#modal-extrato-motorista input[type='week']");
+    if (!inputFiltroSemana || !motoristaExtratoAtual) return;
+
+    const limites = getExtremosDaSemanaISO(inputFiltroSemana.value);
+    if (!limites) return;
+
+    let corridasMotorista = typeof databaseAgenda !== 'undefined' ? databaseAgenda.filter(
+        (item) => String(item.motorista) === String(motoristaExtratoAtual.nome) || String(item.motorista_id) === String(motoristaExtratoAtual.id)
+    ) : [];
+
+    // Filtra apenas viagens que caem entre Segunda e Domingo da semana escolhida
+    corridasMotorista = corridasMotorista.filter(corrida => {
+        if (!corrida.dia) return false;
+        return corrida.dia >= limites.inicio && corrida.dia <= limites.fim;
+    });
+
+    // Ordem cronológica
+    corridasMotorista.sort((a, b) => new Date(`${a.dia}T${a.hora || "00:00"}`) - new Date(`${b.dia}T${b.hora || "00:00"}`));
+
+    let repasseTotalPendente = 0;
+    let repasseTotalSemana = 0;
+
+    const linhasTabela = corridasMotorista.map((corrida) => {
+        const valorRepasse = Number(corrida.valorMotorista) || 0;
+        const estaPago = corrida.pagoMotorista;
+        
+        repasseTotalSemana += valorRepasse; // Soma Bruta
+        if (!estaPago) repasseTotalPendente += valorRepasse; // Soma Pendente
+
+        const badgeStatus = estaPago
+            ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Pago</span>`
+            : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-clock"></i> Pendente</span>`;
+
+        let dataBR = corrida.dia || "--";
+        if (corrida.dia && corrida.dia.includes("-")) {
+            const partes = corrida.dia.split("-");
+            if (partes.length === 3) dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        return `
+            <tr class="hover:bg-gray-50 transition">
+                <td class="p-3">
+                    <div class="font-bold text-gray-800">${dataBR}</div>
+                    <div class="text-[10px] text-gray-500">${corrida.hora || "--:--"}</div>
+                </td>
+                <td class="p-3">
+                    <div class="font-bold text-gray-800">${corrida.cliente || "Cliente Oculto"}</div>
+                    <div class="text-[10px] text-gray-500 truncate max-w-[150px]">${corrida.localizacao || corrida.tipo}</div>
+                </td>
+                <td class="p-3 text-right font-black text-red-600">
+                    R$ ${valorRepasse.toFixed(2)}
+                </td>
+                <td class="p-3 text-center">${badgeStatus}</td>
+            </tr>
         `;
+    }).join("");
 
-        // 1. Filtra as viagens deste motorista específico
-        const corridasMotorista = databaseAgenda.filter(
-          (item) =>
-            String(item.motorista) === String(driverName) ||
-            String(item.motorista_id) === String(driverId),
-        );
+    const tbody = document.getElementById("extrato-tabela-corridas");
+    if (tbody) {
+        // Agora usa o nome correto, resolvendo aquele bug do texto gigante
+        tbody.innerHTML = linhasTabela || `<tr><td colspan="4" class="text-center p-4 text-gray-500 text-xs">Nenhuma viagem de <b>${motoristaExtratoAtual.nome}</b> na semana selecionada.</td></tr>`;
+    }
 
-        let repasseTotalPendente = 0;
+    const formatadorMoeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+    
+    // Atualiza separadamente o Faturado e o Pendente
+    const labelFaturado = document.getElementById("extrato-faturado-semana");
+    if(labelFaturado) labelFaturado.innerText = formatadorMoeda.format(repasseTotalSemana);
+    document.getElementById("extrato-total-pendente").innerText = formatadorMoeda.format(repasseTotalPendente);
+}
 
-        // 2. Prepara as linhas da tabela
-        const linhasTabela = corridasMotorista
-          .map((corrida) => {
-            const valorRepasse = Number(corrida.valorMotorista) || 0;
-            const estaPago = corrida.pagoMotorista;
+// 3. A Função que abre o modal pela primeira vez
+function abrirExtratoMotorista(driverId, driverName, driverPhone) {
+    motoristaExtratoAtual = { id: driverId, nome: driverName, telefone: driverPhone };
 
-            if (!estaPago) {
-              repasseTotalPendente += valorRepasse;
-            }
+    // Desenha o título com um local específico (ID) para injetarmos o valor bruto depois
+    document.getElementById("titulo-extrato-motorista").innerHTML = `
+        <div class="flex flex-col gap-1.5">
+            <div><i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato: ${driverName}</div>
+            <div class="text-[11px] font-medium text-gray-500 bg-gray-50 border border-gray-200 w-fit px-2.5 py-0.5 rounded-md shadow-sm">
+                Faturado na Semana: <span id="extrato-faturado-semana" class="font-bold text-gray-800">R$ 0,00</span>
+            </div>
+        </div>
+    `;
 
-            const badgeStatus = estaPago
-              ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Pago</span>`
-              : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-clock"></i> Pendente</span>`;
+    const inputFiltroSemana = document.querySelector("#modal-extrato-motorista input[type='week']");
+    if (inputFiltroSemana) {
+        // Força a semana atual ao abrir
+        const hoje = new Date();
+        const d = new Date(Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        const weekString = `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
+        
+        inputFiltroSemana.value = weekString;
+        
+        // --- AS DUAS MÁGICAS NOVAS AQUI ---
+        // 1. O Fofoqueiro: Se mudar o input, roda a função que atualiza a tabela
+        inputFiltroSemana.onchange = renderizarFiltroSemanaExtrato; 
+        
+        // 2. A UX Premium: Clicou em qualquer parte da caixa, abre o calendário
+        inputFiltroSemana.onclick = function() { this.showPicker(); };
+    }
 
-            return `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="p-3">
-                        <div class="font-bold text-gray-800">${corrida.dia || "--"}</div>
-                        <div class="text-[10px] text-gray-500">${corrida.hora || "--:--"}</div>
-                    </td>
-                    <td class="p-3">
-                        <div class="font-bold text-gray-800">${corrida.cliente || "Cliente Oculto"}</div>
-                        <div class="text-[10px] text-gray-500 truncate max-w-[150px]">${corrida.localizacao || corrida.tipo}</div>
-                    </td>
-                    <td class="p-3 text-right font-black text-red-600">
-                        R$ ${valorRepasse.toFixed(2)}
-                    </td>
-                    <td class="p-3 text-center">
-                        ${badgeStatus}
-                    </td>
-                </tr>
-            `;
-          })
-          .join("");
+    // Roda a tabela pela primeira vez com a semana atual
+    renderizarFiltroSemanaExtrato();
 
-        // 3. Injeta no DOM
-        const tbody = document.getElementById("extrato-tabela-corridas");
-        if (tbody) {
-          tbody.innerHTML =
-            linhasTabela ||
-            `<tr><td colspan="4" class="text-center p-4 text-gray-500 text-xs">Nenhuma corrida registrada para este motorista.</td></tr>`;
-        }
+    const modal = document.getElementById("modal-extrato-motorista");
+    if (modal) {
+        modal.classList.remove("hidden");
+    }
+}
+// Função de pesquisa em tempo real (Definitiva e Inteligente)
+function buscarMotorista(termo) {
+    const busca = (termo || "").toLowerCase().trim();
 
-        // 4. Atualiza o valor total no topo do modal
-        const formatadorMoeda = new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        });
-        document.getElementById("extrato-total-pendente").innerText =
-          formatadorMoeda.format(repasseTotalPendente);
+    // Se o campo estiver vazio, mostra todo mundo
+    if (busca.length === 0) {
+        renderDrivers(drivers); // 'drivers' é sua lista global original
+        return;
+    }
 
-        // 5. Exibe o modal
-        const modal = document.getElementById("modal-extrato-motorista");
-        if (modal) {
-          modal.classList.remove("hidden");
-        }
-      }
+    const motoristasFiltrados = drivers.filter((driver) => {
+        const nome = String(driver.nome || "").toLowerCase();
+        const veiculo = String(driver.veiculo || "").toLowerCase();
+        const placa = String(driver.placa || "").toLowerCase();
 
+        // MÁGICA AQUI: Bate se o nome/veículo COMEÇA com o texto, 
+        // OU se alguma palavra no meio COMEÇA com o texto (tem um espaço antes).
+        const nomeBate = nome.startsWith(busca) || nome.includes(' ' + busca);
+        const veiculoBate = veiculo.startsWith(busca) || veiculo.includes(' ' + busca);
+        
+        // A placa a gente deixa procurar em qualquer parte mesmo
+        const placaBate = placa.includes(busca);
+
+        return nomeBate || veiculoBate || placaBate;
+    });
+
+    renderDrivers(motoristasFiltrados);
+}
       function enviarExtratoWhatsApp() {
         if (!motoristaExtratoAtual) return;
 
