@@ -367,69 +367,42 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- COLUNA ESQUERDA: NOTÍCIAS, ALERTAS & MENSAGENS -->
           <section class="lg:col-span-1 space-y-4">
-            <!-- 1. BUENOS AIRES AO VIVO & LINK DA CIDADE -->
-            <div
-              class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <h3
-                  class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"
-                >
+            <!-- 1. BUENOS AIRES AO VIVO (Rotativo e Gerenciável) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3 relative overflow-hidden">
+              
+              <!-- CABEÇALHO DO CARD CLICÁVEL -->
+              <div class="flex items-center justify-between mb-1 relative z-10">
+                <h3 onclick="abrirGerenciadorBA()" class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 cursor-pointer hover:text-blue-600 transition group" title="Gerenciar avisos ao vivo">
                   <span>🇦🇷</span> Buenos Aires ao Vivo
+                  <i class="fas fa-cog text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </h3>
-                <span
-                  class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1"
-                >
-                  <span
-                    class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"
-                  ></span>
+                <span class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span>
                   Rotativo
                 </span>
               </div>
 
-              <div class="relative overflow-hidden h-[60px] flex items-center">
-                <div
-                  id="tickerNewsCard"
-                  class="w-full p-2.5 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-0.5 transition-all duration-500 opacity-100 transform translate-y-0"
-                >
-                  <div class="flex justify-between items-center">
-                    <span
-                      id="tickerCategory"
-                      class="text-[9px] font-extrabold text-blue-900 uppercase"
-                      >Trânsito / Alerta</span
-                    >
-                    <span id="tickerTime" class="text-[9px] text-gray-400"
-                      >Há 15 min</span
-                    >
+              <!-- CONTAINER DO TICKER (Ajustado para mensagens longas) -->
+              <div onclick="abrirGerenciadorBA()" class="w-full h-[75px] relative cursor-pointer group" title="Clique para gerenciar avisos">
+                  <div id="tickerNewsCard" class="absolute inset-0 w-full p-3 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-1 transition-all duration-300 transform opacity-100 translate-y-0 group-hover:border-blue-200 group-hover:shadow-sm overflow-hidden">
+                    <div class="flex justify-between items-center">
+                      <span id="bavivo-categoria" class="text-[9px] font-extrabold text-blue-900 uppercase truncate max-w-[60%]"></span>
+                      <span id="bavivo-tempo" class="text-[9px] text-gray-400 shrink-0"></span>
+                    </div>
+                    <!-- AQUI A MÁGICA: line-clamp-2 permite 2 linhas antes de colocar "..." -->
+                    <p id="bavivo-mensagem" class="text-xs text-gray-700 leading-snug line-clamp-2 font-medium">
+                    </p>
                   </div>
-                  <p
-                    id="tickerText"
-                    class="text-xs text-gray-700 leading-tight"
-                  >
-                    Avenida 9 de Julho com interrupções parciais devido a evento
-                    cultural no Obelisco.
-                  </p>
-                </div>
               </div>
 
               <!-- Link Rápido para a Agenda Oficial da Cidade -->
-              <div
-                class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs"
-              >
-                <span class="text-gray-500 font-medium"
-                  >📅 Programação da Cidade:</span
-                >
-                <a
-                  href="https://linda.buenosaires.gob.ar/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-purple-600 font-bold hover:underline flex items-center gap-1"
-                >
-                  Ver Agenda Oficial ↗
+              <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs relative z-10">
+                <span class="text-gray-500 font-medium">📅 Programação da Cidade:</span>
+                <a id="bavivo-link" href="https://linda.buenosaires.gob.ar/" target="_blank" class="text-purple-600 font-bold hover:underline flex items-center gap-1">
+                  Ver Agenda ↗
                 </a>
               </div>
             </div>
-
             <!-- 2. Painel de Atenção / Alertas -->
             <div
               class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
@@ -7195,6 +7168,208 @@ function verDetalhesDoDia(dataISO) {
     if (typeof renderDias === 'function') renderDias();
     if (typeof initAgenda === 'function') initAgenda();
 }
+// --- SISTEMA MÚLTIPLO: BUENOS AIRES AO VIVO (LocalStorage + Ticker) ---
+let listaAvisosBA = [];
+let indiceTickerBA = 0;
+let intervaloTickerBA = null;
+
+// Inicializa o sistema ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    carregarAvisosBA();
+});
+
+function carregarAvisosBA() {
+    const dadosSalvos = localStorage.getItem('turismundo_bavivo_lista');
+    if (dadosSalvos) {
+        listaAvisosBA = JSON.parse(dadosSalvos);
+    } else {
+        // Aviso padrão de boas-vindas se estiver vazio
+        listaAvisosBA = [{
+            id: Date.now(),
+            categoria: "Turismo & Agenda",
+            tempo: "Hoje",
+            mensagem: "Bem-vindo ao CRM Turismundo! Clique na engrenagem para adicionar avisos rotativos.",
+            link: "https://linda.buenosaires.gob.ar/"
+        }];
+    }
+    iniciarTickerBA();
+}
+
+function iniciarTickerBA() {
+    clearInterval(intervaloTickerBA);
+    if (listaAvisosBA.length === 0) {
+        atualizarCardVisualBA({ categoria: "Sem Avisos", tempo: "-", mensagem: "Nenhum aviso cadastrado. Clique para gerenciar.", link: "#" });
+        return;
+    }
+
+    // Mostra o primeiro imediatamente
+    indiceTickerBA = 0;
+    atualizarCardVisualBA(listaAvisosBA[indiceTickerBA]);
+
+    // Se tiver mais de um, começa a girar a cada 5 segundos
+    if (listaAvisosBA.length > 1) {
+        intervaloTickerBA = setInterval(() => {
+            indiceTickerBA = (indiceTickerBA + 1) % listaAvisosBA.length;
+            animarTrocaTickerBA(listaAvisosBA[indiceTickerBA]);
+        }, 5000);
+    }
+}
+
+// Faz a transição de saída e entrada suave
+function animarTrocaTickerBA(aviso) {
+    const card = document.getElementById("tickerNewsCard");
+    
+    // Animação de saída (desce e fica transparente)
+    card.classList.remove("opacity-100", "translate-y-0");
+    card.classList.add("opacity-0", "translate-y-2");
+
+    setTimeout(() => {
+        // Troca o texto enquanto está invisível
+        atualizarCardVisualBA(aviso);
+        
+        // Animação de entrada (sobe e aparece)
+        card.classList.remove("opacity-0", "translate-y-2");
+        card.classList.add("opacity-100", "translate-y-0");
+    }, 300); // 300ms de transição
+}
+
+function atualizarCardVisualBA(aviso) {
+    const elCategoria = document.getElementById("bavivo-categoria");
+    document.getElementById("bavivo-tempo").innerText = aviso.tempo || "";
+    document.getElementById("bavivo-mensagem").innerText = aviso.mensagem || "";
+    
+    const linkEl = document.getElementById("bavivo-link");
+    if(linkEl) linkEl.setAttribute("href", aviso.link && aviso.link !== "#" ? aviso.link : "https://linda.buenosaires.gob.ar/");
+
+    elCategoria.innerText = aviso.categoria || "";
+    
+    // Aplicação manual da cor escolhida pelo usuário
+    elCategoria.className = "text-[9px] font-extrabold uppercase ";
+    const cor = aviso.cor || "azul";
+    
+    if (cor === "vermelho") {
+        elCategoria.className += "text-red-600";
+    } else if (cor === "verde") {
+        elCategoria.className += "text-emerald-600";
+    } else if (cor === "amarelo") {
+        elCategoria.className += "text-amber-600";
+    } else if (cor === "roxo") {
+        elCategoria.className += "text-purple-600";
+    } else {
+        elCategoria.className += "text-blue-900"; // Azul padrão
+    }
+}
+
+// --- FUNÇÕES DO GERENCIADOR (MODAL) ---
+
+function abrirGerenciadorBA() {
+    const modal = document.getElementById("modal-bavivo");
+    if (!modal) return;
+    
+    voltarParaListaBA(); // Garante que abre na lista
+    renderizarListaAvisosBA();
+    
+    modal.classList.remove("hidden");
+    setTimeout(() => {
+        modal.classList.remove("opacity-0");
+        modal.querySelector('div').classList.remove("scale-95");
+    }, 10);
+}
+
+function fecharGerenciadorBA() {
+    const modal = document.getElementById("modal-bavivo");
+    modal.classList.add("opacity-0");
+    modal.querySelector('div').classList.add("scale-95");
+    setTimeout(() => modal.classList.add("hidden"), 300);
+}
+
+function renderizarListaAvisosBA() {
+    const container = document.getElementById("lista-avisos-container");
+    if (listaAvisosBA.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs text-gray-400 py-6">Nenhum aviso cadastrado.</div>`;
+        return;
+    }
+
+    container.innerHTML = listaAvisosBA.map(aviso => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl hover:shadow-sm transition">
+            <div class="flex-1 min-w-0 pr-3">
+                <p class="text-[10px] font-bold text-blue-900 uppercase">${aviso.categoria}</p>
+                <p class="text-xs text-gray-600 truncate">${aviso.mensagem}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="mostrarFormularioBA(${aviso.id})" class="w-7 h-7 flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-lg transition" title="Editar">
+                    <i class="fas fa-pencil-alt text-[10px]"></i>
+                </button>
+                <button onclick="excluirAvisoBA(${aviso.id})" class="w-7 h-7 flex items-center justify-center bg-white text-red-500 hover:bg-red-50 border border-red-100 rounded-lg transition" title="Excluir">
+                    <i class="fas fa-trash text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    `).join("");
+}
+
+function mostrarFormularioBA(idEditar) {
+    document.getElementById("bavivo-view-lista").classList.add("hidden");
+    document.getElementById("bavivo-view-form").classList.remove("hidden");
+
+    if (idEditar) {
+        const aviso = listaAvisosBA.find(a => a.id === idEditar);
+        document.getElementById("input-ba-id").value = aviso.id;
+        document.getElementById("input-ba-categoria").value = aviso.categoria;
+        document.getElementById("input-ba-cor").value = aviso.cor || "azul";
+        document.getElementById("input-ba-tempo").value = aviso.tempo;
+        document.getElementById("input-ba-mensagem").value = aviso.mensagem;
+        document.getElementById("input-ba-link").value = aviso.link === "#" ? "" : aviso.link;
+    } else {
+        // Novo Aviso
+        document.getElementById("input-ba-id").value = "";
+        document.getElementById("input-ba-categoria").value = "";
+        document.getElementById("input-ba-cor").value = "azul";
+        document.getElementById("input-ba-tempo").value = "Hoje";
+        document.getElementById("input-ba-mensagem").value = "";
+        document.getElementById("input-ba-link").value = "";
+    }
+}
+
+function voltarParaListaBA() {
+    document.getElementById("bavivo-view-form").classList.add("hidden");
+    document.getElementById("bavivo-view-lista").classList.remove("hidden");
+}
+
+function salvarAvisoBA() {
+    const idField = document.getElementById("input-ba-id").value;
+    
+    const novoAviso = {
+        id: idField ? parseInt(idField) : Date.now(),
+        categoria: document.getElementById("input-ba-categoria").value.trim() || "Aviso",
+        cor: document.getElementById("input-ba-cor").value, // Salva a cor escolhida
+        tempo: document.getElementById("input-ba-tempo").value.trim() || "Agora",
+        mensagem: document.getElementById("input-ba-mensagem").value.trim() || "Sem detalhes.",
+        link: document.getElementById("input-ba-link").value.trim() || "#"
+    };
+
+    if (idField) {
+        const index = listaAvisosBA.findIndex(a => a.id === parseInt(idField));
+        if(index > -1) listaAvisosBA[index] = novoAviso;
+    } else {
+        listaAvisosBA.push(novoAviso);
+    }
+
+    localStorage.setItem('turismundo_bavivo_lista', JSON.stringify(listaAvisosBA));
+    iniciarTickerBA();
+    voltarParaListaBA();
+    renderizarListaAvisosBA();
+}
+
+function excluirAvisoBA(id) {
+    if(!confirm("Tem certeza que deseja excluir este aviso?")) return;
+    
+    listaAvisosBA = listaAvisosBA.filter(a => a.id !== id);
+    localStorage.setItem('turismundo_bavivo_lista', JSON.stringify(listaAvisosBA));
+    
+    iniciarTickerBA();
+    renderizarListaAvisosBA();
+}
     </script>
     <!-- Template PDF Oculto -->
     <div
@@ -7504,6 +7679,75 @@ function verDetalhesDoDia(dataISO) {
           </div>
       </div>
   </div>
+</div>
+<!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
+<!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
+<div id="modal-bavivo" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+        
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+            <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-broadcast-tower text-blue-600"></i> Avisos ao Vivo
+            </h3>
+            <button onclick="fecharGerenciadorBA()" class="text-gray-400 hover:text-red-500 transition p-1">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- TELA 1: LISTA DE AVISOS -->
+        <div id="bavivo-view-lista" class="p-5 overflow-y-auto flex-1 bg-white">
+            <button onclick="mostrarFormularioBA(null)" class="w-full mb-4 py-3 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700 text-xs font-bold rounded-xl transition flex justify-center items-center gap-2">
+                <i class="fas fa-plus"></i> Adicionar Novo Aviso
+            </button>
+            <div id="lista-avisos-container" class="space-y-3">
+                <!-- Os cards da lista serão gerados via JS -->
+            </div>
+        </div>
+
+        <!-- TELA 2: FORMULÁRIO (Adicionar / Editar) -->
+        <div id="bavivo-view-form" class="p-5 hidden overflow-y-auto flex-1 bg-white space-y-4">
+            <input type="hidden" id="input-ba-id">
+            
+            <!-- Linha de Categoria e Seletor de Cores -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Categoria (Ex: Trânsito)</label>
+                    <input type="text" id="input-ba-categoria" placeholder="Trânsito / Alerta" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cor do Rótulo</label>
+                    <select id="input-ba-cor" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-bold">
+                        <option value="azul">🔵 Azul Padrão</option>
+                        <option value="verde">🟢 Verde Turístico</option>
+                        <option value="vermelho">🔴 Vermelho Alerta</option>
+                        <option value="amarelo">🟡 Amarelo Atenção</option>
+                        <option value="roxo">🟣 Roxo Especial</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tempo (Ex: Hoje, Há 15 min)</label>
+                <input type="text" id="input-ba-tempo" placeholder="Hoje" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Mensagem do Alerta</label>
+                <textarea id="input-ba-mensagem" rows="3" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Link (Opcional)</label>
+                <input type="text" id="input-ba-link" placeholder="https://..." class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
+            </div>
+            
+            <div class="pt-2 border-t border-gray-100 flex justify-end gap-2">
+                <button onclick="voltarParaListaBA()" class="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition">Voltar</button>
+                <button onclick="salvarAvisoBA()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm">Salvar Aviso</button>
+            </div>
+        </div>
+
+    </div>
 </div>
   </body>
 </html>
