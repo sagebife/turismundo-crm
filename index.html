@@ -1227,7 +1227,8 @@
                     id="input-busca-servico"
                     placeholder="Digite para buscar..."
                     class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                    autocomplete="off"
+                    autocomplete="new-password"
+                    
                   />
                   <input type="hidden" id="orc-select-servico" />
 
@@ -1615,6 +1616,7 @@
               <input
                 type="text"
                 id="modalClient"
+                autocomplete="new-password"
                 oninput="capitalizarInput(this)"
                 required
                 placeholder="Ex: Lucas Ramos"
@@ -2212,77 +2214,89 @@
           initSupabase();
         }
       });
-      async function loadRealData() {
-        if (!window.isConnectedToSupabase || !window.supabaseClient) return;
+     async function loadRealData() {
+    if (!window.isConnectedToSupabase || !window.supabaseClient) return;
 
-        try {
-          let { data: dbDrivers, error: driverErr } =
+    try {
+        let { data: dbDrivers, error: driverErr } =
             await window.supabaseClient.from("motoristas").select("*");
-          if (driverErr) throw driverErr;
+        if (driverErr) throw driverErr;
 
-          if (dbDrivers) {
-            drivers = dbDrivers.map((d) => ({
-              id: d.id,
-              nome: d.nome,
-              telefone: d.telefone,
-              veiculo: d.veiculo,
-              placa: d.placa,
-              pix: d.pix,
-              valor: d.valor_combinado,
-              moeda: d.moeda,
-              capacidade: d.capacidade,
-              avaliacao: d.avaliacao,
-              corridas: d.corridas,
+        if (dbDrivers) {
+            // CORREÇÃO: Salvando diretamente na variável global do nosso novo módulo drivers.js
+            window.drivers = dbDrivers.map((d) => ({
+                id: d.id,
+                nome: d.nome,
+                telefone: d.telefone,
+                veiculo: d.veiculo,
+                placa: d.placa,
+                pix: d.pix,
+                valor: d.valor_combinado,
+                moeda: d.moeda,
+                capacidade: d.capacidade,
+                avaliacao: d.avaliacao,
+                corridas: d.corridas,
             }));
-          }
+            
+            // Fallback: mantém a variável antiga atualizada caso outro script antigo precise dela
+            if (typeof drivers !== 'undefined') drivers = window.drivers;
+        }
 
-          let { data: dbReservas, error: resErr } = await window.supabaseClient
+        let { data: dbReservas, error: resErr } = await window.supabaseClient
             .from("reservas")
             .select(
-              "*, clientes(nome, whatsapp), motoristas(nome, valor_combinado)",
+                "*, clientes(nome, whatsapp), motoristas(nome, valor_combinado)",
             );
-          if (resErr) throw resErr;
+        if (resErr) throw resErr;
 
-          if (dbReservas) {
-            databaseAgenda = dbReservas.map((r) => {
-              const valMotorista =
-                r.valor_repasse_motorista ||
-                (r.motoristas ? r.motoristas.valor_combinado : 0);
-              return {
-                id: r.id,
-                dia: r.dia,
-                hora: r.hora,
-                tipo: r.tipo,
-                cliente: r.clientes ? r.clientes.nome : "Cliente Desconhecido",
-                pax: r.pax,
-                localizacao: r.localizacao,
-                motorista: r.motoristas ? r.motoristas.nome : "Sem Motorista",
-                status: r.status,
-                voo: r.voo,
-                statusVoo: r.status_voo,
-                telefone: r.clientes ? r.clientes.whatsapp : "",
-                valorCliente: r.valor_total || 120,
-                valorMotorista: valMotorista || 80,
-                pagoCliente: r.pago_cliente || false,
-                pagoMotorista: r.pago_motorista || false,
-              };
+        if (dbReservas) {
+            window.databaseAgenda = dbReservas.map((r) => {
+                const valMotorista =
+                    r.valor_repasse_motorista ||
+                    (r.motoristas ? r.motoristas.valor_combinado : 0);
+                return {
+                    id: r.id,
+                    dia: r.dia,
+                    hora: r.hora,
+                    tipo: r.tipo,
+                    cliente: r.clientes ? r.clientes.nome : "Cliente Desconhecido",
+                    pax: r.pax,
+                    localizacao: r.localizacao,
+                    motorista: r.motoristas ? r.motoristas.nome : "Sem Motorista",
+                    status: r.status,
+                    voo: r.voo,
+                    statusVoo: r.status_voo,
+                    telefone: r.clientes ? r.clientes.whatsapp : "",
+                    valorCliente: r.valor_total || 120,
+                    valorMotorista: valMotorista || 80,
+                    pagoCliente: r.pago_cliente || false,
+                    pagoMotorista: r.pago_motorista || false,
+                };
             });
-          }
-
-          // showToast("Dados sincronizados com o Supabase!");
-          renderDashboard();
-          renderAgenda();
-          renderDrivers();
-          renderFinanceiro();
-          renderServicos();
-          updateDriverDropdowns();
-          gerarDiasAgenda();
-        } catch (err) {
-          console.error("Erro ao puxar dados do Supabase: ", err);
-          showToast("Erro de sincronização. Voltando ao modo local.");
-          switchToSimulationMode();
+            
+            if (typeof databaseAgenda !== 'undefined') databaseAgenda = window.databaseAgenda;
         }
-      }
+
+        // Renderizações das outras abas (mantendo a sua estrutura original)
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof renderAgenda === 'function') renderAgenda();
+        if (typeof renderFinanceiro === 'function') renderFinanceiro();
+        if (typeof renderServicos === 'function') renderServicos();
+        if (typeof gerarDiasAgenda === 'function') gerarDiasAgenda();
+
+        // --- PASSO 2: O GATILHO PARA O NOVO drivers.js ---
+        // Assim que os dados chegam, ele avisa o módulo para desenhar a tela e atualizar os menus dropdown
+        if (typeof window.renderDrivers === 'function') {
+            window.renderDrivers();
+            window.updateDriverDropdowns();
+        }
+
+    } catch (err) {
+        console.error("Erro ao puxar dados do Supabase: ", err);
+        showToast("Erro de sincronização. Voltando ao modo local.");
+        if (typeof switchToSimulationMode === 'function') switchToSimulationMode();
+    }
+}
 
       async function switchTab(tabId) {
         if (typeof loadRealData === "function") {
@@ -2374,280 +2388,6 @@
         }
       }
 
-      function renderDashboard() {
-        // Filtra as reservas da data selecionada
-        const hoje = databaseAgenda.filter((item) => {
-          const itemDia = String(item.dia || "").trim();
-          const selDia = String(selectedDay).trim();
-          const diaApenas = selDia.split("-")[2];
-          return (
-            itemDia === selDia ||
-            itemDia === String(Number(diaApenas)) ||
-            itemDia === diaApenas
-          );
-        });
-
-        const dashChegadas = document.getElementById("dash-chegadas-hoje");
-        const dashPasseios = document.getElementById("dash-passeios-hoje");
-        const dashDrivers = document.getElementById("dash-drivers-count");
-        const dashFaturamento = document.getElementById("dash-faturamento");
-
-        const chegadasCount = hoje.filter((item) => {
-          const tipo = String(item.tipo || "").toLowerCase();
-          const loc = String(
-            item.localizacao || item.local || "",
-          ).toLowerCase();
-          return (
-            tipo.includes("transfer") ||
-            tipo.includes("chegada") ||
-            tipo.includes("translado") ||
-            loc.includes("eze") ||
-            loc.includes("aep") ||
-            loc.includes("aeroporto") ||
-            loc.includes("ezeiza")
-          );
-        }).length;
-
-        if (dashChegadas) dashChegadas.innerText = chegadasCount;
-        if (dashPasseios)
-          dashPasseios.innerText = hoje.filter(
-            (item) =>
-              String(item.tipo || "")
-                .toLowerCase()
-                .includes("passeio") ||
-              String(item.tipo || "")
-                .toLowerCase()
-                .includes("tango"),
-          ).length;
-        if (dashDrivers) dashDrivers.innerText = drivers.length;
-
-        const faturamentoTotal = databaseAgenda.reduce(
-          (sum, item) =>
-            sum + (Number(item.valorCliente || item.valor_total) || 0),
-          0,
-        );
-        if (dashFaturamento)
-          dashFaturamento.innerText = `R$ ${faturamentoTotal.toLocaleString()}`;
-
-        const container = document.getElementById("dashActivitiesContainer");
-        if (!container) return;
-
-        if (hoje.length === 0) {
-          container.innerHTML = `<p class="text-xs text-gray-400 py-3 text-center">Nenhuma atividade para esta data.</p>`;
-          return;
-        }
-
-        // Otimização: Mapeamento em memória usando a UI Factory
-        container.innerHTML = hoje
-          .map((item) => gerarCardAtividade(item))
-          .join("");
-      }
-      async function renderAgenda() {
-        const titleEl = document.getElementById("tituloDiaSelecionado");
-        if (titleEl && selectedDay) {
-          const [ano, mes, dia] = selectedDay.split("-");
-          const dataObj = new Date(ano, mes - 1, dia);
-          const options = { weekday: "long", day: "numeric", month: "long" };
-          const dataFormatada = dataObj.toLocaleDateString("pt-BR", options);
-          const dataFormatadaCapitalizada =
-            dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
-          titleEl.innerText = `Agenda: ${dataFormatadaCapitalizada}`;
-        }
-
-        const container = document.getElementById("timelineContainer");
-        if (!container) return;
-        container.innerHTML =
-          '<div class="text-center py-8 text-gray-500">Carregando agenda...</div>';
-
-        try {
-          let list = [];
-          if (window.isConnectedToSupabase && window.supabaseClient) {
-            let { data, error } = await window.supabaseClient.from("reservas")
-              .select(`
-                      *,
-                      clientes (
-                          nome
-                      )
-                  `);
-            if (error) throw error;
-
-            list = (data || []).map((item) => ({
-              ...item,
-              cliente:
-                item.cliente ||
-                item.nome ||
-                (item.clientes ? item.clientes.nome : null),
-            }));
-          } else {
-            list = [...databaseAgenda];
-          }
-
-          let dayList = list.filter((item) => {
-            const dataItem = String(
-              item.dia || item.date || item.data || "",
-            ).trim();
-            return dataItem === String(selectedDay);
-          });
-
-          const totalTransfers = dayList.filter((i) => {
-            const t = String(i.tipo || i.category || "").toLowerCase();
-            return t.includes("transfer") || t.includes("translado");
-          }).length;
-
-          const totalPasseios = dayList.filter((i) => {
-            const t = String(i.tipo || i.category || "").toLowerCase();
-            return (
-              t.includes("passeio") ||
-              t.includes("tango") ||
-              t.includes("tour") ||
-              t.includes("show")
-            );
-          }).length;
-
-          const countTodos = document.getElementById("count-todos");
-          const countTransfers = document.getElementById("count-transfers");
-          const countPasseios = document.getElementById("count-passeios");
-
-          if (countTodos) countTodos.innerText = dayList.length;
-          if (countTransfers) countTransfers.innerText = totalTransfers;
-          if (countPasseios) countPasseios.innerText = totalPasseios;
-
-          let displayList = dayList;
-          if (selectedCategory && selectedCategory !== "todos") {
-            displayList = dayList.filter((item) => {
-              const t = String(item.tipo || item.category || "").toLowerCase();
-              if (selectedCategory === "transfer") {
-                return t.includes("transfer") || t.includes("translado");
-              } else if (selectedCategory === "passeio") {
-                return (
-                  t.includes("passeio") ||
-                  t.includes("tango") ||
-                  t.includes("tour") ||
-                  t.includes("show")
-                );
-              }
-              return t === selectedCategory;
-            });
-          }
-
-          displayList.sort((a, b) =>
-            String(a.hora || "").localeCompare(String(b.hora || "")),
-          );
-
-          if (displayList.length === 0) {
-            container.innerHTML = `
-                  <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                      <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${selectedDay}).</p>
-                      <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
-                  </div>`;
-            return;
-          }
-
-          container.innerHTML = displayList
-            .map((item) => {
-              let statusBadge =
-                '<span class="bg-gray-50 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>';
-              let borderStatusColor = "border-l-4 border-gray-300";
-              let bgCardColor = "bg-white"; // Fundo padrão
-
-              const status = String(item.status || "").toLowerCase();
-              const isTransfer =
-                String(item.tipo || "")
-                  .toLowerCase()
-                  .includes("transfer") ||
-                String(item.tipo || "")
-                  .toLowerCase()
-                  .includes("translado");
-
-              if (
-                status.includes("concluido") ||
-                status.includes("concluído")
-              ) {
-                statusBadge =
-                  '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fas fa-check-double mr-1"></i>Concluído</span>';
-                borderStatusColor = "border-l-4 border-emerald-500";
-                bgCardColor = "bg-emerald-50/40"; // Fundo esverdeado suave
-              } else if (status.includes("aterrissou")) {
-                statusBadge =
-                  '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"><i class="fas fa-plane-arrival mr-1"></i>Aterrissou</span>';
-                borderStatusColor = "border-l-4 border-blue-500";
-              } else if (status.includes("andamento")) {
-                statusBadge =
-                  '<span class="bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Em Andamento</span>';
-                borderStatusColor = "border-l-4 border-sky-500";
-              } else if (status.includes("atrasado")) {
-                statusBadge =
-                  '<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>';
-                borderStatusColor = "border-l-4 border-red-500";
-              } else if (status.includes("confirmado")) {
-                statusBadge =
-                  '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-                borderStatusColor = "border-l-4 border-blue-900";
-              }
-
-              const nomeClienteFinal =
-                item.cliente ||
-                item.nome ||
-                (item.clientes ? item.clientes.nome : null) ||
-                "Cliente";
-
-              return `
-              <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative ${bgCardColor} p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:shadow-md cursor-pointer transition group">
-                  
-                  <div class="flex items-center gap-3 w-full">
-                      
-                      <!-- LARGURA FIXA DO HORÁRIO -->
-                      <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
-                          <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
-                          <span class="text-[9px] font-bold text-gray-400 uppercase truncate w-full block mt-0.5" title="${item.tipo || "Serviço"}">${item.tipo || "Serviço"}</span>
-                      </div>
-                      
-                      <div class="space-y-1 flex-1 min-w-0">
-                          <div class="flex items-center justify-between gap-2 w-full">
-                              <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
-                                  ${nomeClienteFinal}
-                              </h4>
-                              <div class="shrink-0 mt-0.5">
-                                  ${statusBadge}
-                              </div>
-                          </div>
-                          
-                          <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
-                              <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
-                              <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
-                          </p>
-                          
-                          <!-- AÇÕES RÁPIDAS (Botões) -->
-                          <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2" onclick="event.stopPropagation()">
-                              ${
-                                !status.includes("concluido")
-                                  ? `
-                              <button onclick="acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 text-gray-500 hover:text-emerald-600 rounded text-[10px] font-bold uppercase transition-colors shadow-sm">
-                                  <i class="fas fa-check"></i> Finalizar
-                              </button>`
-                                  : ""
-                              }
-                              
-                              ${
-                                isTransfer && !status.includes("concluido")
-                                  ? `
-                              <button onclick="alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200 text-gray-500 hover:text-blue-600 rounded text-[10px] font-bold uppercase transition-colors shadow-sm">
-                                  <i class="fas fa-plane-arrival"></i> Pousou
-                              </button>`
-                                  : ""
-                              }
-                          </div>
-                      </div>
-                  </div>
-              </div>`;
-            })
-            .join("");
-        } catch (err) {
-          console.error("Erro ao renderizar agenda:", err);
-          container.innerHTML =
-            '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
-        }
-      }
       // FUNÇÃO 1: Muda o status para Concluído ou outro
       window.acaoRapidaReserva = async function (idReserva, novoStatus) {
         if (!idReserva || idReserva === "undefined")
@@ -2888,349 +2628,7 @@
           }
         }
       }
-   function renderDrivers(dataToRender = drivers) {
-    const container = document.getElementById("driversList");
-    if (!container) return;
-
-    let totalViagensTodos = 0; // Para o contador geral do topo da página
-
-    // --- ANTÍDOTO ANTI-DANÇA & ORDEM DE ELITE (ESTRELAS) ---
-    const motoristasOrdenados = [...dataToRender].sort((a, b) => {
-        // Pega a nota de cada um (se não tiver, assume 5)
-        const notaA = a.avaliacao !== undefined ? Number(a.avaliacao) : 5;
-        const notaB = b.avaliacao !== undefined ? Number(b.avaliacao) : 5;
-        
-        // 1ª Regra: Quem tem mais estrelas fica no topo (Ordem Decrescente)
-        if (notaB !== notaA) {
-            return notaB - notaA; 
-        }
-        
-        // 2ª Regra (Desempate): Se tiverem a mesma quantidade de estrelas, organiza por ordem alfabética
-        return String(a.nome).localeCompare(String(b.nome));
-    });
-
-    // 1. Processamos todo o HTML na memória
-    const driversHTML = motoristasOrdenados.map((driver) => {
-        // --- Contadores Reais ---
-        const corridasReais = typeof databaseAgenda !== "undefined"
-            ? databaseAgenda.filter(
-                (item) => String(item.motorista) === String(driver.nome) || String(item.motorista_id) === String(driver.id)
-            ) : [];
-
-        const qtdCorridas = corridasReais.length;
-        totalViagensTodos += qtdCorridas;
-
-        const repasseTotalGerado = corridasReais.reduce(
-            (sum, item) => sum + (Number(item.valorMotorista) || 0), 0
-        );
-
-        // --- SISTEMA DE ESTRELAS CLICÁVEIS ---
-        const nota = driver.avaliacao !== undefined ? Number(driver.avaliacao) : 5;
-        let stars = "";
-        for (let i = 1; i <= 5; i++) {
-            stars += `<i onclick="atualizarNotaMotorista('${driver.id}', ${i})" 
-                         class="fas fa-star cursor-pointer transition-transform hover:scale-125 ${i <= nota ? "text-amber-400" : "text-gray-200"} text-xs" 
-                         title="Dar nota ${i}"></i>`;
-        }
-
-        return `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200 flex flex-col justify-between">
-          <div>
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 font-bold flex items-center justify-center text-lg shadow-sm">
-                  ${driver.nome.charAt(0)}${driver.nome.split(" ")[1] ? driver.nome.split(" ")[1].charAt(0) : ""}
-                </div>
-                <div>
-                  <h3 class="font-bold text-gray-800 text-base leading-tight">${driver.nome}</h3>
-                  <div class="flex gap-1 mt-1" title="Avaliação: ${nota} Estrelas">${stars}</div>
-                </div>
-              </div>
-              
-              <div class="flex items-center gap-2">
-                <button onclick="editDriver('${driver.id}')" class="text-gray-300 hover:text-blue-500 transition text-sm p-1" title="Editar">
-                  <i class="fas fa-pen"></i>
-                </button>
-                <button onclick="deleteDriver('${driver.id}')" class="text-gray-300 hover:text-red-500 transition text-sm p-1" title="Excluir">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-gray-50 p-3 rounded-xl space-y-1.5 text-xs text-gray-600 mb-3 border border-gray-100">
-              <p class="flex justify-between">
-                <span class="font-medium">🚗 Veículo:</span>
-                <span class="text-gray-900 font-semibold">${driver.veiculo}</span>
-              </p>
-              <p class="flex justify-between">
-                <span class="font-medium">🔢 Placa:</span>
-                <span class="bg-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-900 font-bold">${driver.placa}</span>
-              </p>
-              <p class="flex justify-between">
-                <span class="font-medium">👥 Cap. Max:</span>
-                <span class="text-gray-900 font-semibold">${driver.capacidade} pax</span>
-              </p>
-            </div>
-
-            <div class="space-y-1 text-xs mb-4">
-              <p class="flex justify-between items-center">
-                <span class="text-gray-500 font-medium">💰 Repasse Histórico:</span>
-                <span class="font-bold text-emerald-600 text-sm">R$ ${repasseTotalGerado.toFixed(2)}</span>
-              </p>
-              <div class="flex justify-between items-center gap-2 mt-1">
-                <span class="text-gray-500 font-medium">🔑 Pix / Alias:</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="truncate max-w-[120px] font-mono text-gray-700 bg-blue-50/50 px-1 rounded text-[10px]" title="${driver.pix}">${driver.pix}</span>
-                  <button onclick="copyToClipboard('${driver.pix}')" class="text-blue-600 hover:text-blue-800 transition">
-                    <i class="fas fa-copy text-xs"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
-            <a href="https://wa.me/${driver.telefone}" target="_blank"
-              class="py-2.5 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
-              <i class="fab fa-whatsapp"></i> Chamar
-            </a>
-            <button onclick="abrirExtratoMotorista('${driver.id}', '${driver.nome}', '${driver.telefone}')"
-              class="py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition text-center font-bold text-xs flex items-center justify-center gap-1">
-              <i class="fas fa-file-invoice"></i> Extrato
-            </button>
-            <div class="py-2.5 bg-gray-50 text-gray-700 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-1" title="${qtdCorridas} Viagens Realizadas">
-              <i class="fas fa-route text-blue-500"></i> ${qtdCorridas}v
-            </div>
-          </div>
-        </div>
-        `;
-    }).join("");
-
-    // 2. Injeta no DOM
-    container.innerHTML = driversHTML;
-
-    // 3. Atualizamos as métricas gerais
-    const activeCountEl = document.getElementById("activeCount");
-    const totalTripsEl = document.getElementById("totalTripsCount");
-
-    if (activeCountEl) activeCountEl.innerText = dataToRender.length;
-    if (totalTripsEl) totalTripsEl.innerText = totalViagensTodos;
-}
-async function atualizarNotaMotorista(driverId, novaNota) {
-    // 1. Atualização Visual Instantânea (UX de Alta Performance)
-    // Achamos o motorista na lista atual e mudamos a nota dele localmente na mesma hora
-    const motoristaLocal = drivers.find((d) => String(d.id) === String(driverId));
-    if (motoristaLocal) {
-        motoristaLocal.avaliacao = novaNota;
-        renderDrivers(); // Re-renderiza na hora, sem esperar a internet
-    }
-
-    // 2. Atualiza no Banco de Dados em Background
-    if (window.isConnectedToSupabase && window.supabaseClient) {
-        try {
-            const { error } = await window.supabaseClient
-                .from("motoristas")
-                .update({ avaliacao: novaNota })
-                .eq("id", driverId);
-
-            if (error) throw error;
-            // Retiramos o loadRealData() daqui para a tela não dar "refresh" desnecessário e piscar.
-        } catch (err) {
-            console.error("Erro ao atualizar nota:", err);
-            showToast("Erro ao sincronizar a nova avaliação.", true);
-        }
-    }
-}
-      // 1. Função Edit atualizada (agora ela avisa o sistema que estamos editando)
-      function editDriver(id) {
-        const motorista = drivers.find((d) => String(d.id) === String(id));
-        if (!motorista) return;
-
-        motoristaEmEdicaoId = id; // Trava o ID na memória!
-
-        const preencherCampo = (idDoCampo, valor) => {
-          const campo = document.getElementById(idDoCampo);
-          if (campo) campo.value = valor;
-        };
-
-        preencherCampo("driverName", motorista.nome || "");
-        preencherCampo("driverPhone", motorista.telefone || "");
-        preencherCampo("driverVehicle", motorista.veiculo || "");
-        preencherCampo("driverPlate", motorista.placa || "");
-        preencherCampo("driverCapacity", motorista.capacidade || "4");
-        preencherCampo(
-          "driverValue",
-          motorista.valor || motorista.valor_combinado || "",
-        );
-        preencherCampo("driverCurrency", motorista.moeda || "R$ ($)");
-        preencherCampo("driverPix", motorista.pix || "");
-
-        // Troca o texto do botão para você saber que é uma edição
-        const btnSubmit =
-          document.querySelector("#driverForm button[type='submit']") ||
-          document.querySelector("#driverForm button");
-        if (btnSubmit)
-          btnSubmit.innerHTML = '<i class="fas fa-save"></i> Salvar Alterações';
-
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        if (typeof showToast === "function")
-          showToast("Modo de edição ativado!", false);
-      }
-
-      // 2. O Botão Inteligente (Sabe se é para Criar ou Atualizar)
-      async function addDriver(event) {
-        // ISSO AQUI MATA A PISCADINHA DA TELA (Bloqueia o recarregamento)
-        if (event) {
-          event.preventDefault();
-        }
-
-        const name = document.getElementById("driverName").value;
-        const phone = document.getElementById("driverPhone").value;
-        const vehicle = document.getElementById("driverVehicle").value;
-        const plate = document
-          .getElementById("driverPlate")
-          .value.toUpperCase();
-        const pix = document.getElementById("driverPix").value;
-        const value = document.getElementById("driverValue").value;
-        const currency = document.getElementById("driverCurrency").value;
-        const capacity = document.getElementById("driverCapacity").value;
-
-        if (window.isConnectedToSupabase && window.supabaseClient) {
-          try {
-            if (motoristaEmEdicaoId) {
-              // ----- MODO EDIÇÃO (ATUALIZAR) -----
-              const { error } = await window.supabaseClient
-                .from("motoristas")
-                .update({
-                  nome: name,
-                  telefone: phone,
-                  veiculo: vehicle,
-                  placa: plate,
-                  pix: pix,
-                  valor_combinado: parseFloat(value),
-                  moeda: currency,
-                  capacidade: parseInt(capacity),
-                  // NOTA INTOCADA: Não mexemos na avaliação aqui para não resetar as estrelas!
-                })
-                .eq("id", motoristaEmEdicaoId); // Garante que altera só o cara certo
-
-              if (error) throw error;
-              showToast("Motorista atualizado com sucesso!", false);
-            } else {
-              // ----- MODO CRIAR (NOVO) -----
-              const { error } = await window.supabaseClient
-                .from("motoristas")
-                .insert([
-                  {
-                    nome: name,
-                    telefone: phone,
-                    veiculo: vehicle,
-                    placa: plate,
-                    pix: pix,
-                    valor_combinado: parseFloat(value),
-                    moeda: currency,
-                    capacidade: parseInt(capacity),
-                    avaliacao: 5, // <--- Todo parceiro novo nasce com 5 estrelas!
-                  },
-                ]);
-
-              if (error) {
-                if (error.code === "23505")
-                  throw new Error(
-                    `A placa ${plate} já está cadastrada no sistema!`,
-                  );
-                throw error;
-              }
-              showToast("Motorista cadastrado com sucesso!", false);
-            }
-
-            // Atualiza a tela e limpa a memória
-            loadRealData();
-            resetarFormularioMotorista();
-          } catch (err) {
-            console.error("Erro no Supabase:", err);
-            showToast(
-              err.message || "Erro ao salvar motorista no banco.",
-              true,
-            );
-          }
-        } else {
-          // ----- MODO SIMULAÇÃO LOCAL (SEM BANCO DE DADOS) -----
-          if (motoristaEmEdicaoId) {
-            // Atualiza localmente
-            const index = drivers.findIndex(
-              (d) => String(d.id) === String(motoristaEmEdicaoId),
-            );
-            if (index > -1) {
-              drivers[index] = {
-                ...drivers[index],
-                nome: name,
-                telefone: phone,
-                veiculo: vehicle,
-                placa: plate,
-                pix: pix,
-                valor: value,
-                moeda: currency,
-                capacidade: capacity,
-                // Avaliação intocada na edição local também
-              };
-              showToast("Alterações salvas na simulação!", false);
-            }
-          } else {
-            // Cria localmente
-            const exists = drivers.find((d) => d.placa === plate);
-            if (exists) {
-              showToast(`A placa ${plate} já existe no sistema local!`, true);
-              return;
-            }
-            const newDriver = {
-              id: String(Date.now()),
-              nome: name,
-              telefone: phone,
-              veiculo: vehicle,
-              placa: plate,
-              pix: pix,
-              valor: value,
-              moeda: currency,
-              capacidade: capacity,
-              avaliacao: 5, // <--- Nasce com 5 estrelas na simulação
-              corridas: 0,
-            };
-            drivers.unshift(newDriver);
-            showToast("Motorista adicionado na simulação!", false);
-          }
-
-          renderDrivers();
-          resetarFormularioMotorista();
-        }
-      }
-      // 3. Função para limpar a casa depois de salvar
-      function resetarFormularioMotorista() {
-        const form = document.getElementById("driverForm");
-        if (form) form.reset();
-        document.getElementById("driverCapacity").value = "4";
-
-        motoristaEmEdicaoId = null; // Apaga a memória
-
-        // Devolve o botão ao normal
-        const btnSubmit =
-          document.querySelector("#driverForm button[type='submit']") ||
-          document.querySelector("#driverForm button");
-        if (btnSubmit)
-          btnSubmit.innerHTML =
-            '<i class="fas fa-plus-circle"></i> Cadastrar e Ativar';
-      }
-
-      function updateDriverDropdowns() {
-        const select = document.getElementById("modalDriverSelect");
-        if (!select) return;
-        select.innerHTML = "";
-
-        drivers.forEach((d) => {
-          select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo})</option>`;
-        });
-      }
-
+  
       async function renderServicos() {
         const container = document.getElementById("catalogList");
         if (!container) return;
@@ -3359,54 +2757,7 @@ async function atualizarNotaMotorista(driverId, novaNota) {
           })
           .join("");
       }
-      async function renderClientes() {
-        const container = document.getElementById("clientesList");
-        if (!container) return;
-
-        if (!window.supabaseClient || !window.isConnectedToSupabase) {
-          container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Modo simulação: Lista de clientes indisponível.</p>`;
-          return;
-        }
-
-        container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Carregando clientes...</p>`;
-
-        try {
-          const { data, error } = await window.supabaseClient
-            .from("clientes")
-            .select("*")
-            .order("nome", { ascending: true });
-
-          if (error) throw error;
-
-          if (!data || data.length === 0) {
-            container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Nenhum cliente cadastrado.</p>`;
-            return;
-          }
-
-          // Otimização: Renderização de Virtual DOM via Template Literals
-          container.innerHTML = data
-            .map(
-              (cliente) => `
-        <div onclick="openClientDossier('${cliente.id}', '${cliente.nome || ""}', '${cliente.whatsapp || ""}', '${cliente.biografia || ""}')" class="p-4 bg-white border border-gray-100 rounded-xl hover:border-blue-300 hover:shadow-sm transition cursor-pointer flex items-center justify-between group">
-          <div>
-            <h3 class="font-bold text-gray-900 group-hover:text-blue-900 transition">${cliente.nome || "Cliente sem nome"}</h3>
-            <p class="text-sm text-gray-500">${cliente.whatsapp || "Sem WhatsApp"}</p>
-            ${cliente.biografia ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-1">${cliente.biografia}</p>` : ""}
-          </div>
-          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
-            <button onclick="deletarCliente('${cliente.id}')" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-bold hover:bg-red-100 transition">
-              Deletar
-            </button>
-          </div>
-        </div>
-      `,
-            )
-            .join("");
-        } catch (err) {
-          console.error("Erro ao renderizar clientes:", err);
-          container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar clientes do banco.</p>`;
-        }
-      }
+     
       async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
         const novoNome = prompt("Editar nome do serviço:", nomeAtual);
         if (novoNome === null) return;
@@ -3439,244 +2790,6 @@ async function atualizarNotaMotorista(driverId, novaNota) {
         }
       }
 
-      async function renderFinanceiro() {
-        const tableBody = document.getElementById("financeTableBody");
-        if (!tableBody) return;
-
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Calculando caixa...</td></tr>`;
-
-        let totalFaturamento = 0;
-        let totalRepasses = 0;
-        let totalLucro = 0;
-        let totalPendente = 0;
-
-        const extrairNumero = (valor) => {
-          if (!valor) return 0;
-          if (typeof valor === "number") return valor;
-          let limpo = String(valor)
-            .replace(/R\$/gi, "")
-            .replace(/USD/gi, "")
-            .trim();
-          if (limpo.includes(",")) {
-            limpo = limpo.replace(/\./g, "").replace(",", ".");
-          }
-          return Number(limpo) || 0;
-        };
-
-        try {
-          let list = [];
-          if (window.isConnectedToSupabase && window.supabaseClient) {
-            // A MÁGICA AQUI: Pedimos os dados da tabela clientes e da tabela motoristas!
-            let { data, error } = await window.supabaseClient
-              .from("reservas")
-              .select("*, clientes(*), motoristas(*)");
-            if (error) throw error;
-
-            list = data || [];
-          } else {
-            list = [...databaseAgenda];
-          }
-
-          list.sort((a, b) =>
-            String(b.dia || b.data || b.date || "").localeCompare(
-              String(a.dia || a.data || a.date || ""),
-            ),
-          );
-
-          const linhasHTML = list
-            .map((item) => {
-              const rawValorCliente =
-                item.valor_total || item.valorCliente || 0;
-              const rawValorMotorista =
-                item.valor_repasse_motorista || item.valorMotorista || 0;
-
-              const valorCliente = extrairNumero(rawValorCliente);
-              const valorMotorista = extrairNumero(rawValorMotorista);
-              const lucro = valorCliente - valorMotorista;
-
-              totalFaturamento += valorCliente;
-              totalRepasses += valorMotorista;
-              totalLucro += lucro;
-
-              const isPagoCliente =
-                item.pago_cliente === true ||
-                item.pago_cliente === "true" ||
-                item.pagoCliente === true;
-              const isPagoMotorista =
-                item.pago_motorista === true ||
-                item.pago_motorista === "true" ||
-                item.pagoMotorista === true;
-
-              if (!isPagoCliente) {
-                totalPendente += valorCliente;
-              }
-
-              let dataFormatada = "--/--";
-              const dataOriginal = item.dia || item.data || item.date;
-              if (dataOriginal && dataOriginal.includes("-")) {
-                const partes = dataOriginal.split("-");
-                dataFormatada = `${partes[2]}/${partes[1]}`;
-              } else {
-                dataFormatada = dataOriginal || "--/--";
-              }
-
-              const tipoServico = String(
-                item.tipo || item.category || "",
-              ).toLowerCase();
-              let iconeServico =
-                tipoServico.includes("transfer") ||
-                tipoServico.includes("translado")
-                  ? "🚐 Transfer"
-                  : "📸 Passeio";
-
-              // BUSCANDO OS NOMES REAIS (traduzindo os IDs)
-              const nomeDoCliente =
-                (item.clientes
-                  ? item.clientes.nome || item.clientes.nome_completo
-                  : null) ||
-                item.cliente ||
-                item.nome ||
-                "Cliente Sem Nome";
-              const nomeDoMotorista =
-                (item.motoristas
-                  ? item.motoristas.nome || item.motoristas.nome_completo
-                  : null) ||
-                item.motorista ||
-                "Não alocado";
-
-              const statusClienteBtn = isPagoCliente
-                ? `<button onclick="toggleFinanceStatus('${item.id}', 'cliente', false)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-emerald-200 transition"><i class="fas fa-check-circle mr-1"></i> Recebido</button>`
-                : `<button onclick="toggleFinanceStatus('${item.id}', 'cliente', true)" class="px-2 py-1 bg-amber-100 text-amber-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-amber-200 transition"><i class="fas fa-clock mr-1"></i> Pendente</button>`;
-
-              const statusMotoristaBtn = isPagoMotorista
-                ? `<button onclick="toggleFinanceStatus('${item.id}', 'motorista', false)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-emerald-200 transition"><i class="fas fa-check-circle mr-1"></i> Pago</button>`
-                : `<button onclick="toggleFinanceStatus('${item.id}', 'motorista', true)" class="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[10px] shadow-sm hover:bg-red-200 transition"><i class="fas fa-clock mr-1"></i> A pagar</button>`;
-
-              return `
-                <tr class="hover:bg-gray-50/50 transition">
-                    <td class="p-4 font-bold text-gray-900">
-                        <div>${nomeDoCliente}</div>
-                        <div class="text-[10px] text-gray-400 font-normal mt-0.5">${iconeServico} • Dia ${dataFormatada}</div>
-                    </td>
-                    <td class="p-4 font-semibold text-gray-700">${nomeDoMotorista}</td>
-                    <td class="p-4 text-right font-bold text-blue-900">R$ ${valorCliente.toFixed(2)}</td>
-                    <td class="p-4 text-right font-bold text-red-600">R$ ${valorMotorista.toFixed(2)}</td>
-                    <td class="p-4 text-right font-black text-emerald-600">R$ ${lucro.toFixed(2)}</td>
-                    <td class="p-4 text-center">${statusClienteBtn}</td>
-                    <td class="p-4 text-center">${statusMotoristaBtn}</td>
-                </tr>
-              `;
-            })
-            .join("");
-
-          tableBody.innerHTML =
-            linhasHTML ||
-            `<tr><td colspan="7" class="text-center py-6 text-gray-500 text-xs">Nenhuma movimentação financeira encontrada.</td></tr>`;
-
-          const formatadorBR = new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          });
-          document.getElementById("fin-faturamento").innerText =
-            formatadorBR.format(totalFaturamento);
-          document.getElementById("fin-repasses").innerText =
-            formatadorBR.format(totalRepasses);
-          document.getElementById("fin-lucro").innerText =
-            formatadorBR.format(totalLucro);
-          document.getElementById("fin-pendente").innerText =
-            formatadorBR.format(totalPendente);
-        } catch (error) {
-          console.error("Erro ao carregar o Financeiro:", error);
-          tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500 text-xs">Erro ao carregar os dados financeiros.</td></tr>`;
-        }
-      }
-      window.toggleFinanceStatus = async function (
-        idReserva,
-        tipo,
-        novoStatus,
-      ) {
-        if (!idReserva || idReserva === "undefined")
-          return showToast("ID da reserva não encontrado.", true);
-
-        try {
-          // Define qual campo será atualizado no banco ('pagoCliente' ou 'pagoMotorista')
-          const campoAtualizar =
-            tipo === "cliente" ? "pagoCliente" : "pagoMotorista";
-          const objAtualizacao = {};
-          objAtualizacao[campoAtualizar] = novoStatus;
-
-          if (window.isConnectedToSupabase && window.supabaseClient) {
-            const { error } = await window.supabaseClient
-              .from("reservas")
-              .update(objAtualizacao)
-              .eq("id", idReserva);
-
-            if (error) throw error;
-          } else {
-            // Se estiver rodando offline/banco local
-            const index = databaseAgenda.findIndex(
-              (r) => String(r.id) === String(idReserva),
-            );
-            if (index !== -1)
-              databaseAgenda[index][campoAtualizar] = novoStatus;
-          }
-
-          const mensagemAcao = novoStatus
-            ? "marcado como pago"
-            : "marcado como pendente";
-          showToast(`Status financeiro ${mensagemAcao}! 💸`, false);
-
-          // Recarrega os painéis e tabelas para os números baterem instantaneamente
-          renderFinanceiro();
-        } catch (error) {
-          console.error("Erro ao atualizar status financeiro:", error);
-          showToast("Erro ao atualizar cobrança.", true);
-        }
-      };
-      async function toggleFinanceStatus(id, target) {
-        const index = databaseAgenda.findIndex(
-          (item) => String(item.id) === String(id),
-        );
-        if (index === -1) return;
-
-        let nextState = false;
-        let updateObject = {};
-
-        if (target === "cliente") {
-          nextState = !databaseAgenda[index].pagoCliente;
-          databaseAgenda[index].pagoCliente = nextState;
-          updateObject = { pago_cliente: nextState };
-        } else if (target === "motorista") {
-          nextState = !databaseAgenda[index].pagoMotorista;
-          databaseAgenda[index].pagoMotorista = nextState;
-          updateObject = { pago_motorista: nextState };
-        }
-
-        renderFinanceiro();
-
-        if (window.isConnectedToSupabase && window.supabaseClient) {
-          try {
-            const { error } = await window.supabaseClient
-              .from("reservas")
-              .update(updateObject)
-              .eq("id", id);
-            if (error) throw error;
-            showToast("Finanças salvas na nuvem!");
-            loadRealData();
-          } catch (err) {
-            console.error("Erro ao atualizar finanças no Supabase: ", err);
-            showToast("Erro ao salvar. Revertendo alteração.");
-            if (target === "cliente") {
-              databaseAgenda[index].pagoCliente = !nextState;
-            } else if (target === "motorista") {
-              databaseAgenda[index].pagoMotorista = !nextState;
-            }
-            renderFinanceiro();
-          }
-        } else {
-          showToast("Finanças atualizadas na simulação!");
-        }
-      }
 
       // 1. Função Auxiliar: Responsável apenas por limpar o formulário
       function limparFormularioReserva() {
@@ -4273,37 +3386,6 @@ async function atualizarNotaMotorista(driverId, novaNota) {
         window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       }
 
-      function gerarDiasAgenda() {
-        const containerDias = document.getElementById("containerDiasAgenda");
-        if (!containerDias) return;
-        containerDias.innerHTML = "";
-
-        const hoje = new Date();
-
-        for (let i = -3; i <= 3; i++) {
-          const d = new Date();
-          d.setDate(hoje.getDate() + i);
-
-          const anoLoc = d.getFullYear();
-          const mesLoc = String(d.getMonth() + 1).padStart(2, "0");
-          const diaLoc = String(d.getDate()).padStart(2, "0");
-          const diaStr = `${anoLoc}-${mesLoc}-${diaLoc}`;
-
-          const diaNumero = d.getDate();
-          const diaSemana = d
-            .toLocaleDateString("pt-BR", { weekday: "short" })
-            .replace(".", "");
-          const isSelected = diaStr === selectedDay;
-
-          containerDias.innerHTML += `
-                  <div data-date="${diaStr}" onclick="selectDay('${diaStr}')" class="day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition ${isSelected ? "bg-blue-900 text-white shadow-md border border-blue-900" : "bg-white hover:bg-gray-100 text-gray-700 border border-gray-100"}">
-                      <span class="block text-xs uppercase ${isSelected ? "text-blue-200" : "text-gray-500"}">${diaSemana}</span>
-                      <span class="text-lg font-bold ${isSelected ? "text-white" : "text-gray-800"}">${diaNumero}</span>
-                  </div>
-                  `;
-        }
-      }
-
       function openConfirmModal(title, text) {
         document.getElementById("confirmTitle").innerText = title;
         document.getElementById("confirmText").innerText = text;
@@ -4670,33 +3752,7 @@ async function atualizarNotaMotorista(driverId, novaNota) {
 
       let noticiaAtualIndex = 0;
 
-      function iniciarTickerNoticias() {
-        const card = document.getElementById("tickerNewsCard");
-        const catEl = document.getElementById("tickerCategory");
-        const timeEl = document.getElementById("tickerTime");
-        const textEl = document.getElementById("tickerText");
-
-        if (!card) return;
-
-        card.classList.remove("opacity-100", "translate-y-0");
-        card.classList.add("opacity-0", "-translate-y-2");
-
-        setTimeout(() => {
-          noticiaAtualIndex = (noticiaAtualIndex + 1) % bairesNoticias.length;
-          const item = bairesNoticias[noticiaAtualIndex];
-
-          catEl.innerText = item.cat;
-          catEl.className = `text-[10px] font-extrabold uppercase ${item.color}`;
-          timeEl.innerText = item.time;
-          textEl.innerText = item.text;
-
-          card.classList.remove("opacity-0", "-translate-y-2");
-          card.classList.add("opacity-100", "translate-y-0");
-        }, 400);
-      }
-
-      setInterval(iniciarTickerNoticias, 5000);
-
+    
       async function carregarAtencaoOperacional() {
         const container = document.querySelector(".space-y-2");
         if (!container) return;
@@ -7168,236 +6224,7 @@ function verDetalhesDoDia(dataISO) {
     if (typeof renderDias === 'function') renderDias();
     if (typeof initAgenda === 'function') initAgenda();
 }
-// --- SISTEMA MÚLTIPLO: BUENOS AIRES AO VIVO (Supabase) ---
-let listaAvisosBA = [];
-let indiceTickerBA = 0;
-let intervaloTickerBA = null;
 
-// Inicializa o sistema ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
-    carregarAvisosBA();
-});
-
-async function carregarAvisosBA() {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('avisos_bavivo')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-            listaAvisosBA = data;
-        } else {
-            listaAvisosBA = [{
-                categoria: "Turismo & Agenda",
-                tempo: "Hoje",
-                mensagem: "Bem-vindo ao CRM Turismundo na nuvem! Adicione seus avisos.",
-                link: "https://linda.buenosaires.gob.ar/",
-                cor: "verde"
-            }];
-        }
-        iniciarTickerBA();
-    } catch (err) {
-        console.error("Erro ao carregar avisos do Supabase:", err);
-    }
-}
-
-function iniciarTickerBA() {
-    clearInterval(intervaloTickerBA);
-    if (listaAvisosBA.length === 0) {
-        atualizarCardVisualBA({ categoria: "Sem Avisos", tempo: "-", mensagem: "Nenhum aviso cadastrado.", link: "#", cor: "azul" });
-        return;
-    }
-
-    indiceTickerBA = 0;
-    atualizarCardVisualBA(listaAvisosBA[indiceTickerBA]);
-
-    if (listaAvisosBA.length > 1) {
-        intervaloTickerBA = setInterval(() => {
-            indiceTickerBA = (indiceTickerBA + 1) % listaAvisosBA.length;
-            animarTrocaTickerBA(listaAvisosBA[indiceTickerBA]);
-        }, 5000);
-    }
-}
-
-function animarTrocaTickerBA(aviso) {
-    const card = document.getElementById("tickerNewsCard");
-    if (!card) return;
-    
-    card.classList.remove("opacity-100", "translate-y-0");
-    card.classList.add("opacity-0", "translate-y-2");
-
-    setTimeout(() => {
-        atualizarCardVisualBA(aviso);
-        card.classList.remove("opacity-0", "translate-y-2");
-        card.classList.add("opacity-100", "translate-y-0");
-    }, 300);
-}
-
-function atualizarCardVisualBA(aviso) {
-    const elCategoria = document.getElementById("bavivo-categoria");
-    const elTempo = document.getElementById("bavivo-tempo");
-    const elMensagem = document.getElementById("bavivo-mensagem");
-    const linkEl = document.getElementById("bavivo-link");
-
-    if(!elCategoria) return;
-
-    elTempo.innerText = aviso.tempo || "";
-    elMensagem.innerText = aviso.mensagem || "";
-    if(linkEl) linkEl.setAttribute("href", aviso.link && aviso.link !== "#" ? aviso.link : "https://linda.buenosaires.gob.ar/");
-
-    elCategoria.innerText = aviso.categoria || "";
-    
-    elCategoria.className = "text-[9px] font-extrabold uppercase ";
-    const cor = aviso.cor || "azul";
-    
-    if (cor === "vermelho") {
-        elCategoria.className += "text-red-600";
-    } else if (cor === "verde") {
-        elCategoria.className += "text-emerald-600";
-    } else if (cor === "amarelo") {
-        elCategoria.className += "text-amber-600";
-    } else if (cor === "roxo") {
-        elCategoria.className += "text-purple-600";
-    } else {
-        elCategoria.className += "text-blue-900";
-    }
-}
-
-// --- FUNÇÕES DO GERENCIADOR (MODAL) ---
-
-function abrirGerenciadorBA() {
-    const modal = document.getElementById("modal-bavivo");
-    if (!modal) return;
-    
-    voltarParaListaBA();
-    renderizarListaAvisosBA();
-    
-    modal.classList.remove("hidden");
-    setTimeout(() => {
-        modal.classList.remove("opacity-0");
-        modal.querySelector('div').classList.remove("scale-95");
-    }, 10);
-}
-
-function fecharGerenciadorBA() {
-    const modal = document.getElementById("modal-bavivo");
-    if (!modal) return;
-    modal.classList.add("opacity-0");
-    modal.querySelector('div').classList.add("scale-95");
-    setTimeout(() => modal.classList.add("hidden"), 300);
-}
-
-function renderizarListaAvisosBA() {
-    const container = document.getElementById("lista-avisos-container");
-    if (!container) return;
-
-    if (listaAvisosBA.length === 0) {
-        container.innerHTML = `<div class="text-center text-xs text-gray-400 py-6">Nenhum aviso cadastrado.</div>`;
-        return;
-    }
-
-    container.innerHTML = listaAvisosBA.map(aviso => `
-        <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl hover:shadow-sm transition">
-            <div class="flex-1 min-w-0 pr-3">
-                <p class="text-[10px] font-bold text-blue-900 uppercase">${aviso.categoria}</p>
-                <p class="text-xs text-gray-600 truncate">${aviso.mensagem}</p>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <button onclick="mostrarFormularioBA('${aviso.id}')" class="w-7 h-7 flex items-center justify-center bg-white text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-lg transition" title="Editar">
-                    <i class="fas fa-pencil-alt text-[10px]"></i>
-                </button>
-                <button onclick="excluirAvisoBA('${aviso.id}')" class="w-7 h-7 flex items-center justify-center bg-white text-red-500 hover:bg-red-50 border border-red-100 rounded-lg transition" title="Excluir">
-                    <i class="fas fa-trash text-[10px]"></i>
-                </button>
-            </div>
-        </div>
-    `).join("");
-}
-
-function mostrarFormularioBA(idEditar) {
-    document.getElementById("bavivo-view-lista").classList.add("hidden");
-    document.getElementById("bavivo-view-form").classList.remove("hidden");
-
-    if (idEditar && idEditar !== 'undefined') {
-        const aviso = listaAvisosBA.find(a => String(a.id) === String(idEditar));
-        if (aviso) {
-            document.getElementById("input-ba-id").value = aviso.id;
-            document.getElementById("input-ba-categoria").value = aviso.categoria || "";
-            document.getElementById("input-ba-cor").value = aviso.cor || "azul";
-            document.getElementById("input-ba-tempo").value = aviso.tempo || "";
-            document.getElementById("input-ba-mensagem").value = aviso.mensagem || "";
-            document.getElementById("input-ba-link").value = aviso.link === "#" ? "" : (aviso.link || "");
-        }
-    } else {
-        document.getElementById("input-ba-id").value = "";
-        document.getElementById("input-ba-categoria").value = "";
-        document.getElementById("input-ba-cor").value = "azul";
-        document.getElementById("input-ba-tempo").value = "Hoje";
-        document.getElementById("input-ba-mensagem").value = "";
-        document.getElementById("input-ba-link").value = "";
-    }
-}
-
-function voltarParaListaBA() {
-    document.getElementById("bavivo-view-form").classList.add("hidden");
-    document.getElementById("bavivo-view-lista").classList.remove("hidden");
-}
-
-async function salvarAvisoBA() {
-    const idField = document.getElementById("input-ba-id").value;
-    
-    const dadosAviso = {
-        categoria: document.getElementById("input-ba-categoria").value.trim() || "Aviso",
-        cor: document.getElementById("input-ba-cor").value,
-        tempo: document.getElementById("input-ba-tempo").value.trim() || "Agora",
-        mensagem: document.getElementById("input-ba-mensagem").value.trim() || "Sem detalhes.",
-        link: document.getElementById("input-ba-link").value.trim() || "#"
-    };
-
-    try {
-        if (idField) {
-            const { error } = await window.supabaseClient
-                .from('avisos_bavivo')
-                .update(dadosAviso)
-                .eq('id', idField);
-            if (error) throw error;
-        } else {
-            const { error } = await window.supabaseClient
-                .from('avisos_bavivo')
-                .insert([dadosAviso]);
-            if (error) throw error;
-        }
-
-        await carregarAvisosBA();
-        voltarParaListaBA();
-        renderizarListaAvisosBA();
-    } catch (err) {
-        console.error("Erro ao salvar aviso no Supabase:", err);
-        alert("Erro ao salvar no banco de dados. Verifique o console.");
-    }
-}
-
-async function excluirAvisoBA(id) {
-    if(!confirm("Tem certeza que deseja excluir este aviso?")) return;
-    
-    try {
-        const { error } = await window.supabaseClient
-            .from('avisos_bavivo')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-
-        await carregarAvisosBA();
-        renderizarListaAvisosBA();
-    } catch (err) {
-        console.error("Erro ao excluir aviso no Supabase:", err);
-        alert("Erro ao excluir do banco de dados.");
-    }
-}
     </script>
     <!-- Template PDF Oculto -->
     <div
@@ -7777,5 +6604,11 @@ async function excluirAvisoBA(id) {
 
     </div>
 </div>
+<script src="bavivo.js"></script>
+<script src="agenda.js"></script>
+<script src="drivers.js"></script>
+<script src="dashboard.js"></script>
+<script src="financeiro.js"></script>
+<script src="clientes.js"></script>
   </body>
 </html>
