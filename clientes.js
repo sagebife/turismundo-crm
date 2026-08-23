@@ -34,7 +34,7 @@ window.renderClientes = async function() {
     const container = document.getElementById("clientesList");
     if (!container) return;
 
-    if (!window.supabaseClient || !window.isConnectedToSupabase) {
+   // if (!window.supabaseClient || !window.isConnectedToSupabase) {
         container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8 italic"><i class="fas fa-wifi mr-2"></i>Modo simulação: Lista de clientes indisponível offline.</p>`;
         return;
     }
