@@ -2,7 +2,7 @@
 // MÓDULO: EXTRATO DO MOTORISTA
 // ==========================================
 
-var motoristaExtratoAtual = null;
+window.motoristaExtratoAtual = null;
 window.idsCorridasPendentesSemana = [];
 
 function getExtremosDaSemanaISO(semanaISO) {

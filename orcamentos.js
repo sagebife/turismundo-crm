@@ -2,9 +2,9 @@
 // MÓDULO: ORÇAMENTOS E LEADS
 // ==========================================
 
-var itensOrcamentoAtual = [];
-var servicosDisponiveis = [];
-var servicoSelecionado = null;
+window.itensOrcamentoAtual = [];
+window.servicosDisponiveis = [];
+window.servicoSelecionado = null;
 
 async function carregarOrcamentos() {
   if (!window.supabaseClient) return;

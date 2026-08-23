@@ -2,7 +2,8 @@
 // MÓDULO: CALENDÁRIO MENSAL
 // ==========================================
 
-var dataCalendarioVisualizacao = new Date();
+window.dataCalendarioVisualizacao =
+  window.dataCalendarioVisualizacao || new Date();
 
 function abrirCalendarioMensal() {
   const modal = document.getElementById("modal-calendario");
