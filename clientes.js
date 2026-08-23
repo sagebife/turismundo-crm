@@ -39,12 +39,7 @@ window.renderClientes = async function () {
   const container = document.getElementById("clientesList");
   if (!container) return;
 
-  if (!window.supabaseClient || !window.isConnectedToSupabase) {
-    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8 italic"><i class="fas fa-wifi mr-2"></i>Modo simulação: Lista de clientes indisponível offline.</p>`;
-    return;
-  }
-
-  container.innerHTML = `<p class="text-xs text-blue-500 text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Carregando base de clientes...</p>`;
+  container.innerHTML = `<p class="text-xs text-blue-500 text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Carregando base de dados...</p>`;
 
   try {
     const { data, error } = await window.supabaseClient
@@ -54,11 +49,11 @@ window.renderClientes = async function () {
 
     if (error) throw error;
 
-    clientesCache = data || [];
+    let clientesCache = data || [];
     window.desenharListaClientes(clientesCache);
   } catch (err) {
     console.error("Erro ao renderizar clientes:", err);
-    container.innerHTML = `<p class="text-xs text-red-500 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar clientes do banco.</p>`;
+    container.innerHTML = `<p class="text-xs text-red-500 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Erro ao carregar clientes.</p>`;
   }
 };
 
