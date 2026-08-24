@@ -2155,7 +2155,7 @@
 
         if (savedUrl && savedKey) {
           try {
-            window.supabaseClient = supabase.createClient(savedUrl, savedKey);
+           // window.supabaseClient = supabase.createClient(savedUrl, savedKey);
 
             const { error } = await window.supabaseClient
               .from("motoristas")
