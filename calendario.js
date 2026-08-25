@@ -94,38 +94,14 @@ function renderizarCalendarioMensal() {
     }
 
     const dataISO = `${ano}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+
+    // O Gatilho Perfeito: Chama o fecharCalendario daqui mesmo, e depois chama a função global blindada!
     htmlGrid += `
-            <div class="${classesBase}" title="${qtdServicos > 0 ? qtdServicos + " serviço(s)" : "Livre"}" onclick="verDetalhesDoDia('${dataISO}')">
+            <div class="${classesBase}" title="${qtdServicos > 0 ? qtdServicos + " serviço(s)" : "Livre"}" onclick="fecharCalendario(); window.verDetalhesDoDia('${dataISO}')">
                 <span class="text-sm pointer-events-none">${dia}</span>
                 ${indicadorHtml}
             </div>
         `;
   }
   grid.innerHTML = htmlGrid;
-}
-
-function verDetalhesDoDia(dataISO) {
-  fecharCalendario();
-  const todasAsTelas = document.querySelectorAll(".view-section");
-  todasAsTelas.forEach((tela) => tela.classList.add("hidden"));
-  const telaAgenda = document.getElementById("view-agenda");
-  if (telaAgenda) telaAgenda.classList.remove("hidden");
-
-  selectedDay = dataISO;
-  if (typeof renderAgenda === "function") renderAgenda();
-
-  const labelMes = document.getElementById("labelMesAnoAgenda");
-  if (labelMes) {
-    const [ano, mes, dia] = dataISO.split("-");
-    const dataObj = new Date(ano, mes - 1, dia);
-    const nomeMes = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(
-      dataObj,
-    );
-    labelMes.innerText = `${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)} ${ano}`;
-  }
-
-  if (typeof gerarCarrosselDias === "function") gerarCarrosselDias();
-  if (typeof gerarDiasAgenda === "function") gerarDiasAgenda();
-  if (typeof renderDias === "function") renderDias();
-  if (typeof initAgenda === "function") initAgenda();
 }
