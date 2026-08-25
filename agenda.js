@@ -1,4 +1,6 @@
-// --- MÓDULO ISOLADO: AGENDA E RESERVAS (Supabase) ---
+// ==========================================
+// MÓDULO ISOLADO: AGENDA E RESERVAS (Supabase)
+// ==========================================
 
 // Função blindada para pegar o dia de HOJE no fuso horário local correto
 function getHojeLocal() {
@@ -50,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
       '[data-date], [data-day], td[onclick], div[onclick*="selecionar"]',
     );
     if (calendarCell && e.isTrusted) {
-      // Dupla proteção: Ignora o clique se o elemento estava dentro do carrossel
       if (calendarCell.closest("#containerDiasAgenda")) return;
 
       let possibleDate =
@@ -93,7 +94,6 @@ function gerarDiasAgenda() {
       .replace(".", "");
     const isSelected = diaStr === window.selectedDay;
 
-    // 🔴 AQUI ESTÁ O ESCUDO (event.stopPropagation): Ele impede o "clique vazado"
     containerDias.innerHTML += `
             <div data-date="${diaStr}" onclick="event.stopPropagation(); selectDay('${diaStr}', false)" class="day-btn cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition ${isSelected ? "bg-blue-900 text-white shadow-md border border-blue-900" : "bg-white hover:bg-gray-100 text-gray-700 border border-gray-100"}">
                 <span class="block text-xs uppercase ${isSelected ? "text-blue-200" : "text-gray-500"} pointer-events-none">${diaSemana}</span>
@@ -165,6 +165,7 @@ async function renderAgenda() {
 
   const container = document.getElementById("timelineContainer");
   if (!container) return;
+
   container.innerHTML =
     '<div class="text-center py-8 text-gray-500">Carregando agenda...</div>';
 
@@ -188,6 +189,8 @@ async function renderAgenda() {
           (item.clientes ? item.clientes.nome : null) ||
           "Cliente sem nome",
       }));
+
+      window.databaseAgenda = list;
     } else {
       list = window.databaseAgenda || [];
     }
@@ -255,12 +258,13 @@ async function renderAgenda() {
 
     container.innerHTML = displayList
       .map((item) => {
-        let statusBadge =
-          '<span class="bg-gray-50 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>';
-        let borderStatusColor = "border-l-4 border-gray-300";
-        let bgCardColor = "bg-white";
+        let statusBadge = "";
+        let borderStatusColor = "border-amber-400 bg-amber-50/20";
 
-        const status = String(item.status || "").toLowerCase();
+        const status = String(item.status || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
         const isTransfer =
           String(item.tipo || "")
             .toLowerCase()
@@ -269,34 +273,31 @@ async function renderAgenda() {
             .toLowerCase()
             .includes("translado");
 
-        if (status.includes("concluido") || status.includes("concluído")) {
-          statusBadge =
-            '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full"><i class="fas fa-check-double mr-1"></i>Concluído</span>';
-          borderStatusColor = "border-l-4 border-emerald-500";
-          bgCardColor = "bg-emerald-50/40";
-        } else if (status.includes("aterrissou")) {
-          statusBadge =
-            '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"><i class="fas fa-plane-arrival mr-1"></i>Aterrissou</span>';
-          borderStatusColor = "border-l-4 border-blue-500";
-        } else if (status.includes("andamento")) {
-          statusBadge =
-            '<span class="bg-sky-50 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Em Andamento</span>';
-          borderStatusColor = "border-l-4 border-sky-500";
-        } else if (status.includes("atrasado")) {
-          statusBadge =
-            '<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>';
-          borderStatusColor = "border-l-4 border-red-500";
-        } else if (status.includes("confirmado")) {
-          statusBadge =
-            '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-          borderStatusColor = "border-l-4 border-blue-900";
+        // Lógica do Semáforo com o design padrão de borda completa em todos os cards
+        if (
+          status.includes("concluido") ||
+          status.includes("executado") ||
+          status.includes("finalizado")
+        ) {
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Concluído</span>`;
+          borderStatusColor = "border-emerald-400 bg-emerald-50/20";
+        } else if (
+          status.includes("declinar") ||
+          status.includes("declinado") ||
+          status.includes("cancelado") ||
+          status.includes("nao")
+        ) {
+          statusBadge = `<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Declinado</span>`;
+          borderStatusColor = "border-red-400 bg-red-50/20";
+        } else {
+          statusBadge = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>`;
+          borderStatusColor = "border-amber-400 bg-amber-50/20";
         }
 
         const nomeClienteFinal = item.cliente || "Cliente";
 
         return `
-                <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative ${bgCardColor} p-4 sm:p-5 rounded-2xl ${borderStatusColor} shadow-sm border border-gray-100 mb-3 hover:shadow-md cursor-pointer transition group">
-                    
+                <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl border ${borderStatusColor} shadow-sm mb-3 hover:shadow-md cursor-pointer transition group">
                     <div class="flex items-center gap-3 w-full">
                         
                         <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
@@ -319,22 +320,28 @@ async function renderAgenda() {
                                 <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
                             </p>
                             
-                            <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2" onclick="event.stopPropagation()">
+                            <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
                                 ${
-                                  !status.includes("concluido")
+                                  !status.includes("concluido") &&
+                                  !status.includes("declinado")
                                     ? `
-                                <button onclick="acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-200 text-gray-500 hover:text-emerald-600 rounded text-[10px] font-bold uppercase transition-colors shadow-sm">
-                                    <i class="fas fa-check"></i> Finalizar
-                                </button>`
+                                    <button onclick="event.stopPropagation(); acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold transition">
+                                        <i class="fas fa-check"></i> Finalizar
+                                    </button>
+                                    <button onclick="event.stopPropagation(); mudarStatusReserva('${item.id}', 'Declinado')" class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-[11px] font-bold transition">
+                                        Declinado
+                                    </button>
+                                `
                                     : ""
                                 }
-                                
+
                                 ${
                                   isTransfer && !status.includes("concluido")
                                     ? `
-                                <button onclick="alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200 text-gray-500 hover:text-blue-600 rounded text-[10px] font-bold uppercase transition-colors shadow-sm">
-                                    <i class="fas fa-plane-arrival"></i> Pousou
-                                </button>`
+                                    <button onclick="event.stopPropagation(); alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-bold transition">
+                                        <i class="fas fa-plane-arrival"></i> Pousou
+                                    </button>
+                                `
                                     : ""
                                 }
                             </div>
@@ -349,3 +356,65 @@ async function renderAgenda() {
       '<div class="text-center py-8 text-red-500">Erro ao carregar os serviços da agenda.</div>';
   }
 }
+
+// ==========================================
+// AÇÃO RÁPIDA: ALTERAR STATUS DA RESERVA
+// ==========================================
+async function acaoRapidaReserva(idReserva, novoStatus) {
+  try {
+    // 1. Atualiza no Banco de Dados (Supabase) se houver conexão
+    if (window.isConnectedToSupabase && window.supabaseClient) {
+      const { error } = await window.supabaseClient
+        .from("reservas")
+        .update({ status: novoStatus })
+        .eq("id", idReserva);
+
+      if (error) {
+        console.error("Erro ao atualizar status no Supabase:", error);
+        alert("Erro ao salvar o status no banco de dados.");
+        return;
+      }
+    }
+
+    // 2. Atualiza imediatamente na memória global (window.databaseAgenda)
+    if (window.databaseAgenda && Array.isArray(window.databaseAgenda)) {
+      const item = window.databaseAgenda.find(
+        (r) => String(r.id) === String(idReserva),
+      );
+      if (item) {
+        item.status = novoStatus;
+      }
+    }
+
+    // 3. Atualiza também se houver uma lista filtrada ativa em tela
+    if (
+      typeof window.databaseAgendaFiltrada !== "undefined" &&
+      Array.isArray(window.databaseAgendaFiltrada)
+    ) {
+      const itemFiltrado = window.databaseAgendaFiltrada.find(
+        (r) => String(r.id) === String(idReserva),
+      );
+      if (itemFiltrado) {
+        itemFiltrado.status = novoStatus;
+      }
+    }
+
+    // 4. Redesenha a agenda instantaneamente para refletir o semáforo de cores (Verde/Amarelo/Vermelho)
+    if (typeof window.renderAgenda === "function") {
+      window.renderAgenda();
+    }
+
+    console.log(
+      `Reserva ${idReserva} atualizada com sucesso para: ${novoStatus}`,
+    );
+  } catch (e) {
+    console.error("Erro crítico na ação rápida da reserva:", e);
+  }
+}
+
+// Atalho global para compatibilidade com o botão "Declinado"
+window.mudarStatusReserva = function (idReserva, status) {
+  acaoRapidaReserva(idReserva, status);
+};
+
+window.acaoRapidaReserva = acaoRapidaReserva;

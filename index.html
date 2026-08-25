@@ -5336,7 +5336,7 @@ function buscarMotorista(termo) {
 
         // Ajusta os títulos do modal
         if (tipo === "chegada") {
-          modalTitulo.innerText = "Chegadas e Partidas de Hoje";
+          modalTitulo.innerText = "Chegadas e Partidasde Hoje";
           modalIcone.className = "fas fa-plane-arrival text-blue-400 text-lg";
         } else if (tipo === "passeio") {
           modalTitulo.innerText = "Passeios e Reservas de Hoje";
@@ -5644,55 +5644,61 @@ function buscarMotorista(termo) {
         }
       }
       // ==========================================
-      // UI FACTORY: COMPONENTES REUTILIZÁVEIS (DRY)
-      // ==========================================
+// ==========================================
+// UI FACTORY: COMPONENTES REUTILIZÁVEIS (DRY)
+// ==========================================
 
-      function gerarCardAtividade(item, isTimeline = false) {
-        // Lógica universal de Badges de Status
-        let badgeHtml =
-          '<span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Confirmado</span>';
-        const statusStr = String(item.status || "").toLowerCase();
+function gerarCardAtividade(item, isTimeline = false) {
+    const statusStr = String(item.status || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    let badgeHtml = '';
+    let borderClass = 'border-amber-400 bg-amber-50/20'; // Amarelo Padrão (Pendente)
 
-        if (
-          statusStr.includes("concluido") ||
-          statusStr.includes("executado")
-        ) {
-          badgeHtml = `<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Executado</span>`;
-        } else if (statusStr.includes("atrasado")) {
-          badgeHtml = `<span class="bg-red-50 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Atrasado</span>`;
-        } else if (statusStr.includes("pendente")) {
-          badgeHtml = `<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Pendente</span>`;
-        }
+    if (statusStr.includes("concluido") || statusStr.includes("executado") || statusStr.includes("finalizado")) {
+        borderClass = 'border-emerald-400 bg-emerald-50/20';
+        badgeHtml = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Concluído</span>`;
+    } 
+    else if (statusStr.includes("declinar") || statusStr.includes("declinado") || statusStr.includes("cancelado") || statusStr.includes("nao")) {
+        borderClass = 'border-red-400 bg-red-50/20';
+        badgeHtml = `<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Declinado</span>`;
+    } 
+    else {
+        // Qualquer outro estado (como "Confirmado" antigo) vira Pendente Amarelo limpo
+        badgeHtml = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendente</span>`;
+    }
 
-        // Layout Específico para a Linha do Tempo (Dossiê do Cliente)
-        if (isTimeline) {
-          return `
-                    <div class="relative bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${item.tipo || "Serviço"}</span>
-                            <span class="text-xs text-gray-400">Dia ${item.dia} às ${item.hora || ""}</span>
-                        </div>
-                        <p class="text-sm text-gray-800 mt-2 font-medium">${item.localizacao || "Sem descrição"}</p>
-                        <div class="mt-2 flex justify-between items-center text-xs text-gray-500 border-t pt-2">
-                            <span>Valor: R$ ${parseFloat(item.valor_total || 0).toFixed(2)}</span>
-                            ${badgeHtml}
-                        </div>
-                    </div>
-                `;
-        }
-
-        // Layout Padrão (Dashboard, Filtros e Resumos)
+    // Layout Específico para a Linha do Tempo (Dossiê)
+    if (isTimeline) {
         return `
-                <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="p-4 bg-white rounded-xl border border-gray-100 shadow-sm mb-3 flex items-center justify-between text-xs hover:border-blue-300 cursor-pointer transition group">
-                  <div>
-                    <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
-                    <p class="text-[11px] text-gray-600">${item.localizacao || "Local não informado"}</p>
-                  </div>
-                  ${badgeHtml}
+            <div class="relative bg-white p-3 rounded-xl border ${borderClass} shadow-sm mb-3">
+                <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">${item.tipo || "Serviço"}</span>
+                    <span class="text-xs text-gray-400">Dia ${item.dia} às ${item.hora || ""}</span>
                 </div>
-              `;
-      }
+                <p class="text-sm text-gray-800 mt-2 font-medium">${item.localizacao || "Sem descrição"}</p>
+                <div class="mt-2 flex justify-between items-center text-xs text-gray-500 border-t pt-2">
+                    <span>Valor: R$ ${parseFloat(item.valor_total || item.valorCliente || 0).toFixed(2)}</span>
+                    ${badgeHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Layout Padrão (Dashboard e Agenda)
+    return `
+        <div class="p-4 bg-white rounded-xl border ${borderClass} shadow-sm mb-3 flex items-center justify-between text-xs transition group">
+            <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="cursor-pointer flex-1">
+                <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
+                <p class="text-[11px] text-gray-600">${item.localizacao || "Local não informado"}</p>
+            </div>
+            <div class="flex items-center gap-3">
+                ${badgeHtml}
+            </div>
+        </div>
+    `;
+}
+// ==========================================
       // ==========================================
       // FUNÇÕES DO MOTORISTA (EXCLUIR E EDITAR)
       // ==========================================
