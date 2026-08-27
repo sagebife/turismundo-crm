@@ -881,7 +881,7 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
+              <!-- <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 uppercase mb-1"
@@ -909,7 +909,7 @@
                     <option value="ARS">ARS ($)</option>
                   </select>
                 </div>
-              </div>
+              </div> -->
 
               <div>
                 <label
@@ -925,22 +925,33 @@
                 />
               </div>
 
-              <div class="flex gap-2 mt-2">
-                <button
-                  type="submit"
-                  id="btnSubmitDriver"
-                  class="flex-1 py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 text-sm"
-                >
-                  <i class="fas fa-plus-circle"></i> Cadastrar e Ativar
-                </button>
+              <div class="space-y-2 mt-2">
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    id="btnSubmitDriver"
+                    class="flex-1 py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 text-sm"
+                  >
+                    <i class="fas fa-plus-circle"></i> Cadastrar e Ativar
+                  </button>
+                  <button
+                    type="button"
+                    id="btnCancelarEdicao"
+                    onclick="resetarFormularioMotorista()"
+                    class="hidden px-4 py-4 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition text-sm"
+                    title="Cancelar Edição"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <!-- BOTÃO VERDE DE DISPARO POR FROTA (No mesmo padrão do azul) -->
                 <button
                   type="button"
-                  id="btnCancelarEdicao"
-                  onclick="resetarFormularioMotorista()"
-                  class="hidden px-4 py-4 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition text-sm"
-                  title="Cancelar Edição"
+                  onclick="abrirModalDisparo()"
+                  class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow-md flex items-center justify-center gap-2 text-sm"
                 >
-                  <i class="fas fa-times"></i>
+                  <i class="fab fa-whatsapp text-lg"></i> Disparar por Frota
                 </button>
               </div>
             </form>
@@ -6665,5 +6676,83 @@
     <script src="extratos.js"></script>
     <script src="financeiro.js"></script>
     <script src="orcamentos.js"></script>
+
+    <!-- MODAL DE DISPARO EM MASSA POR FROTA -->
+    <div
+      id="modalDisparoFrota"
+      class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col"
+      >
+        <!-- Cabeçalho -->
+        <div
+          class="bg-blue-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 class="font-bold text-base flex items-center gap-2">
+            <i class="fab fa-whatsapp text-emerald-400 text-lg"></i> Disparo
+            Inteligente por Frota
+          </h3>
+          <button
+            onclick="fecharModalDisparo()"
+            class="text-white/80 hover:text-white transition text-lg"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Corpo -->
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >Filtrar por Veículo / Modelo</label
+            >
+            <select
+              id="filtroModeloDisparo"
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm"
+            >
+              <option value="Spin">Chevrolet Spin</option>
+              <option value="Sedan">Sedan / Executivo</option>
+              <option value="Van">Van / Minibus</option>
+              <option value="todos">Todos os Veículos</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
+              >Mensagem para os Motoristas</label
+            >
+            <textarea
+              id="textoMensagemDisparo"
+              rows="4"
+              placeholder="Digite a mensagem aqui. Ex: Temos uma corrida prioritária amanhã na região..."
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm resize-none"
+            ></textarea>
+            <p class="text-[11px] text-gray-400 mt-1">
+              Dica: O sistema incluirá automaticamente uma saudação
+              personalizada com o nome de cada motorista.
+            </p>
+          </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div
+          class="bg-gray-50 px-6 py-4 flex justify-end gap-2 border-t border-gray-100"
+        >
+          <button
+            onclick="fecharModalDisparo()"
+            class="px-4 py-2.5 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition text-sm"
+          >
+            Cancelar
+          </button>
+          <button
+            onclick="executarDisparoInteligente()"
+            class="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition text-sm flex items-center gap-2 shadow-sm"
+          >
+            <i class="fab fa-whatsapp"></i> Iniciar Disparos
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

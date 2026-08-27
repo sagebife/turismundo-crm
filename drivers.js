@@ -406,3 +406,70 @@ window.updateDriverDropdowns = function () {
     select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo || "S/V"}) - ${d.capacidade || 4}pax</option>`;
   });
 };
+// Abrir Modal
+window.abrirModalDisparo = function () {
+  const modal = document.getElementById("modalDisparoFrota");
+  if (modal) modal.classList.remove("hidden");
+};
+
+// Fechar Modal
+window.fecharModalDisparo = function () {
+  const modal = document.getElementById("modalDisparoFrota");
+  if (modal) modal.classList.add("hidden");
+};
+
+// Executar o Disparo de forma segura e controlada
+window.executarDisparoInteligente = function () {
+  const modeloSelecionado =
+    document.getElementById("filtroModeloDisparo")?.value || "";
+  const mensagemTexto =
+    document.getElementById("textoMensagemDisparo")?.value || "";
+
+  if (!mensagemTexto.trim()) {
+    alert("Por favor, digite uma mensagem antes de disparar.");
+    return;
+  }
+
+  if (!window.drivers || window.drivers.length === 0) {
+    alert("Nenhum motorista cadastrado no sistema.");
+    return;
+  }
+
+  // Filtra os motoristas pelo veículo cadastrado
+  const motoristasAlvo = window.drivers.filter((d) => {
+    if (modeloSelecionado === "todos") return true;
+    const veiculo = (d.veiculo || d.modelo || d.carro || "").toLowerCase();
+    return veiculo.includes(modeloSelecionado.toLowerCase());
+  });
+
+  if (motoristasAlvo.length === 0) {
+    alert(
+      `Nenhum motorista encontrado com o veículo selecionado (${modeloSelecionado}).`,
+    );
+    return;
+  }
+
+  fecharModalDisparo();
+
+  // Dispara abrindo as abas com intervalo de 1.5s para o navegador não bloquear
+  motoristasAlvo.forEach((driver, index) => {
+    const telefoneLimpo = (driver.telefone || "").replace(/\D/g, "");
+    if (!telefoneLimpo) return;
+
+    const mensagemPersonalizada = `Olá ${driver.nome}, ${mensagemTexto}`;
+    const urlWhatsApp = `https://wa.me/${telefoneLimpo}?text=${encodeURIComponent(mensagemPersonalizada)}`;
+
+    setTimeout(() => {
+      window.open(urlWhatsApp, "_blank");
+    }, index * 1500);
+  });
+
+  if (typeof window.showToast === "function") {
+    window.showToast(
+      `Iniciando envio para ${motoristasAlvo.length} motoristas (${modeloSelecionado})!`,
+      false,
+    );
+  } else {
+    alert(`Disparo iniciado para ${motoristasAlvo.length} motoristas!`);
+  }
+};
