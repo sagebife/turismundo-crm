@@ -836,18 +836,22 @@
                     class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
                   />
                 </div>
+                <!-- Substitua o input antigo do veículo por este select -->
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 uppercase mb-1"
-                    >Veículo / Modelo</label
+                    >Veículo / Categoria</label
                   >
-                  <input
-                    type="text"
+                  <select
                     id="driverVeiculo"
-                    oninput="capitalizarInput(this)"
-                    placeholder="Ex: Chevrolet Spin"
-                    class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:ring-blue-500 focus:border-blue-500 transition"
-                  />
+                    required
+                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
+                  >
+                    <option value="">Selecione a categoria...</option>
+                    <option value="Chevrolet Spin">Chevrolet Spin</option>
+                    <option value="Sedan / Executivo">Sedan / Executivo</option>
+                    <option value="Van / Minibus">Van / Minibus</option>
+                  </select>
                 </div>
               </div>
 
