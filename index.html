@@ -368,37 +368,72 @@
           <!-- COLUNA ESQUERDA: NOTÍCIAS, ALERTAS & MENSAGENS -->
           <section class="lg:col-span-1 space-y-4">
             <!-- 1. BUENOS AIRES AO VIVO (Rotativo e Gerenciável) -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3 relative overflow-hidden">
-              
+            <div
+              class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3 relative overflow-hidden"
+            >
               <!-- CABEÇALHO DO CARD CLICÁVEL -->
               <div class="flex items-center justify-between mb-1 relative z-10">
-                <h3 onclick="abrirGerenciadorBA()" class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 cursor-pointer hover:text-blue-600 transition group" title="Gerenciar avisos ao vivo">
+                <h3
+                  onclick="abrirGerenciadorBA()"
+                  class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 cursor-pointer hover:text-blue-600 transition group"
+                  title="Gerenciar avisos ao vivo"
+                >
                   <span>🇦🇷</span> Buenos Aires ao Vivo
-                  <i class="fas fa-cog text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  <i
+                    class="fas fa-cog text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  ></i>
                 </h3>
-                <span class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span>
+                <span
+                  class="bg-sky-50 text-sky-700 font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1"
+                >
+                  <span
+                    class="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"
+                  ></span>
                   Rotativo
                 </span>
               </div>
 
               <!-- CONTAINER DO TICKER (Ajustado para mensagens longas) -->
-              <div onclick="abrirGerenciadorBA()" class="w-full h-[75px] relative cursor-pointer group" title="Clique para gerenciar avisos">
-                  <div id="tickerNewsCard" class="absolute inset-0 w-full p-3 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-1 transition-all duration-300 transform opacity-100 translate-y-0 group-hover:border-blue-200 group-hover:shadow-sm overflow-hidden">
-                    <div class="flex justify-between items-center">
-                      <span id="bavivo-categoria" class="text-[9px] font-extrabold text-blue-900 uppercase truncate max-w-[60%]"></span>
-                      <span id="bavivo-tempo" class="text-[9px] text-gray-400 shrink-0"></span>
-                    </div>
-                    <!-- AQUI A MÁGICA: line-clamp-2 permite 2 linhas antes de colocar "..." -->
-                    <p id="bavivo-mensagem" class="text-xs text-gray-700 leading-snug line-clamp-2 font-medium">
-                    </p>
+              <div
+                onclick="abrirGerenciadorBA()"
+                class="w-full h-[75px] relative cursor-pointer group"
+                title="Clique para gerenciar avisos"
+              >
+                <div
+                  id="tickerNewsCard"
+                  class="absolute inset-0 w-full p-3 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-1 transition-all duration-300 transform opacity-100 translate-y-0 group-hover:border-blue-200 group-hover:shadow-sm overflow-hidden"
+                >
+                  <div class="flex justify-between items-center">
+                    <span
+                      id="bavivo-categoria"
+                      class="text-[9px] font-extrabold text-blue-900 uppercase truncate max-w-[60%]"
+                    ></span>
+                    <span
+                      id="bavivo-tempo"
+                      class="text-[9px] text-gray-400 shrink-0"
+                    ></span>
                   </div>
+                  <!-- AQUI A MÁGICA: line-clamp-2 permite 2 linhas antes de colocar "..." -->
+                  <p
+                    id="bavivo-mensagem"
+                    class="text-xs text-gray-700 leading-snug line-clamp-2 font-medium"
+                  ></p>
+                </div>
               </div>
 
               <!-- Link Rápido para a Agenda Oficial da Cidade -->
-              <div class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs relative z-10">
-                <span class="text-gray-500 font-medium">📅 Programação da Cidade:</span>
-                <a id="bavivo-link" href="https://linda.buenosaires.gob.ar/" target="_blank" class="text-purple-600 font-bold hover:underline flex items-center gap-1">
+              <div
+                class="pt-2 border-t border-gray-50 flex items-center justify-between text-xs relative z-10"
+              >
+                <span class="text-gray-500 font-medium"
+                  >📅 Programação da Cidade:</span
+                >
+                <a
+                  id="bavivo-link"
+                  href="https://linda.buenosaires.gob.ar/"
+                  target="_blank"
+                  class="text-purple-600 font-bold hover:underline flex items-center gap-1"
+                >
                   Ver Agenda ↗
                 </a>
               </div>
@@ -648,9 +683,12 @@
                     >Próximas Atividades de Hoje</span
                   >
                 </h3>
-             <button onclick="abrirCalendarioMensal()" class="text-xs font-semibold text-blue-900 underline hover:text-blue-700 transition bg-transparent border-none p-0 cursor-pointer">
-    Ver agenda completa
-</button>
+                <button
+                  onclick="abrirCalendarioMensal()"
+                  class="text-xs font-semibold text-blue-900 underline hover:text-blue-700 transition bg-transparent border-none p-0 cursor-pointer"
+                >
+                  Ver agenda completa
+                </button>
               </div>
 
               <div class="space-y-3" id="dashActivitiesContainer">
@@ -842,8 +880,6 @@
                   />
                 </div>
               </div>
-              <div>
-
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -889,42 +925,60 @@
                 />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 text-sm mt-2"
-              >
-                <i class="fas fa-plus-circle"></i> Cadastrar e Ativar
-              </button>
+              <div class="flex gap-2 mt-2">
+                <button
+                  type="submit"
+                  id="btnSubmitDriver"
+                  class="flex-1 py-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 text-sm"
+                >
+                  <i class="fas fa-plus-circle"></i> Cadastrar e Ativar
+                </button>
+                <button
+                  type="button"
+                  id="btnCancelarEdicao"
+                  onclick="resetarFormularioMotorista()"
+                  class="hidden px-4 py-4 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition text-sm"
+                  title="Cancelar Edição"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
             </form>
           </section>
 
           <!-- LISTA DE MOTORISTAS -->
           <section class="lg:col-span-2 space-y-4">
-           <!-- Barra de Busca e Filtros -->
-    <div class="flex items-center justify-between gap-4 mb-2">
-      
-      <!-- BARRA DE PESQUISA -->
-      <div class="relative w-full max-w-md">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
-        <input 
-          type="text" 
-          placeholder="Buscar motorista ou veículo..." 
-          class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm transition capitalize"
-          oninput="buscarMotorista(this.value)"
-        >
-      </div>
+            <!-- Barra de Busca e Filtros -->
+            <div class="flex items-center justify-between gap-4 mb-2">
+              <!-- BARRA DE PESQUISA -->
+              <div class="relative w-full max-w-md">
+                <i
+                  class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"
+                ></i>
+                <input
+                  type="text"
+                  placeholder="Buscar motorista ou veículo..."
+                  class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-blue-500 shadow-sm transition capitalize"
+                  oninput="buscarMotorista(this.value)"
+                />
+              </div>
 
-      <!-- CONTADORES VERDE E AZUL -->
-      <div class="flex items-center gap-3 whitespace-nowrap">
-        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-100">
-          <i class="fas fa-users"></i> <span id="activeCount">0</span> Ativos
-        </div>
-        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
-          <i class="fas fa-car-side"></i> <span id="totalTripsCount">0</span> Viagens total
-        </div>
-      </div>
-
-    </div>
+              <!-- CONTADORES VERDE E AZUL -->
+              <div class="flex items-center gap-3 whitespace-nowrap">
+                <div
+                  class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-100"
+                >
+                  <i class="fas fa-users"></i>
+                  <span id="activeCount">0</span> Ativos
+                </div>
+                <div
+                  class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100"
+                >
+                  <i class="fas fa-car-side"></i>
+                  <span id="totalTripsCount">0</span> Viagens total
+                </div>
+              </div>
+            </div>
 
             <!-- Container Dinâmico -->
             <div id="driversList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1228,7 +1282,6 @@
                     placeholder="Digite para buscar..."
                     class="w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     autocomplete="new-password"
-                    
                   />
                   <input type="hidden" id="orc-select-servico" />
 
@@ -1624,9 +1677,11 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1">
-    <i class="fab fa-whatsapp text-emerald-500"></i> WHATSAPP
-</label>
+              <label
+                class="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1"
+              >
+                <i class="fab fa-whatsapp text-emerald-500"></i> WHATSAPP
+              </label>
               <input
                 type="tel"
                 id="modalPhone"
@@ -1678,29 +1733,35 @@
               />
             </div>
             <div class="grid grid-cols-2 gap-1">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 text-center">🧳10KG</label>
-              <input
-                type="number"
-                id="modalBag10"
-                min="0"
-                value="0"
-                title="Malas 10kg"
-                class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
-              />
+              <div>
+                <label
+                  class="block text-[10px] font-bold text-gray-400 uppercase mb-1 text-center"
+                  >🧳10KG</label
+                >
+                <input
+                  type="number"
+                  id="modalBag10"
+                  min="0"
+                  value="0"
+                  title="Malas 10kg"
+                  class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-[10px] font-bold text-gray-400 uppercase mb-1 text-center"
+                  >🧳23KG</label
+                >
+                <input
+                  type="number"
+                  id="modalBag23"
+                  min="0"
+                  value="0"
+                  title="Malas 23kg"
+                  class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
+                />
+              </div>
             </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 text-center">🧳23KG</label>
-              <input
-                type="number"
-                id="modalBag23"
-                min="0"
-                value="0"
-                title="Malas 23kg"
-                class="w-full border border-gray-200 rounded-lg py-2 text-xs text-center focus:border-blue-500 outline-none shadow-sm"
-              />
-            </div>
-          </div>
           </div>
 
           <!-- Linha 3: Serviço/Rota junto com Data e Hora (4 colunas) -->
@@ -2154,7 +2215,7 @@
 
         if (savedUrl && savedKey) {
           try {
-           // window.supabaseClient = supabase.createClient(savedUrl, savedKey);
+            // window.supabaseClient = supabase.createClient(savedUrl, savedKey);
 
             const { error } = await window.supabaseClient
               .from("motoristas")
@@ -2213,89 +2274,90 @@
           initSupabase();
         }
       });
-     async function loadRealData() {
-    if (!window.isConnectedToSupabase || !window.supabaseClient) return;
+      async function loadRealData() {
+        if (!window.isConnectedToSupabase || !window.supabaseClient) return;
 
-    try {
-        let { data: dbDrivers, error: driverErr } =
+        try {
+          let { data: dbDrivers, error: driverErr } =
             await window.supabaseClient.from("motoristas").select("*");
-        if (driverErr) throw driverErr;
+          if (driverErr) throw driverErr;
 
-        if (dbDrivers) {
+          if (dbDrivers) {
             // CORREÇÃO: Salvando diretamente na variável global do nosso novo módulo drivers.js
             window.drivers = dbDrivers.map((d) => ({
-                id: d.id,
-                nome: d.nome,
-                telefone: d.telefone,
-                veiculo: d.veiculo,
-                placa: d.placa,
-                pix: d.pix,
-                valor: d.valor_combinado,
-                moeda: d.moeda,
-                capacidade: d.capacidade,
-                avaliacao: d.avaliacao,
-                corridas: d.corridas,
+              id: d.id,
+              nome: d.nome,
+              telefone: d.telefone,
+              veiculo: d.veiculo,
+              placa: d.placa,
+              pix: d.pix,
+              valor: d.valor_combinado,
+              moeda: d.moeda,
+              capacidade: d.capacidade,
+              avaliacao: d.avaliacao,
+              corridas: d.corridas,
             }));
-            
-            // Fallback: mantém a variável antiga atualizada caso outro script antigo precise dela
-            if (typeof drivers !== 'undefined') drivers = window.drivers;
-        }
 
-        let { data: dbReservas, error: resErr } = await window.supabaseClient
+            // Fallback: mantém a variável antiga atualizada caso outro script antigo precise dela
+            if (typeof drivers !== "undefined") drivers = window.drivers;
+          }
+
+          let { data: dbReservas, error: resErr } = await window.supabaseClient
             .from("reservas")
             .select(
-                "*, clientes(nome, whatsapp), motoristas(nome, valor_combinado)",
+              "*, clientes(nome, whatsapp), motoristas(nome, valor_combinado)",
             );
-        if (resErr) throw resErr;
+          if (resErr) throw resErr;
 
-        if (dbReservas) {
+          if (dbReservas) {
             window.databaseAgenda = dbReservas.map((r) => {
-                const valMotorista =
-                    r.valor_repasse_motorista ||
-                    (r.motoristas ? r.motoristas.valor_combinado : 0);
-                return {
-                    id: r.id,
-                    dia: r.dia,
-                    hora: r.hora,
-                    tipo: r.tipo,
-                    cliente: r.clientes ? r.clientes.nome : "Cliente Desconhecido",
-                    pax: r.pax,
-                    localizacao: r.localizacao,
-                    motorista: r.motoristas ? r.motoristas.nome : "Sem Motorista",
-                    status: r.status,
-                    voo: r.voo,
-                    statusVoo: r.status_voo,
-                    telefone: r.clientes ? r.clientes.whatsapp : "",
-                    valorCliente: r.valor_total || 120,
-                    valorMotorista: valMotorista || 80,
-                    pagoCliente: r.pago_cliente || false,
-                    pagoMotorista: r.pago_motorista || false,
-                };
+              const valMotorista =
+                r.valor_repasse_motorista ||
+                (r.motoristas ? r.motoristas.valor_combinado : 0);
+              return {
+                id: r.id,
+                dia: r.dia,
+                hora: r.hora,
+                tipo: r.tipo,
+                cliente: r.clientes ? r.clientes.nome : "Cliente Desconhecido",
+                pax: r.pax,
+                localizacao: r.localizacao,
+                motorista: r.motoristas ? r.motoristas.nome : "Sem Motorista",
+                status: r.status,
+                voo: r.voo,
+                statusVoo: r.status_voo,
+                telefone: r.clientes ? r.clientes.whatsapp : "",
+                valorCliente: r.valor_total || 120,
+                valorMotorista: valMotorista || 80,
+                pagoCliente: r.pago_cliente || false,
+                pagoMotorista: r.pago_motorista || false,
+              };
             });
-            
-            if (typeof databaseAgenda !== 'undefined') databaseAgenda = window.databaseAgenda;
-        }
 
-        // Renderizações das outras abas (mantendo a sua estrutura original)
-        if (typeof renderDashboard === 'function') renderDashboard();
-        if (typeof renderAgenda === 'function') renderAgenda();
-        if (typeof renderFinanceiro === 'function') renderFinanceiro();
-        if (typeof renderServicos === 'function') renderServicos();
-        if (typeof gerarDiasAgenda === 'function') gerarDiasAgenda();
+            if (typeof databaseAgenda !== "undefined")
+              databaseAgenda = window.databaseAgenda;
+          }
 
-        // --- PASSO 2: O GATILHO PARA O NOVO drivers.js ---
-        // Assim que os dados chegam, ele avisa o módulo para desenhar a tela e atualizar os menus dropdown
-        if (typeof window.renderDrivers === 'function') {
+          // Renderizações das outras abas (mantendo a sua estrutura original)
+          if (typeof renderDashboard === "function") renderDashboard();
+          if (typeof renderAgenda === "function") renderAgenda();
+          if (typeof renderFinanceiro === "function") renderFinanceiro();
+          if (typeof renderServicos === "function") renderServicos();
+          if (typeof gerarDiasAgenda === "function") gerarDiasAgenda();
+
+          // --- PASSO 2: O GATILHO PARA O NOVO drivers.js ---
+          // Assim que os dados chegam, ele avisa o módulo para desenhar a tela e atualizar os menus dropdown
+          if (typeof window.renderDrivers === "function") {
             window.renderDrivers();
             window.updateDriverDropdowns();
+          }
+        } catch (err) {
+          console.error("Erro ao puxar dados do Supabase: ", err);
+          showToast("Erro de sincronização. Voltando ao modo local.");
+          if (typeof switchToSimulationMode === "function")
+            switchToSimulationMode();
         }
-
-    } catch (err) {
-        console.error("Erro ao puxar dados do Supabase: ", err);
-        showToast("Erro de sincronização. Voltando ao modo local.");
-        if (typeof switchToSimulationMode === 'function') switchToSimulationMode();
-    }
-}
+      }
 
       async function switchTab(tabId) {
         if (typeof loadRealData === "function") {
@@ -2627,7 +2689,7 @@
           }
         }
       }
-  
+
       async function renderServicos() {
         const container = document.getElementById("catalogList");
         if (!container) return;
@@ -2756,7 +2818,7 @@
           })
           .join("");
       }
-     
+
       async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
         const novoNome = prompt("Editar nome do serviço:", nomeAtual);
         if (novoNome === null) return;
@@ -2788,7 +2850,6 @@
           renderServicos();
         }
       }
-
 
       // 1. Função Auxiliar: Responsável apenas por limpar o formulário
       function limparFormularioReserva() {
@@ -3751,7 +3812,6 @@
 
       let noticiaAtualIndex = 0;
 
-    
       async function carregarAtencaoOperacional() {
         const container = document.querySelector(".space-y-2");
         if (!container) return;
@@ -3929,72 +3989,87 @@
       // ==========================================
       let motoristaExtratoAtual = null;
 
-   // 1. Função Matemática Auxiliar (Descobre os dias da semana selecionada)
-function getExtremosDaSemanaISO(semanaISO) {
-    if (!semanaISO) return null;
-    const [anoStr, semanaStr] = semanaISO.split('-W');
-    const ano = parseInt(anoStr, 10);
-    const semana = parseInt(semanaStr, 10);
+      // 1. Função Matemática Auxiliar (Descobre os dias da semana selecionada)
+      function getExtremosDaSemanaISO(semanaISO) {
+        if (!semanaISO) return null;
+        const [anoStr, semanaStr] = semanaISO.split("-W");
+        const ano = parseInt(anoStr, 10);
+        const semana = parseInt(semanaStr, 10);
 
-    const jan4 = new Date(ano, 0, 4);
-    const diaJan4 = jan4.getDay() || 7;
-    const segundaSemana1 = new Date(ano, 0, 4 - diaJan4 + 1);
-    
-    const inicioSemana = new Date(segundaSemana1);
-    inicioSemana.setDate(segundaSemana1.getDate() + (semana - 1) * 7);
-    
-    const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(inicioSemana.getDate() + 6);
+        const jan4 = new Date(ano, 0, 4);
+        const diaJan4 = jan4.getDay() || 7;
+        const segundaSemana1 = new Date(ano, 0, 4 - diaJan4 + 1);
 
-    const pad = (n) => n.toString().padStart(2, '0');
-    return {
-        inicio: `${inicioSemana.getFullYear()}-${pad(inicioSemana.getMonth() + 1)}-${pad(inicioSemana.getDate())}`,
-        fim: `${fimSemana.getFullYear()}-${pad(fimSemana.getMonth() + 1)}-${pad(fimSemana.getDate())}`
-    };
-}
+        const inicioSemana = new Date(segundaSemana1);
+        inicioSemana.setDate(segundaSemana1.getDate() + (semana - 1) * 7);
 
-// 2. O "Motor" que refaz a tabela sempre que a semana muda
-function renderizarFiltroSemanaExtrato() {
-    const inputFiltroSemana = document.querySelector("#modal-extrato-motorista input[type='week']");
-    if (!inputFiltroSemana || !motoristaExtratoAtual) return;
+        const fimSemana = new Date(inicioSemana);
+        fimSemana.setDate(inicioSemana.getDate() + 6);
 
-    const limites = getExtremosDaSemanaISO(inputFiltroSemana.value);
-    if (!limites) return;
+        const pad = (n) => n.toString().padStart(2, "0");
+        return {
+          inicio: `${inicioSemana.getFullYear()}-${pad(inicioSemana.getMonth() + 1)}-${pad(inicioSemana.getDate())}`,
+          fim: `${fimSemana.getFullYear()}-${pad(fimSemana.getMonth() + 1)}-${pad(fimSemana.getDate())}`,
+        };
+      }
 
-    let corridasMotorista = typeof databaseAgenda !== 'undefined' ? databaseAgenda.filter(
-        (item) => String(item.motorista) === String(motoristaExtratoAtual.nome) || String(item.motorista_id) === String(motoristaExtratoAtual.id)
-    ) : [];
+      // 2. O "Motor" que refaz a tabela sempre que a semana muda
+      function renderizarFiltroSemanaExtrato() {
+        const inputFiltroSemana = document.querySelector(
+          "#modal-extrato-motorista input[type='week']",
+        );
+        if (!inputFiltroSemana || !motoristaExtratoAtual) return;
 
-    // Filtra apenas viagens que caem entre Segunda e Domingo da semana escolhida
-    corridasMotorista = corridasMotorista.filter(corrida => {
-        if (!corrida.dia) return false;
-        return corrida.dia >= limites.inicio && corrida.dia <= limites.fim;
-    });
+        const limites = getExtremosDaSemanaISO(inputFiltroSemana.value);
+        if (!limites) return;
 
-    // Ordem cronológica
-    corridasMotorista.sort((a, b) => new Date(`${a.dia}T${a.hora || "00:00"}`) - new Date(`${b.dia}T${b.hora || "00:00"}`));
+        let corridasMotorista =
+          typeof databaseAgenda !== "undefined"
+            ? databaseAgenda.filter(
+                (item) =>
+                  String(item.motorista) ===
+                    String(motoristaExtratoAtual.nome) ||
+                  String(item.motorista_id) ===
+                    String(motoristaExtratoAtual.id),
+              )
+            : [];
 
-    let repasseTotalPendente = 0;
-    let repasseTotalSemana = 0;
+        // Filtra apenas viagens que caem entre Segunda e Domingo da semana escolhida
+        corridasMotorista = corridasMotorista.filter((corrida) => {
+          if (!corrida.dia) return false;
+          return corrida.dia >= limites.inicio && corrida.dia <= limites.fim;
+        });
 
-    const linhasTabela = corridasMotorista.map((corrida) => {
-        const valorRepasse = Number(corrida.valorMotorista) || 0;
-        const estaPago = corrida.pagoMotorista;
-        
-        repasseTotalSemana += valorRepasse; // Soma Bruta
-        if (!estaPago) repasseTotalPendente += valorRepasse; // Soma Pendente
+        // Ordem cronológica
+        corridasMotorista.sort(
+          (a, b) =>
+            new Date(`${a.dia}T${a.hora || "00:00"}`) -
+            new Date(`${b.dia}T${b.hora || "00:00"}`),
+        );
 
-        const badgeStatus = estaPago
-            ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Pago</span>`
-            : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-clock"></i> Pendente</span>`;
+        let repasseTotalPendente = 0;
+        let repasseTotalSemana = 0;
 
-        let dataBR = corrida.dia || "--";
-        if (corrida.dia && corrida.dia.includes("-")) {
-            const partes = corrida.dia.split("-");
-            if (partes.length === 3) dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
+        const linhasTabela = corridasMotorista
+          .map((corrida) => {
+            const valorRepasse = Number(corrida.valorMotorista) || 0;
+            const estaPago = corrida.pagoMotorista;
 
-        return `
+            repasseTotalSemana += valorRepasse; // Soma Bruta
+            if (!estaPago) repasseTotalPendente += valorRepasse; // Soma Pendente
+
+            const badgeStatus = estaPago
+              ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-check"></i> Pago</span>`
+              : `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold"><i class="fas fa-clock"></i> Pendente</span>`;
+
+            let dataBR = corrida.dia || "--";
+            if (corrida.dia && corrida.dia.includes("-")) {
+              const partes = corrida.dia.split("-");
+              if (partes.length === 3)
+                dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+
+            return `
             <tr class="hover:bg-gray-50 transition">
                 <td class="p-3">
                     <div class="font-bold text-gray-800">${dataBR}</div>
@@ -4010,28 +4085,42 @@ function renderizarFiltroSemanaExtrato() {
                 <td class="p-3 text-center">${badgeStatus}</td>
             </tr>
         `;
-    }).join("");
+          })
+          .join("");
 
-    const tbody = document.getElementById("extrato-tabela-corridas");
-    if (tbody) {
-        // Agora usa o nome correto, resolvendo aquele bug do texto gigante
-        tbody.innerHTML = linhasTabela || `<tr><td colspan="4" class="text-center p-4 text-gray-500 text-xs">Nenhuma viagem de <b>${motoristaExtratoAtual.nome}</b> na semana selecionada.</td></tr>`;
-    }
+        const tbody = document.getElementById("extrato-tabela-corridas");
+        if (tbody) {
+          // Agora usa o nome correto, resolvendo aquele bug do texto gigante
+          tbody.innerHTML =
+            linhasTabela ||
+            `<tr><td colspan="4" class="text-center p-4 text-gray-500 text-xs">Nenhuma viagem de <b>${motoristaExtratoAtual.nome}</b> na semana selecionada.</td></tr>`;
+        }
 
-    const formatadorMoeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-    
-    // Atualiza separadamente o Faturado e o Pendente
-    const labelFaturado = document.getElementById("extrato-faturado-semana");
-    if(labelFaturado) labelFaturado.innerText = formatadorMoeda.format(repasseTotalSemana);
-    document.getElementById("extrato-total-pendente").innerText = formatadorMoeda.format(repasseTotalPendente);
-}
+        const formatadorMoeda = new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
 
-// 3. A Função que abre o modal pela primeira vez
-function abrirExtratoMotorista(driverId, driverName, driverPhone) {
-    motoristaExtratoAtual = { id: driverId, nome: driverName, telefone: driverPhone };
+        // Atualiza separadamente o Faturado e o Pendente
+        const labelFaturado = document.getElementById(
+          "extrato-faturado-semana",
+        );
+        if (labelFaturado)
+          labelFaturado.innerText = formatadorMoeda.format(repasseTotalSemana);
+        document.getElementById("extrato-total-pendente").innerText =
+          formatadorMoeda.format(repasseTotalPendente);
+      }
 
-    // Desenha o título com um local específico (ID) para injetarmos o valor bruto depois
-    document.getElementById("titulo-extrato-motorista").innerHTML = `
+      // 3. A Função que abre o modal pela primeira vez
+      function abrirExtratoMotorista(driverId, driverName, driverPhone) {
+        motoristaExtratoAtual = {
+          id: driverId,
+          nome: driverName,
+          telefone: driverPhone,
+        };
+
+        // Desenha o título com um local específico (ID) para injetarmos o valor bruto depois
+        document.getElementById("titulo-extrato-motorista").innerHTML = `
         <div class="flex flex-col gap-1.5">
             <div><i class="fas fa-file-invoice-dollar text-emerald-600"></i> Extrato: ${driverName}</div>
             <div class="text-[11px] font-medium text-gray-500 bg-gray-50 border border-gray-200 w-fit px-2.5 py-0.5 rounded-md shadow-sm">
@@ -4040,63 +4129,70 @@ function abrirExtratoMotorista(driverId, driverName, driverPhone) {
         </div>
     `;
 
-    const inputFiltroSemana = document.querySelector("#modal-extrato-motorista input[type='week']");
-    if (inputFiltroSemana) {
-        // Força a semana atual ao abrir
-        const hoje = new Date();
-        const d = new Date(Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
-        const dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        const weekString = `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
-        
-        inputFiltroSemana.value = weekString;
-        
-        // --- AS DUAS MÁGICAS NOVAS AQUI ---
-        // 1. O Fofoqueiro: Se mudar o input, roda a função que atualiza a tabela
-        inputFiltroSemana.onchange = renderizarFiltroSemanaExtrato; 
-        
-        // 2. A UX Premium: Clicou em qualquer parte da caixa, abre o calendário
-        inputFiltroSemana.onclick = function() { this.showPicker(); };
-    }
+        const inputFiltroSemana = document.querySelector(
+          "#modal-extrato-motorista input[type='week']",
+        );
+        if (inputFiltroSemana) {
+          // Força a semana atual ao abrir
+          const hoje = new Date();
+          const d = new Date(
+            Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()),
+          );
+          const dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+          const weekString = `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2, "0")}`;
 
-    // Roda a tabela pela primeira vez com a semana atual
-    renderizarFiltroSemanaExtrato();
+          inputFiltroSemana.value = weekString;
 
-    const modal = document.getElementById("modal-extrato-motorista");
-    if (modal) {
-        modal.classList.remove("hidden");
-    }
-}
-// Função de pesquisa em tempo real (Definitiva e Inteligente)
-function buscarMotorista(termo) {
-    const busca = (termo || "").toLowerCase().trim();
+          // --- AS DUAS MÁGICAS NOVAS AQUI ---
+          // 1. O Fofoqueiro: Se mudar o input, roda a função que atualiza a tabela
+          inputFiltroSemana.onchange = renderizarFiltroSemanaExtrato;
 
-    // Se o campo estiver vazio, mostra todo mundo
-    if (busca.length === 0) {
-        renderDrivers(drivers); // 'drivers' é sua lista global original
-        return;
-    }
+          // 2. A UX Premium: Clicou em qualquer parte da caixa, abre o calendário
+          inputFiltroSemana.onclick = function () {
+            this.showPicker();
+          };
+        }
 
-    const motoristasFiltrados = drivers.filter((driver) => {
-        const nome = String(driver.nome || "").toLowerCase();
-        const veiculo = String(driver.veiculo || "").toLowerCase();
-        const placa = String(driver.placa || "").toLowerCase();
+        // Roda a tabela pela primeira vez com a semana atual
+        renderizarFiltroSemanaExtrato();
 
-        // MÁGICA AQUI: Bate se o nome/veículo COMEÇA com o texto, 
-        // OU se alguma palavra no meio COMEÇA com o texto (tem um espaço antes).
-        const nomeBate = nome.startsWith(busca) || nome.includes(' ' + busca);
-        const veiculoBate = veiculo.startsWith(busca) || veiculo.includes(' ' + busca);
-        
-        // A placa a gente deixa procurar em qualquer parte mesmo
-        const placaBate = placa.includes(busca);
+        const modal = document.getElementById("modal-extrato-motorista");
+        if (modal) {
+          modal.classList.remove("hidden");
+        }
+      }
+      // Função de pesquisa em tempo real (Definitiva e Inteligente)
+      function buscarMotorista(termo) {
+        const busca = (termo || "").toLowerCase().trim();
 
-        return nomeBate || veiculoBate || placaBate;
-    });
+        // Se o campo estiver vazio, mostra todo mundo
+        if (busca.length === 0) {
+          renderDrivers(drivers); // 'drivers' é sua lista global original
+          return;
+        }
 
-    renderDrivers(motoristasFiltrados);
-}
+        const motoristasFiltrados = drivers.filter((driver) => {
+          const nome = String(driver.nome || "").toLowerCase();
+          const veiculo = String(driver.veiculo || "").toLowerCase();
+          const placa = String(driver.placa || "").toLowerCase();
+
+          // MÁGICA AQUI: Bate se o nome/veículo COMEÇA com o texto,
+          // OU se alguma palavra no meio COMEÇA com o texto (tem um espaço antes).
+          const nomeBate = nome.startsWith(busca) || nome.includes(" " + busca);
+          const veiculoBate =
+            veiculo.startsWith(busca) || veiculo.includes(" " + busca);
+
+          // A placa a gente deixa procurar em qualquer parte mesmo
+          const placaBate = placa.includes(busca);
+
+          return nomeBate || veiculoBate || placaBate;
+        });
+
+        renderDrivers(motoristasFiltrados);
+      }
       function enviarExtratoWhatsApp() {
         if (!motoristaExtratoAtual) return;
 
@@ -5644,32 +5740,42 @@ function buscarMotorista(termo) {
         }
       }
       // ==========================================
-// ==========================================
-// UI FACTORY: COMPONENTES REUTILIZÁVEIS (DRY)
-// ==========================================
+      // ==========================================
+      // UI FACTORY: COMPONENTES REUTILIZÁVEIS (DRY)
+      // ==========================================
 
-function gerarCardAtividade(item, isTimeline = false) {
-    const statusStr = String(item.status || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    let badgeHtml = '';
-    let borderClass = 'border-amber-400 bg-amber-50/20'; // Amarelo Padrão (Pendente)
+      function gerarCardAtividade(item, isTimeline = false) {
+        const statusStr = String(item.status || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
 
-    if (statusStr.includes("concluido") || statusStr.includes("executado") || statusStr.includes("finalizado")) {
-        borderClass = 'border-emerald-400 bg-emerald-50/20';
-        badgeHtml = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Concluído</span>`;
-    } 
-    else if (statusStr.includes("declinar") || statusStr.includes("declinado") || statusStr.includes("cancelado") || statusStr.includes("nao")) {
-        borderClass = 'border-red-400 bg-red-50/20';
-        badgeHtml = `<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Declinado</span>`;
-    } 
-    else {
-        // Qualquer outro estado (como "Confirmado" antigo) vira Pendente Amarelo limpo
-        badgeHtml = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendente</span>`;
-    }
+        let badgeHtml = "";
+        let borderClass = "border-amber-400 bg-amber-50/20"; // Amarelo Padrão (Pendente)
 
-    // Layout Específico para a Linha do Tempo (Dossiê)
-    if (isTimeline) {
-        return `
+        if (
+          statusStr.includes("concluido") ||
+          statusStr.includes("executado") ||
+          statusStr.includes("finalizado")
+        ) {
+          borderClass = "border-emerald-400 bg-emerald-50/20";
+          badgeHtml = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Concluído</span>`;
+        } else if (
+          statusStr.includes("declinar") ||
+          statusStr.includes("declinado") ||
+          statusStr.includes("cancelado") ||
+          statusStr.includes("nao")
+        ) {
+          borderClass = "border-red-400 bg-red-50/20";
+          badgeHtml = `<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-600"></span> Declinado</span>`;
+        } else {
+          // Qualquer outro estado (como "Confirmado" antigo) vira Pendente Amarelo limpo
+          badgeHtml = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendente</span>`;
+        }
+
+        // Layout Específico para a Linha do Tempo (Dossiê)
+        if (isTimeline) {
+          return `
             <div class="relative bg-white p-3 rounded-xl border ${borderClass} shadow-sm mb-3">
                 <span class="absolute -left-[23px] top-3 w-3 h-3 bg-blue-600 rounded-full border-2 border-white"></span>
                 <div class="flex justify-between items-start">
@@ -5683,10 +5789,10 @@ function gerarCardAtividade(item, isTimeline = false) {
                 </div>
             </div>
         `;
-    }
+        }
 
-    // Layout Padrão (Dashboard e Agenda)
-    return `
+        // Layout Padrão (Dashboard e Agenda)
+        return `
         <div class="p-4 bg-white rounded-xl border ${borderClass} shadow-sm mb-3 flex items-center justify-between text-xs transition group">
             <div onclick="openClientDossier('${item.cliente_id || ""}', '${item.cliente || "Cliente"}', '${item.telefone || ""}', '')" class="cursor-pointer flex-1">
                 <p class="font-bold text-gray-900 group-hover:text-blue-900 transition">${item.hora || "--:--"} - ${item.cliente || "Cliente"}</p>
@@ -5697,8 +5803,8 @@ function gerarCardAtividade(item, isTimeline = false) {
             </div>
         </div>
     `;
-}
-// ==========================================
+      }
+      // ==========================================
       // ==========================================
       // FUNÇÕES DO MOTORISTA (EXCLUIR E EDITAR)
       // ==========================================
@@ -6080,7 +6186,6 @@ function gerarCardAtividade(item, isTimeline = false) {
           btn.innerHTML = `<i class="fas fa-check-double"></i> Pagar Semana`;
         }
       };
-
     </script>
     <!-- Template PDF Oculto -->
     <div
@@ -6355,112 +6460,203 @@ function gerarCardAtividade(item, isTimeline = false) {
       </div>
     </div>
     <!-- MODAL DO CALENDÁRIO MENSAL (Google Calendar Style) -->
-<div id="modal-calendario" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
-      
-      <!-- Header do Modal -->
-      <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+    <div
+      id="modal-calendario"
+      class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300"
+      >
+        <!-- Header do Modal -->
+        <div
+          class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50"
+        >
           <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <i class="far fa-calendar-alt text-blue-600"></i> Visão Mensal da Agenda
+            <i class="far fa-calendar-alt text-blue-600"></i> Visão Mensal da
+            Agenda
           </h3>
-          <button onclick="fecharCalendario()" class="text-gray-400 hover:text-red-500 transition p-1">
-              <i class="fas fa-times text-xl"></i>
+          <button
+            onclick="fecharCalendario()"
+            class="text-gray-400 hover:text-red-500 transition p-1"
+          >
+            <i class="fas fa-times text-xl"></i>
           </button>
-      </div>
+        </div>
 
-      <!-- Controles de Navegação do Mês -->
-      <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100 shadow-sm z-10 relative">
-          <button onclick="mudarMesCalendario(-1)" class="px-4 py-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 font-bold rounded-lg transition flex items-center gap-2">
-              <i class="fas fa-chevron-left"></i> Anterior
+        <!-- Controles de Navegação do Mês -->
+        <div
+          class="p-4 flex justify-between items-center bg-white border-b border-gray-100 shadow-sm z-10 relative"
+        >
+          <button
+            onclick="mudarMesCalendario(-1)"
+            class="px-4 py-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 font-bold rounded-lg transition flex items-center gap-2"
+          >
+            <i class="fas fa-chevron-left"></i> Anterior
           </button>
-          <h4 id="mes-ano-calendario" class="text-lg font-black text-gray-800 uppercase tracking-wide">Agosto 2026</h4>
-          <button onclick="mudarMesCalendario(1)" class="px-4 py-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 font-bold rounded-lg transition flex items-center gap-2">
-              Próximo <i class="fas fa-chevron-right"></i>
+          <h4
+            id="mes-ano-calendario"
+            class="text-lg font-black text-gray-800 uppercase tracking-wide"
+          >
+            Agosto 2026
+          </h4>
+          <button
+            onclick="mudarMesCalendario(1)"
+            class="px-4 py-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 font-bold rounded-lg transition flex items-center gap-2"
+          >
+            Próximo <i class="fas fa-chevron-right"></i>
           </button>
-      </div>
+        </div>
 
-      <!-- Grid do Calendário -->
-      <div class="p-6 bg-gray-50/50">
+        <!-- Grid do Calendário -->
+        <div class="p-6 bg-gray-50/50">
           <!-- Dias da semana -->
-          <div class="grid grid-cols-7 gap-2 mb-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-wider">
-              <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+          <div
+            class="grid grid-cols-7 gap-2 mb-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-wider"
+          >
+            <div>Dom</div>
+            <div>Seg</div>
+            <div>Ter</div>
+            <div>Qua</div>
+            <div>Qui</div>
+            <div>Sex</div>
+            <div>Sáb</div>
           </div>
           <!-- Quadrados dos dias (O JS vai injetar aqui) -->
-          <div id="grid-dias-calendario" class="grid grid-cols-7 gap-2">
-          </div>
+          <div id="grid-dias-calendario" class="grid grid-cols-7 gap-2"></div>
+        </div>
       </div>
-  </div>
-</div>
-<!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
-<!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
-<div id="modal-bavivo" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
-        
-        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-            <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-broadcast-tower text-blue-600"></i> Avisos ao Vivo
-            </h3>
-            <button onclick="fecharGerenciadorBA()" class="text-gray-400 hover:text-red-500 transition p-1">
-                <i class="fas fa-times text-lg"></i>
-            </button>
+    </div>
+    <!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
+    <!-- MODAL GERENCIADOR DE AVISOS BUENOS AIRES -->
+    <div
+      id="modal-bavivo"
+      class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300 opacity-0"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]"
+      >
+        <div
+          class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0"
+        >
+          <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-broadcast-tower text-blue-600"></i> Avisos ao Vivo
+          </h3>
+          <button
+            onclick="fecharGerenciadorBA()"
+            class="text-gray-400 hover:text-red-500 transition p-1"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
         </div>
 
         <!-- TELA 1: LISTA DE AVISOS -->
         <div id="bavivo-view-lista" class="p-5 overflow-y-auto flex-1 bg-white">
-            <button onclick="mostrarFormularioBA(null)" class="w-full mb-4 py-3 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700 text-xs font-bold rounded-xl transition flex justify-center items-center gap-2">
-                <i class="fas fa-plus"></i> Adicionar Novo Aviso
-            </button>
-            <div id="lista-avisos-container" class="space-y-3">
-                <!-- Os cards da lista serão gerados via JS -->
-            </div>
+          <button
+            onclick="mostrarFormularioBA(null)"
+            class="w-full mb-4 py-3 border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700 text-xs font-bold rounded-xl transition flex justify-center items-center gap-2"
+          >
+            <i class="fas fa-plus"></i> Adicionar Novo Aviso
+          </button>
+          <div id="lista-avisos-container" class="space-y-3">
+            <!-- Os cards da lista serão gerados via JS -->
+          </div>
         </div>
 
         <!-- TELA 2: FORMULÁRIO (Adicionar / Editar) -->
-        <div id="bavivo-view-form" class="p-5 hidden overflow-y-auto flex-1 bg-white space-y-4">
-            <input type="hidden" id="input-ba-id">
-            
-            <!-- Linha de Categoria e Seletor de Cores -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Categoria (Ex: Trânsito)</label>
-                    <input type="text" id="input-ba-categoria" placeholder="Trânsito / Alerta" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cor do Rótulo</label>
-                    <select id="input-ba-cor" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-bold">
-                        <option value="azul">🔵 Azul Padrão</option>
-                        <option value="verde">🟢 Verde Turístico</option>
-                        <option value="vermelho">🔴 Vermelho Alerta</option>
-                        <option value="amarelo">🟡 Amarelo Atenção</option>
-                        <option value="roxo">🟣 Roxo Especial</option>
-                    </select>
-                </div>
-            </div>
+        <div
+          id="bavivo-view-form"
+          class="p-5 hidden overflow-y-auto flex-1 bg-white space-y-4"
+        >
+          <input type="hidden" id="input-ba-id" />
 
+          <!-- Linha de Categoria e Seletor de Cores -->
+          <div class="grid grid-cols-2 gap-4">
             <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tempo (Ex: Hoje, Há 15 min)</label>
-                <input type="text" id="input-ba-tempo" placeholder="Hoje" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
+              <label
+                class="block text-[10px] font-bold text-gray-400 uppercase mb-1"
+                >Categoria (Ex: Trânsito)</label
+              >
+              <input
+                type="text"
+                id="input-ba-categoria"
+                placeholder="Trânsito / Alerta"
+                class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+              />
             </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-gray-400 uppercase mb-1"
+                >Cor do Rótulo</label
+              >
+              <select
+                id="input-ba-cor"
+                class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-bold"
+              >
+                <option value="azul">🔵 Azul Padrão</option>
+                <option value="verde">🟢 Verde Turístico</option>
+                <option value="vermelho">🔴 Vermelho Alerta</option>
+                <option value="amarelo">🟡 Amarelo Atenção</option>
+                <option value="roxo">🟣 Roxo Especial</option>
+              </select>
+            </div>
+          </div>
 
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Mensagem do Alerta</label>
-                <textarea id="input-ba-mensagem" rows="3" class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"></textarea>
-            </div>
-            
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Link (Opcional)</label>
-                <input type="text" id="input-ba-link" placeholder="https://..." class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
-            </div>
-            
-            <div class="pt-2 border-t border-gray-100 flex justify-end gap-2">
-                <button onclick="voltarParaListaBA()" class="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition">Voltar</button>
-                <button onclick="salvarAvisoBA()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm">Salvar Aviso</button>
-            </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-gray-400 uppercase mb-1"
+              >Tempo (Ex: Hoje, Há 15 min)</label
+            >
+            <input
+              type="text"
+              id="input-ba-tempo"
+              placeholder="Hoje"
+              class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-gray-400 uppercase mb-1"
+              >Mensagem do Alerta</label
+            >
+            <textarea
+              id="input-ba-mensagem"
+              rows="3"
+              class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-gray-400 uppercase mb-1"
+              >Link (Opcional)</label
+            >
+            <input
+              type="text"
+              id="input-ba-link"
+              placeholder="https://..."
+              class="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div class="pt-2 border-t border-gray-100 flex justify-end gap-2">
+            <button
+              onclick="voltarParaListaBA()"
+              class="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition"
+            >
+              Voltar
+            </button>
+            <button
+              onclick="salvarAvisoBA()"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition shadow-sm"
+            >
+              Salvar Aviso
+            </button>
+          </div>
         </div>
-
+      </div>
     </div>
-</div>
-<script src="bavivo.js"></script>
+    <script src="bavivo.js"></script>
     <script src="agenda.js"></script>
     <script src="calendario.js"></script>
     <script src="clientes.js"></script>
