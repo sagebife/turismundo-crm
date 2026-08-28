@@ -836,22 +836,19 @@
                     class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
                   />
                 </div>
-                <!-- Substitua o input antigo do veículo por este select -->
+                <!-- Campo de Modelo Específico (Texto Livre) -->
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 uppercase mb-1"
-                    >Veículo / Categoria</label
+                    >Modelo do Carro</label
                   >
-                  <select
+                  <input
+                    type="text"
                     id="driverVeiculo"
                     required
+                    placeholder="Ex: Logan, Fluence, Onix..."
                     class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
-                  >
-                    <option value="">Selecione a categoria...</option>
-                    <option value="Chevrolet Spin">Chevrolet Spin</option>
-                    <option value="Sedan / Executivo">Sedan / Executivo</option>
-                    <option value="Van / Minibus">Van / Minibus</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -885,35 +882,28 @@
                 </div>
               </div>
 
-              <!-- <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    class="block text-xs font-bold text-gray-500 uppercase mb-1"
-                    >Valor Combinado</label
-                  >
-                  <input
-                    type="number"
-                    id="driverValue"
-                    required
-                    placeholder="Ex: 80"
-                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-xs font-bold text-gray-500 uppercase mb-1"
-                    >Moeda</label
-                  >
-                  <select
-                    id="driverCurrency"
-                    class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
-                  >
-                    <option value="R$">R$ ($)</option>
-                    <option value="BRL">BRL (R$)</option>
-                    <option value="ARS">ARS ($)</option>
-                  </select>
-                </div>
-              </div> -->
+              <!-- Campo de Categoria da Frota (Select - Ocupando a largura total) -->
+              <div>
+                <label
+                  class="block text-xs font-bold text-gray-500 uppercase mb-1"
+                  >Categoria da Frota</label
+                >
+                <select
+                  id="driverCategoria"
+                  required
+                  class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 focus:bg-white transition text-sm"
+                >
+                  <option value="">Selecione a categoria...</option>
+                  <option value="Sedan Executivo">Executivo</option>
+                  <option value="Sedan Convencional">Sedan Convencional</option>
+                  <option value="Carro Pequeno">Carro Pequeno</option>
+                  <option value="Monovolume / Spin">7 Lugares</option>
+                  <option value="Utilitáios Caçamba">
+                    Utilitários Caçamba
+                  </option>
+                  <option value="Van / Minibus">Van / Minibus</option>
+                </select>
+              </div>
 
               <div>
                 <label
@@ -6715,9 +6705,9 @@
               id="filtroModeloDisparo"
               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900 text-sm"
             >
-              <option value="Spin">Chevrolet Spin</option>
-              <option value="Sedan">Sedan / Executivo</option>
-              <option value="Van">Van / Minibus</option>
+              <option value="Sedan Executivo">Sedan Executivo</option>
+              <option value="Monovolume / Spin">Monovolume / Spin</option>
+              <option value="Van / Minibus">Van / Minibus</option>
               <option value="todos">Todos os Veículos</option>
             </select>
           </div>

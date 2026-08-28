@@ -473,3 +473,14 @@ window.executarDisparoInteligente = function () {
     alert(`Disparo iniciado para ${motoristasAlvo.length} motoristas!`);
   }
 };
+
+const categoriaSelect = document.getElementById("driverCategoria")?.value || "";
+
+const dadosParaSalvar = {
+  nome: name,
+  telefone: phone,
+  veiculo: vehicle, // Ex: "Renault Logan"
+  categoria: categoriaSelect, // Ex: "Sedan Executivo"
+  placa: plate,
+  // ... restante dos campos
+};
