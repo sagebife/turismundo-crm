@@ -9,22 +9,18 @@ if (typeof window.drivers === "undefined") {
 }
 
 // --- MÁGICA AUTÔNOMA (Não precisa mexer no index.html) ---
-// O sistema fica verificando a cada meio segundo se os dados já chegaram do Supabase.
-// Assim que chegarem, ele desenha a tela e desliga o verificador sozinho!
 let verificadorMotoristas = setInterval(() => {
   if (window.drivers && window.drivers.length > 0) {
     const container = document.getElementById("driversList");
-    // Desenha apenas se a lista ainda estiver vazia
     if (container && container.innerHTML.trim() === "") {
       window.renderDrivers();
       window.updateDriverDropdowns();
     }
-    clearInterval(verificadorMotoristas); // Desliga o radar
+    clearInterval(verificadorMotoristas);
   }
 }, 500);
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Interceptador de clique: se você clicar no menu "Motoristas", ele garante que a lista apareça
   document.body.addEventListener("click", (e) => {
     const navItem = e.target.closest("a, button, li, .menu-item");
     if (
@@ -86,8 +82,8 @@ window.renderDrivers = function (dataToRender = window.drivers) {
       let stars = "";
       for (let i = 1; i <= 5; i++) {
         stars += `<i onclick="atualizarNotaMotorista('${driver.id}', ${i})" 
-                         class="fas fa-star cursor-pointer transition-transform hover:scale-125 ${i <= nota ? "text-amber-400" : "text-gray-200"} text-xs" 
-                         title="Dar nota ${i}"></i>`;
+                        class="fas fa-star cursor-pointer transition-transform hover:scale-125 ${i <= nota ? "text-amber-400" : "text-gray-200"} text-xs" 
+                        title="Dar nota ${i}"></i>`;
       }
 
       const partesNome = (driver.nome || "Motorista").split(" ");
@@ -126,6 +122,10 @@ window.renderDrivers = function (dataToRender = window.drivers) {
               <p class="flex justify-between items-center">
                 <span class="font-medium text-gray-500">🚗 Veículo:</span>
                 <span class="text-gray-900 font-bold truncate max-w-[130px]" title="${driver.veiculo || driver.modelo || driver.carro || "-"}">${driver.veiculo || driver.modelo || driver.carro || "-"}</span>
+              </p>
+              <p class="flex justify-between items-center">
+                <span class="font-medium text-gray-500">🏷️ Categoria:</span>
+                <span class="text-blue-800 font-bold">${driver.categoria || "Geral"}</span>
               </p>
               <p class="flex justify-between items-center">
                 <span class="font-medium text-gray-500">🔢 Placa:</span>
@@ -193,6 +193,7 @@ window.filterDrivers = function (termo) {
     (d) =>
       (d.nome && d.nome.toLowerCase().includes(lower)) ||
       (d.veiculo && d.veiculo.toLowerCase().includes(lower)) ||
+      (d.categoria && d.categoria.toLowerCase().includes(lower)) ||
       (d.placa && d.placa.toLowerCase().includes(lower)),
   );
 
@@ -241,6 +242,7 @@ window.editDriver = function (id) {
   preencherCampo("driverName", motorista.nome || "");
   preencherCampo("driverPhone", motorista.telefone || "");
   preencherCampo("driverVehicle", motorista.veiculo || "");
+  preencherCampo("driverCategoria", motorista.categoria || "");
   preencherCampo("driverPlate", motorista.placa || "");
   preencherCampo("driverCapacity", motorista.capacidade || "4");
   preencherCampo(
@@ -298,13 +300,11 @@ window.addDriver = async function (event) {
 
   const name = document.getElementById("driverName")?.value || "";
   const phone = document.getElementById("driverPhone")?.value || "";
-
-  // Captura garantida do campo de veículo (pegando pelo ID correto do HTML)
   const vehicle =
     document.getElementById("driverVeiculo")?.value ||
     document.getElementById("driverVehicle")?.value ||
     "";
-
+  const categoria = document.getElementById("driverCategoria")?.value || "";
   const plate = (
     document.getElementById("driverPlate")?.value || ""
   ).toUpperCase();
@@ -319,11 +319,11 @@ window.addDriver = async function (event) {
     return;
   }
 
-  // Objeto unificado dos dados que vão para o Supabase
   const dadosParaSalvar = {
     nome: name,
     telefone: phone,
-    veiculo: vehicle, // Mapeado exatamente para a coluna do banco
+    veiculo: vehicle,
+    categoria: categoria,
     placa: plate,
     pix: pix,
     valor_combinado: parseFloat(value),
@@ -371,7 +371,6 @@ window.addDriver = async function (event) {
         window.showToast(err.message || "Erro ao salvar motorista.", true);
     }
   } else {
-    // Modo local (caso não esteja conectado)
     if (window.motoristaEmEdicaoId) {
       const index = window.drivers.findIndex(
         (d) => String(d.id) === String(window.motoristaEmEdicaoId),
@@ -406,6 +405,7 @@ window.updateDriverDropdowns = function () {
     select.innerHTML += `<option value="${d.id}">${d.nome} (${d.veiculo || "S/V"}) - ${d.capacidade || 4}pax</option>`;
   });
 };
+
 // Abrir Modal
 window.abrirModalDisparo = function () {
   const modal = document.getElementById("modalDisparoFrota");
@@ -418,7 +418,6 @@ window.fecharModalDisparo = function () {
   if (modal) modal.classList.add("hidden");
 };
 
-// Executar o Disparo de forma segura e controlada
 window.executarDisparoInteligente = function () {
   const modeloSelecionado =
     document.getElementById("filtroModeloDisparo")?.value || "";
@@ -435,23 +434,32 @@ window.executarDisparoInteligente = function () {
     return;
   }
 
-  // Filtra os motoristas pelo veículo cadastrado
   const motoristasAlvo = window.drivers.filter((d) => {
     if (modeloSelecionado === "todos") return true;
-    const veiculo = (d.veiculo || d.modelo || d.carro || "").toLowerCase();
-    return veiculo.includes(modeloSelecionado.toLowerCase());
+
+    const categoriaDriver = (d.categoria || "").toLowerCase();
+    const veiculoDriver = (
+      d.veiculo ||
+      d.modelo ||
+      d.carro ||
+      ""
+    ).toLowerCase();
+    const termoBusca = modeloSelecionado.toLowerCase();
+
+    return (
+      categoriaDriver.includes(termoBusca) || veiculoDriver.includes(termoBusca)
+    );
   });
 
   if (motoristasAlvo.length === 0) {
     alert(
-      `Nenhum motorista encontrado com o veículo selecionado (${modeloSelecionado}).`,
+      `Nenhum motorista encontrado para a categoria/veículo selecionado (${modeloSelecionado}).`,
     );
     return;
   }
 
   fecharModalDisparo();
 
-  // Dispara abrindo as abas com intervalo de 1.5s para o navegador não bloquear
   motoristasAlvo.forEach((driver, index) => {
     const telefoneLimpo = (driver.telefone || "").replace(/\D/g, "");
     if (!telefoneLimpo) return;
@@ -466,21 +474,10 @@ window.executarDisparoInteligente = function () {
 
   if (typeof window.showToast === "function") {
     window.showToast(
-      `Iniciando envio para ${motoristasAlvo.length} motoristas (${modeloSelecionado})!`,
+      `Iniciando envio para ${motoristasAlvo.length} motoristas!`,
       false,
     );
   } else {
     alert(`Disparo iniciado para ${motoristasAlvo.length} motoristas!`);
   }
-};
-
-const categoriaSelect = document.getElementById("driverCategoria")?.value || "";
-
-const dadosParaSalvar = {
-  nome: name,
-  telefone: phone,
-  veiculo: vehicle, // Ex: "Renault Logan"
-  categoria: categoriaSelect, // Ex: "Sedan Executivo"
-  placa: plate,
-  // ... restante dos campos
 };
