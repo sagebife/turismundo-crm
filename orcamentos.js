@@ -322,15 +322,27 @@ async function enviarOrcamentoWhatsAppDinamico(id, dados = null) {
 async function gerarPDFOrcamentoDinamico(orcamentoId) {
   if (!window.supabaseClient) return;
   try {
+    // Garante que usa a variável correta com 'c'
+    const idParaConsulta = orcamentoId;
+
+    if (!idParaConsulta) {
+      throw new Error("ID do orçamento não informado.");
+    }
+
     const { data, error } = await window.supabaseClient
       .from("orcamentos")
       .select("*")
-      .eq("id", orçamentoId);
+      .eq("id", idParaConsulta);
+
     if (error || !data || data.length === 0)
       throw new Error("Orçamento não encontrado.");
+
     const orc = data[0];
+
     // Gerador PDF nativo do sistema já integrado
-    showToast("Gerando PDF...", false);
+    if (typeof showToast === "function") {
+      showToast("Gerando PDF...", false);
+    }
   } catch (err) {
     console.error(err);
     alert("Erro: " + err.message);
