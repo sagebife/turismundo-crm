@@ -300,10 +300,19 @@ window.addDriver = async function (event) {
 
   const name = document.getElementById("driverName")?.value || "";
   const phone = document.getElementById("driverPhone")?.value || "";
-  const vehicle =
+
+  const formatarTextoMaiusculo = (texto) => {
+    if (!texto) return "";
+    return texto
+      .toLowerCase()
+      .replace(/(^\w{1}|\s+\w{1})/g, (letra) => letra.toUpperCase());
+  };
+
+  const vehicle = formatarTextoMaiusculo(
     document.getElementById("driverVeiculo")?.value ||
-    document.getElementById("driverVehicle")?.value ||
-    "";
+      document.getElementById("driverVehicle")?.value ||
+      "",
+  );
   const categoria = document.getElementById("driverCategoria")?.value || "";
   const plate = (
     document.getElementById("driverPlate")?.value || ""
