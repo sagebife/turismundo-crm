@@ -320,46 +320,201 @@ async function enviarOrcamentoWhatsAppDinamico(id, dados = null) {
 }
 
 async function gerarPDFOrcamentoDinamico(orcamentoId) {
-  if (!window.supabaseClient) return;
+  if (!window.supabaseClient) {
+    alert("Supabase não está conectado.");
+    return;
+  }
+
+  let containerTemp = null;
+
   try {
-    // Garante que usa a variável correta com 'c'
-    const idParaConsulta = orcamentoId;
-
-    if (!idParaConsulta) {
-      throw new Error("ID do orçamento não informado.");
-    }
-
+    // =========================================================
+    // 1. BUSCAR O ORÇAMENTO CORRETO (Sem .single() para evitar falhas)
+    // =========================================================
     const { data, error } = await window.supabaseClient
       .from("orcamentos")
       .select("*")
-      .eq("id", idParaConsulta);
+      .eq("id", orcamentoId);
 
-    if (error || !data || data.length === 0)
-      throw new Error("Orçamento não encontrado.");
-
-    const orc = data[0];
-
-    // Gerador PDF nativo do sistema já integrado
-    if (typeof showToast === "function") {
-      showToast("Gerando PDF...", false);
+    if (error || !data || data.length === 0) {
+      throw new Error("Orçamento não encontrado ou ID inválido.");
     }
+
+    const orc = data[0]; // Pega o registro com segurança
+
+    // =========================================================
+    // 2. FORMATADORES (Com proteção contra nulos)
+    // =========================================================
+    const formatarMoeda = (valor) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(Number(valor) || 0);
+    };
+
+    const formatarData = (dataStr) => {
+      if (!dataStr) return new Date().toLocaleDateString("pt-BR");
+      return new Date(dataStr).toLocaleDateString("pt-BR");
+    };
+
+    // =========================================================
+    // 3. CARREGAR FUNDO
+    // =========================================================
+    const carregarImagemFundo = () => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = () => resolve("");
+        img.src = "fundo-proposta.png";
+      });
+    };
+
+    const imagemFundoBase64 = await carregarImagemFundo();
+
+    // =========================================================
+    // 4. MONTAR SERVIÇOS
+    // =========================================================
+    let linhasTabela = "";
+    const itens = Array.isArray(orc.dados_detalhados)
+      ? orc.dados_detalhados
+      : [];
+
+    if (itens.length > 0) {
+      itens.forEach((item, index) => {
+        linhasTabela += `
+          <tr style="border-bottom: 1px solid #cbd5e1; background-color: ${index % 2 === 0 ? "rgba(255,255,255,0.95)" : "rgba(248,250,252,0.95)"};">
+            <td style="padding:10px 12px;font-size:11px;">
+              <strong>${item.servico || item.nome || "Serviço"}</strong>
+            </td>
+            <td style="padding:10px 12px;text-align:center;font-size:11px;">
+              ${item.quantidade || 1}
+            </td>
+            <td style="padding:10px 12px;text-align:right;font-size:11px;">
+              ${formatarMoeda(item.valor_unitario || 0)}
+            </td>
+            <td style="padding:10px 12px;text-align:right;font-size:11px;font-weight:bold;color:#047857;">
+              ${formatarMoeda(item.valor_total || 0)}
+            </td>
+          </tr>
+        `;
+      });
+    } else {
+      linhasTabela = `
+        <tr>
+          <td colspan="4" style="padding: 15px; text-align: center; font-size: 11px; color: #64748b;">
+            ${orc.servicos || orc.servicos_solicitados || "Nenhum detalhe informado."}
+          </td>
+        </tr>
+      `;
+    }
+
+    // =========================================================
+    // 5. CRIAR CONTAINER TEMPORÁRIO INVISÍVEL
+    // =========================================================
+    containerTemp = document.createElement("div");
+    containerTemp.style.width = "210mm";
+    containerTemp.style.height = "296.8mm";
+    containerTemp.style.position = "absolute";
+    containerTemp.style.top = "0";
+    containerTemp.style.left = "0";
+    containerTemp.style.zIndex = "-9999";
+    containerTemp.style.pointerEvents = "none";
+    containerTemp.style.backgroundColor = "#ffffff";
+    containerTemp.style.fontFamily = "Arial, sans-serif";
+    containerTemp.style.color = "#1f2937";
+    containerTemp.style.boxSizing = "border-box";
+    containerTemp.style.overflow = "hidden";
+    containerTemp.style.margin = "0";
+    containerTemp.style.padding = "0";
+
+    // =========================================================
+    // 6. MODELO DO ORÇAMENTO
+    // =========================================================
+    containerTemp.innerHTML = `
+      <div style="position:absolute;top:0;left:0;width:210mm;height:297mm;z-index:0;overflow:hidden;">
+        <img src="${imagemFundoBase64}" style="width:100%;height:100%;object-fit:contain;display:block;">
+      </div>
+      <div style="position:relative;z-index:1;width:100%;height:100%;padding:12mm 15mm;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <div style="height:180px;"></div>
+          <!-- CLIENTE -->
+          <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.95);border:1px solid #cbd5e1;border-radius:6px;padding:10px 14px;margin-bottom:15px;font-size:11px;">
+            <div>
+              <span style="color:#64748b;font-size:8px;font-weight:bold;display:block;">CLIENTE:</span>
+              <strong style="font-size:13px;color:#0f172a;">👤 ${(orc.nome_lead || orc.cliente || "Cliente").toUpperCase()}</strong>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#64748b;font-size:9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
+              <div style="color:#64748b;font-size:9.5px;margin-top:2px;">📅 <strong>Data:</strong> ${formatarData(orc.created_at)}</div>
+            </div>
+          </div>
+          <!-- SERVIÇOS -->
+          <div style="margin-bottom:15px;">
+            <div style="background-color:#1e40af;color:#ffffff;padding:7px 12px;font-size:10.5px;font-weight:bold;border-radius:4px 4px 0 0;">
+              🚗 SERVIÇOS SOLICITADOS
+            </div>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;">
+              <thead>
+                <tr style="background-color:#e2e8f0;color:#334155;font-size:10px;">
+                  <th style="padding:8px 12px;width:55%;text-align:left;">SERVIÇO</th>
+                  <th style="padding:8px 12px;text-align:center;width:15%;">QTD</th>
+                  <th style="padding:8px 12px;text-align:right;width:15%;">V. UNITÁRIO</th>
+                  <th style="padding:8px 12px;text-align:right;width:15%;">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>${linhasTabela}</tbody>
+            </table>
+          </div>
+          <!-- TOTAL -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:15px;">
+            <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);color:white;padding:9px 18px;border-radius:6px;display:flex;align-items:center;gap:15px;">
+              <span style="font-size:10.5px;font-weight:bold;">VALOR TOTAL DA PROPOSTA</span>
+              <span style="font-size:16px;font-weight:bold;">${formatarMoeda(orc.valor_total || orc.valorTotal || 0)}</span>
+            </div>
+          </div>
+        </div>
+        <div style="height:40px;"></div>
+      </div>
+    `;
+
+    // =========================================================
+    // 7. INSERIR NO DOM E ESPERAR RENDERIZAÇÃO
+    // =========================================================
+    document.body.appendChild(containerTemp);
+
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    // =========================================================
+    // 8. GERAR PDF
+    // =========================================================
+    await html2pdf()
+      .set({
+        margin: 0,
+        filename: `Proposta_${orc.nome_lead || orc.cliente || "Cliente"}.pdf`,
+        image: { type: "jpeg", quality: 1.0 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(containerTemp)
+      .save();
   } catch (err) {
-    console.error(err);
-    alert("Erro: " + err.message);
+    console.error("Erro ao gerar orçamento:", err);
+    alert("Erro ao gerar orçamento:\n" + (err.message || "Erro desconhecido"));
+  } finally {
+    if (containerTemp && containerTemp.parentNode) {
+      containerTemp.parentNode.removeChild(containerTemp);
+    }
   }
-}
-
-function executarAcaoWhatsApp() {
-  if (window.orcamentoAtualSalvo)
-    enviarOrcamentoWhatsAppDinamico(
-      window.orcamentoAtualSalvo.id,
-      window.orcamentoAtualSalvo,
-    );
-  fecharModalPosSalvamento();
-}
-
-function executarAcaoPDF() {
-  if (window.orcamentoAtualSalvo)
-    gerarPDFOrcamentoDinamico(window.orcamentoAtualSalvo.id);
-  fecharModalPosSalvamento();
 }
