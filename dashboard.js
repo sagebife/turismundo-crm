@@ -21,11 +21,16 @@ window.renderDashboard = async function () {
   try {
     let agenda = window.databaseAgenda || [];
 
-    // Se estiver conectado ao Supabase, busca sempre do banco para pegar o status mais atualizado
+    // Se estiver conectado ao Supabase, busca sempre do banco para pegar o status e o telefone mais atualizados
     if (window.isConnectedToSupabase && window.supabaseClient) {
-      let { data, error } = await window.supabaseClient
-        .from("reservas")
-        .select(`*, clientes (nome)`);
+      let { data, error } = await window.supabaseClient.from("reservas")
+        .select(`
+          *,
+          clientes (
+            nome,
+            whatsapp
+          )
+        `);
       if (!error && data) {
         agenda = data.map((item) => ({
           ...item,
@@ -34,6 +39,11 @@ window.renderDashboard = async function () {
             item.cliente ||
             (item.clientes ? item.clientes.nome : null) ||
             "Cliente sem nome",
+          // CORREÇÃO: Puxa o whatsapp da tabela relacionada 'clientes'
+          telefone:
+            item.telefone ||
+            (item.clientes ? item.clientes.whatsapp : null) ||
+            "",
           status: item.status || "Pendente", // Garante o status real do banco
         }));
         window.databaseAgenda = agenda; // Atualiza a global

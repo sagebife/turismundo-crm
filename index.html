@@ -2778,7 +2778,6 @@
           .map((categoria) => {
             const itens = servicosPorCategoria[categoria] || [];
 
-            // Desenha a lista de serviços limpa
             const itensHTML =
               itens.length > 0
                 ? itens
@@ -2802,34 +2801,33 @@
                             </div>
                         </div>
                     </div>
-                `,
+                  `,
                     )
                     .join("")
                 : `<div class="px-5 py-4 text-center text-gray-400 text-sm italic">Nenhum serviço cadastrado nesta categoria.</div>`;
 
-            // Desenha o Card da Categoria envelopando os serviços
             return `
-                <div class="mb-5 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center group">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">${categoria}</h3>
-                        <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                            <button onclick="editarCategoria('${categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded transition" title="Editar Categoria">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-                            <button onclick="deletarCategoria('${categoria}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded transition" title="Excluir Categoria">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-gray-100 flex flex-col">
-                        ${itensHTML}
+            <div class="mb-5 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center group">
+                    <!-- ALTERADO PARA TEXTO VERMELHO AQUI -->
+                    <h3 class="text-xs font-bold text-red-600 uppercase tracking-widest">${categoria}</h3>
+                    <div class="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editarCategoria('${categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded transition" title="Editar Categoria">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button onclick="deletarCategoria('${categoria}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded transition" title="Excluir Categoria">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
                     </div>
                 </div>
-            `;
+                <div class="divide-y divide-gray-100 flex flex-col">
+                    ${itensHTML}
+                </div>
+            </div>
+        `;
           })
           .join("");
       }
-
       async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
         const novoNome = prompt("Editar nome do serviço:", nomeAtual);
         if (novoNome === null) return;

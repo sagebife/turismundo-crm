@@ -172,11 +172,13 @@ async function renderAgenda() {
   try {
     let list = [];
     if (window.isConnectedToSupabase && window.supabaseClient) {
+      // CORREÇÃO: Buscando o whatsapp da tabela relacionada 'clientes'
       let { data, error } = await window.supabaseClient.from("reservas")
         .select(`
                 *,
                 clientes (
-                    nome
+                    nome,
+                    whatsapp
                 )
             `);
       if (error) throw error;
@@ -188,6 +190,11 @@ async function renderAgenda() {
           item.cliente ||
           (item.clientes ? item.clientes.nome : null) ||
           "Cliente sem nome",
+        // CORREÇÃO: Garantindo que o telefone pegue o whatsapp do banco
+        telefone:
+          item.telefone ||
+          (item.clientes ? item.clientes.whatsapp : null) ||
+          "",
       }));
 
       window.databaseAgenda = list;
@@ -249,10 +256,10 @@ async function renderAgenda() {
 
     if (displayList.length === 0) {
       container.innerHTML = `
-                <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${currentDay}).</p>
-                    <button onclick="document.querySelector('header button.bg-emerald-500').click()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
-                </div>`;
+            <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${currentDay}).</p>
+                <button onclick="document.querySelector('header button.bg-emerald-500').click()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
+            </div>`;
       return;
     }
 
@@ -273,7 +280,6 @@ async function renderAgenda() {
             .toLowerCase()
             .includes("translado");
 
-        // Lógica do Semáforo com o design padrão de borda completa em todos os cards
         if (
           status.includes("concluido") ||
           status.includes("executado") ||
@@ -297,57 +303,57 @@ async function renderAgenda() {
         const nomeClienteFinal = item.cliente || "Cliente";
 
         return `
-                <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl border ${borderStatusColor} shadow-sm mb-3 hover:shadow-md cursor-pointer transition group">
-                    <div class="flex items-center gap-3 w-full">
-                        
-                        <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
-                            <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
-                            <span class="text-[9px] font-bold text-gray-400 uppercase truncate w-full block mt-0.5" title="${item.tipo || "Serviço"}">${item.tipo || "Serviço"}</span>
+            <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl border ${borderStatusColor} shadow-sm mb-3 hover:shadow-md cursor-pointer transition group">
+                <div class="flex items-center gap-3 w-full">
+                    
+                    <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
+                        <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase truncate w-full block mt-0.5" title="${item.tipo || "Serviço"}">${item.tipo || "Serviço"}</span>
+                    </div>
+                    
+                    <div class="space-y-1 flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2 w-full">
+                            <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
+                                ${nomeClienteFinal}
+                            </h4>
+                            <div class="shrink-0 mt-0.5">
+                                ${statusBadge}
+                            </div>
                         </div>
                         
-                        <div class="space-y-1 flex-1 min-w-0">
-                            <div class="flex items-center justify-between gap-2 w-full">
-                                <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
-                                    ${nomeClienteFinal}
-                                </h4>
-                                <div class="shrink-0 mt-0.5">
-                                    ${statusBadge}
-                                </div>
-                            </div>
-                            
-                            <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
-                                <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
-                                <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
-                            </p>
-                            
-                            <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
-                                ${
-                                  !status.includes("concluido") &&
-                                  !status.includes("declinado")
-                                    ? `
-                                    <button onclick="event.stopPropagation(); acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold transition">
-                                        <i class="fas fa-check"></i> Finalizar
-                                    </button>
-                                    <button onclick="event.stopPropagation(); mudarStatusReserva('${item.id}', 'Declinado')" class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-[11px] font-bold transition">
-                                        Declinado
-                                    </button>
-                                `
-                                    : ""
-                                }
+                        <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
+                            <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
+                            <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
+                        </p>
+                        
+                        <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
+                            ${
+                              !status.includes("concluido") &&
+                              !status.includes("declinado")
+                                ? `
+                            <button onclick="event.stopPropagation(); acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold transition">
+                                <i class="fas fa-check"></i> Finalizar
+                            </button>
+                            <button onclick="event.stopPropagation(); mudarStatusReserva('${item.id}', 'Declinado')" class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-[11px] font-bold transition">
+                                Declinado
+                            </button>
+                            `
+                                : ""
+                            }
 
-                                ${
-                                  isTransfer && !status.includes("concluido")
-                                    ? `
-                                    <button onclick="event.stopPropagation(); alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-bold transition">
-                                        <i class="fas fa-plane-arrival"></i> Pousou
-                                    </button>
-                                `
-                                    : ""
-                                }
-                            </div>
+                            ${
+                              isTransfer && !status.includes("concluido")
+                                ? `
+                            <button onclick="event.stopPropagation(); alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-bold transition">
+                                <i class="fas fa-plane-arrival"></i> Pousou
+                            </button>
+                            `
+                                : ""
+                            }
                         </div>
                     </div>
-                </div>`;
+                </div>
+            </div>`;
       })
       .join("");
   } catch (err) {
