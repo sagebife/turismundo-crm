@@ -1658,75 +1658,6 @@
       </div>
     </div>
 
-    <!-- Modal: Mensagens Rápidas do WhatsApp -->
-    <div
-      id="messageModal"
-      class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200"
-    >
-      <div
-        class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4"
-      >
-        <div
-          class="flex justify-between items-center border-b border-gray-100 pb-3"
-        >
-          <h3 class="font-bold text-gray-900 text-base" id="modalTemplateTitle">
-            Template de Mensagem
-          </h3>
-          <button
-            onclick="closeMessageTemplate()"
-            class="text-gray-400 hover:text-gray-600"
-          >
-            <i class="fas fa-times text-lg"></i>
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          <div>
-            <label
-              class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-              >Destinatário (WhatsApp)</label
-            >
-            <input
-              type="text"
-              id="tempWhatsApp"
-              placeholder="Ex: 5511999999999"
-              class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:outline-none"
-            />
-          </div>
-          <div>
-            <label
-              class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-              >Nome do Cliente</label
-            >
-            <input
-              type="text"
-              id="tempClient"
-              placeholder="Ex: Marcos"
-              class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:outline-none"
-            />
-          </div>
-          <div>
-            <label
-              class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-              >Visualização da Mensagem</label
-            >
-            <textarea
-              id="tempBody"
-              rows="6"
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs font-mono text-gray-750 focus:outline-none focus:bg-white leading-relaxed"
-            ></textarea>
-          </div>
-        </div>
-
-        <button
-          onclick="triggerWhatsAppRedirect()"
-          class="w-full py-3 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition shadow-md flex items-center justify-center gap-2 text-sm"
-        >
-          <i class="fab fa-whatsapp"></i> Abrir WhatsApp
-        </button>
-      </div>
-    </div>
-
     <!-- Modal: Adicionar Reserva Rápido -->
     <div
       id="quickModal"
@@ -1747,7 +1678,11 @@
           </button>
         </div>
 
-        <form onsubmit="saveQuickReserva(event)" class="space-y-3">
+        <form
+          onsubmit="saveQuickReserva(event)"
+          autocomplete="off"
+          class="space-y-3"
+        >
           <!-- Linha 1: Cliente e Telefones (4 colunas) -->
           <div class="grid grid-cols-4 gap-3">
             <div class="col-span-2">
@@ -1758,7 +1693,7 @@
               <input
                 type="text"
                 id="modalClient"
-                autocomplete="new-password"
+                autocomplete="off"
                 oninput="capitalizarInput(this)"
                 required
                 placeholder="Ex: Lucas Ramos"
@@ -1774,6 +1709,7 @@
               <input
                 type="tel"
                 id="modalPhone"
+                autocomplete="off"
                 required
                 placeholder="Ex: 5511..."
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
@@ -1787,6 +1723,7 @@
               <input
                 type="tel"
                 id="modalPhone2"
+                autocomplete="off"
                 placeholder="Opcional..."
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
@@ -1803,6 +1740,7 @@
               <input
                 type="text"
                 id="modalHotel"
+                autocomplete="off"
                 oninput="capitalizarInput(this)"
                 placeholder="Ex: Hotel NH Tango..."
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
@@ -1816,6 +1754,7 @@
               <input
                 type="number"
                 id="modalPax"
+                autocomplete="off"
                 min="1"
                 value="1"
                 class="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm text-center focus:border-blue-500 outline-none shadow-sm"
@@ -1830,6 +1769,7 @@
                 <input
                   type="number"
                   id="modalBag10"
+                  autocomplete="off"
                   min="0"
                   value="0"
                   title="Malas 10kg"
@@ -1844,6 +1784,7 @@
                 <input
                   type="number"
                   id="modalBag23"
+                  autocomplete="off"
                   min="0"
                   value="0"
                   title="Malas 23kg"
@@ -1863,6 +1804,7 @@
               <input
                 type="text"
                 id="input-busca-servico-reserva"
+                autocomplete="off"
                 oninput="capitalizarInput(this)"
                 placeholder="Digite o serviço..."
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
@@ -1882,6 +1824,7 @@
               <input
                 type="date"
                 id="modalDate"
+                autocomplete="off"
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
@@ -1893,6 +1836,7 @@
               <input
                 type="time"
                 id="modalTime"
+                autocomplete="off"
                 required
                 value="12:00"
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
@@ -1920,6 +1864,7 @@
               <input
                 type="text"
                 id="modalFlight"
+                autocomplete="off"
                 placeholder="Ex: AR1250"
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
@@ -1932,6 +1877,7 @@
               <input
                 type="number"
                 id="modalValueTotal"
+                autocomplete="off"
                 required
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
@@ -1944,6 +1890,7 @@
               <input
                 type="number"
                 id="modalValueDriver"
+                autocomplete="off"
                 required
                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               />
@@ -1971,45 +1918,6 @@
             Confirmar e Agendar
           </button>
         </form>
-      </div>
-    </div>
-
-    <!-- Modal: Confirmação Customizada -->
-    <div
-      id="confirmModal"
-      class="fixed inset-0 bg-gray-950/75 backdrop-blur-sm z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition duration-150"
-    >
-      <div
-        class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4"
-      >
-        <div class="text-center space-y-2">
-          <div
-            class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl"
-          >
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
-          <h3 class="font-bold text-gray-900 text-lg" id="confirmTitle">
-            Confirmar Ação
-          </h3>
-          <p class="text-xs text-gray-600 leading-relaxed" id="confirmText">
-            Você tem certeza que deseja realizar esta ação?
-          </p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <button
-            onclick="closeConfirmModal(false)"
-            class="py-2.5 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl hover:bg-gray-200 transition"
-          >
-            Cancelar
-          </button>
-          <button
-            onclick="closeConfirmModal(true)"
-            class="py-2.5 bg-red-600 text-white font-semibold text-xs rounded-xl hover:bg-red-700 transition"
-            id="confirmConfirmBtn"
-          >
-            Confirmar
-          </button>
-        </div>
       </div>
     </div>
 
