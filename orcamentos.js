@@ -424,8 +424,8 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         </style>
       </head>
       <body>
-        <div id="pdf-container" style="width: 210mm; height: 297mm; position: relative; overflow: hidden; color: #1f2937;">
-          <div style="position:absolute;top:0;left:0;width:210mm;height:297mm;z-index:0;overflow:hidden;">
+        <div id="pdf-container" style="width: 210mm; height: 296mm; position: relative; overflow: hidden; color: #1f2937;">
+          <div style="position:absolute;top:0;left:0;width:210mm;height:296mm;z-index:0;overflow:hidden;">
             <img src="${imagemFundoBase64}" style="width:100%;height:100%;object-fit:contain;display:block;">
           </div>
           
