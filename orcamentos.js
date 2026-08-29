@@ -325,12 +325,7 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
     return;
   }
 
-  let containerTemp = null;
-
   try {
-    // =========================================================
-    // 1. BUSCAR O ORÇAMENTO CORRETO (Sem .single() para evitar falhas)
-    // =========================================================
     const { data, error } = await window.supabaseClient
       .from("orcamentos")
       .select("*")
@@ -340,11 +335,8 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
       throw new Error("Orçamento não encontrado ou ID inválido.");
     }
 
-    const orc = data[0]; // Pega o registro com segurança
+    const orc = data[0];
 
-    // =========================================================
-    // 2. FORMATADORES (Com proteção contra nulos)
-    // =========================================================
     const formatarMoeda = (valor) => {
       return new Intl.NumberFormat("pt-BR", {
         style: "currency",
@@ -357,9 +349,6 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
       return new Date(dataStr).toLocaleDateString("pt-BR");
     };
 
-    // =========================================================
-    // 3. CARREGAR FUNDO
-    // =========================================================
     const carregarImagemFundo = () => {
       return new Promise((resolve) => {
         const img = new Image();
@@ -379,9 +368,6 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
 
     const imagemFundoBase64 = await carregarImagemFundo();
 
-    // =========================================================
-    // 4. MONTAR SERVIÇOS
-    // =========================================================
     let linhasTabela = "";
     const itens = Array.isArray(orc.dados_detalhados)
       ? orc.dados_detalhados
@@ -416,89 +402,88 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
       `;
     }
 
-    // =========================================================
-    // 5. CRIAR CONTAINER TEMPORÁRIO INVISÍVEL
-    // =========================================================
-    containerTemp = document.createElement("div");
-    containerTemp.style.width = "210mm";
-    containerTemp.style.height = "296.8mm";
-    containerTemp.style.position = "absolute";
-    containerTemp.style.top = "0";
-    containerTemp.style.left = "0";
-    containerTemp.style.zIndex = "-9999";
-    containerTemp.style.pointerEvents = "none";
-    containerTemp.style.backgroundColor = "#ffffff";
-    containerTemp.style.fontFamily = "Arial, sans-serif";
-    containerTemp.style.color = "#1f2937";
-    containerTemp.style.boxSizing = "border-box";
-    containerTemp.style.overflow = "hidden";
-    containerTemp.style.margin = "0";
-    containerTemp.style.padding = "0";
+    // Cria o Iframe Invisível
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "200vw"; // Longe da vista do usuário
+    iframe.style.width = "210mm";
+    iframe.style.height = "297mm";
+    iframe.style.border = "none";
+    document.body.appendChild(iframe);
 
-    // =========================================================
-    // 6. MODELO DO ORÇAMENTO
-    // =========================================================
-    containerTemp.innerHTML = `
-      <div style="position:absolute;top:0;left:0;width:210mm;height:297mm;z-index:0;overflow:hidden;">
-        <img src="${imagemFundoBase64}" style="width:100%;height:100%;object-fit:contain;display:block;">
-      </div>
-      <div style="position:relative;z-index:1;width:100%;height:100%;padding:12mm 15mm;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;">
-        <div>
-          <div style="height:180px;"></div>
-          <!-- CLIENTE -->
-          <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.95);border:1px solid #cbd5e1;border-radius:6px;padding:10px 14px;margin-bottom:15px;font-size:11px;">
+    const iframeDoc = iframe.contentWindow.document;
+
+    // Injeta o HTML completo e as regras CSS apenas dentro do Iframe
+    const conteudoHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #fff; }
+          * { box-sizing: border-box; }
+        </style>
+      </head>
+      <body>
+        <div id="pdf-container" style="width: 210mm; height: 297mm; position: relative; overflow: hidden; color: #1f2937;">
+          <div style="position:absolute;top:0;left:0;width:210mm;height:297mm;z-index:0;overflow:hidden;">
+            <img src="${imagemFundoBase64}" style="width:100%;height:100%;object-fit:contain;display:block;">
+          </div>
+          
+          <div style="position:relative;z-index:1;width:100%;height:100%;padding:12mm 15mm;display:flex;flex-direction:column;justify-content:space-between;">
             <div>
-              <span style="color:#64748b;font-size:8px;font-weight:bold;display:block;">CLIENTE:</span>
-              <strong style="font-size:13px;color:#0f172a;">👤 ${(orc.nome_lead || orc.cliente || "Cliente").toUpperCase()}</strong>
+              <div style="height:180px;"></div>
+              
+              <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.95);border:1px solid #cbd5e1;border-radius:6px;padding:10px 14px;margin-bottom:15px;font-size:11px;">
+                <div>
+                  <span style="color:#64748b;font-size:8px;font-weight:bold;display:block;">CLIENTE:</span>
+                  <strong style="font-size:13px;color:#0f172a;">👤 ${(orc.nome_lead || orc.cliente || "Cliente").toUpperCase()}</strong>
+                </div>
+                <div style="text-align:right;">
+                  <div style="color:#64748b;font-size:9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
+                  <div style="color:#64748b;font-size:9.5px;margin-top:2px;">📅 <strong>Data:</strong> ${formatarData(orc.created_at)}</div>
+                </div>
+              </div>
+              
+              <div style="margin-bottom:15px;">
+                <div style="background-color:#1e40af;color:#ffffff;padding:7px 12px;font-size:10.5px;font-weight:bold;border-radius:4px 4px 0 0;">
+                  🚗 SERVIÇOS SOLICITADOS
+                </div>
+                <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;">
+                  <thead>
+                    <tr style="background-color:#e2e8f0;color:#334155;font-size:10px;">
+                      <th style="padding:8px 12px;width:55%;text-align:left;">SERVIÇO</th>
+                      <th style="padding:8px 12px;text-align:center;width:15%;">QTD</th>
+                      <th style="padding:8px 12px;text-align:right;width:15%;">V. UNITÁRIO</th>
+                      <th style="padding:8px 12px;text-align:right;width:15%;">TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>${linhasTabela}</tbody>
+                </table>
+              </div>
+              
+              <div style="display:flex;justify-content:flex-end;margin-bottom:15px;">
+                <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);color:white;padding:9px 18px;border-radius:6px;display:flex;align-items:center;gap:15px;">
+                  <span style="font-size:10.5px;font-weight:bold;">VALOR TOTAL DA PROPOSTA</span>
+                  <span style="font-size:16px;font-weight:bold;">${formatarMoeda(orc.valor_total || orc.valorTotal || 0)}</span>
+                </div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <div style="color:#64748b;font-size:9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
-              <div style="color:#64748b;font-size:9.5px;margin-top:2px;">📅 <strong>Data:</strong> ${formatarData(orc.created_at)}</div>
-            </div>
-          </div>
-          <!-- SERVIÇOS -->
-          <div style="margin-bottom:15px;">
-            <div style="background-color:#1e40af;color:#ffffff;padding:7px 12px;font-size:10.5px;font-weight:bold;border-radius:4px 4px 0 0;">
-              🚗 SERVIÇOS SOLICITADOS
-            </div>
-            <table style="width:100%;border-collapse:collapse;border:1px solid #cbd5e1;">
-              <thead>
-                <tr style="background-color:#e2e8f0;color:#334155;font-size:10px;">
-                  <th style="padding:8px 12px;width:55%;text-align:left;">SERVIÇO</th>
-                  <th style="padding:8px 12px;text-align:center;width:15%;">QTD</th>
-                  <th style="padding:8px 12px;text-align:right;width:15%;">V. UNITÁRIO</th>
-                  <th style="padding:8px 12px;text-align:right;width:15%;">TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>${linhasTabela}</tbody>
-            </table>
-          </div>
-          <!-- TOTAL -->
-          <div style="display:flex;justify-content:flex-end;margin-bottom:15px;">
-            <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);color:white;padding:9px 18px;border-radius:6px;display:flex;align-items:center;gap:15px;">
-              <span style="font-size:10.5px;font-weight:bold;">VALOR TOTAL DA PROPOSTA</span>
-              <span style="font-size:16px;font-weight:bold;">${formatarMoeda(orc.valor_total || orc.valorTotal || 0)}</span>
-            </div>
+            <div style="height:40px;"></div>
           </div>
         </div>
-        <div style="height:40px;"></div>
-      </div>
+      </body>
+      </html>
     `;
 
-    // =========================================================
-    // 7. INSERIR NO DOM E ESPERAR RENDERIZAÇÃO
-    // =========================================================
-    document.body.appendChild(containerTemp);
+    iframeDoc.open();
+    iframeDoc.write(conteudoHTML);
+    iframeDoc.close();
 
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
+    await new Promise((resolve) => setTimeout(resolve, 350));
 
-    // =========================================================
-    // 8. GERAR PDF
-    // =========================================================
+    // Captura apenas a div específica de dentro do Iframe
+    const elementToCapture = iframeDoc.getElementById("pdf-container");
+
     await html2pdf()
       .set({
         margin: 0,
@@ -507,14 +492,13 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       })
-      .from(containerTemp)
+      .from(elementToCapture)
       .save();
+
+    // Remove o Iframe após o download
+    document.body.removeChild(iframe);
   } catch (err) {
     console.error("Erro ao gerar orçamento:", err);
     alert("Erro ao gerar orçamento:\n" + (err.message || "Erro desconhecido"));
-  } finally {
-    if (containerTemp && containerTemp.parentNode) {
-      containerTemp.parentNode.removeChild(containerTemp);
-    }
   }
 }
