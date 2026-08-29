@@ -149,6 +149,84 @@
       </div>
     </header>
 
+    <!-- Modal Editar Serviço -->
+    <div
+      id="modal-editar-servico"
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+          <h3 class="text-lg font-bold text-gray-900">Editar Serviço</h3>
+          <button
+            onclick="fecharModalEditarServico()"
+            class="text-gray-400 hover:text-gray-600 font-bold text-xl"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form id="form-editar-servico" onsubmit="salvarEdicaoServico(event)">
+          <!-- Campo oculto para guardar o ID do serviço -->
+          <input type="hidden" id="edit-servico-id" />
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700"
+              >Nome do Serviço</label
+            >
+            <input
+              type="text"
+              id="edit-servico-nome"
+              required
+              class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              oninput="capitalizarInputAoVivo(this)"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700"
+              >Valor (R$)</label
+            >
+            <input
+              type="number"
+              step="0.01"
+              id="edit-servico-preco"
+              required
+              class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700"
+              >Categoria</label
+            >
+            <input
+              type="text"
+              id="edit-servico-categoria"
+              required
+              class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+              oninput="capitalizarInputAoVivo(this)"
+            />
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              onclick="fecharModalEditarServico()"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
+            >
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Modal: Extrato e Repasse do Motorista -->
     <div
       id="modal-extrato-motorista"
@@ -2828,38 +2906,70 @@
           })
           .join("");
       }
-      async function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
-        const novoNome = prompt("Editar nome do serviço:", nomeAtual);
-        if (novoNome === null) return;
+      // 1. O segredo da formatação ao vivo (mantém o cursor no lugar certo)
+      function capitalizarInputAoVivo(elemento) {
+        let inicio = elemento.selectionStart;
+        let fim = elemento.selectionEnd;
 
-        const novoPrecoStr = prompt("Editar valor (R$):", precoAtual);
-        if (novoPrecoStr === null) return;
+        let textoFormatado = elemento.value
+          .toLowerCase()
+          .replace(/\b\w/g, (letra) => letra.toUpperCase());
 
-        const novoPreco = parseFloat(novoPrecoStr);
-        if (isNaN(novoPreco)) {
-          alert("Por favor, insira um valor numérico válido para o preço.");
-          return;
-        }
+        elemento.value = textoFormatado;
 
-        const novaCategoria = prompt("Editar categoria:", categoriaAtual);
-        if (novaCategoria === null) return;
-
-        const { error } = await window.supabaseClient
-          .from("servicos")
-          .update({
-            nome: novoNome,
-            preco: novoPreco,
-            categoria: novaCategoria,
-          })
-          .eq("id", id);
-
-        if (error) {
-          alert("Erro ao atualizar o serviço: " + error.message);
-        } else {
-          renderServicos();
-        }
+        // Restaura a posição do cursor para ele não pular para o final do texto
+        elemento.setSelectionRange(inicio, fim);
       }
 
+      // 2. Função para APENAS abrir a janela e preencher os dados
+      function editarServico(id, nomeAtual, precoAtual, categoriaAtual) {
+        document.getElementById("edit-servico-id").value = id;
+        document.getElementById("edit-servico-nome").value = nomeAtual;
+        document.getElementById("edit-servico-preco").value = precoAtual;
+        document.getElementById("edit-servico-categoria").value =
+          categoriaAtual;
+
+        document
+          .getElementById("modal-editar-servico")
+          .classList.remove("hidden");
+      }
+
+      // 3. Função para fechar a janela
+      function fecharModalEditarServico() {
+        document.getElementById("modal-editar-servico").classList.add("hidden");
+      }
+
+      // 4. Função chamada ao clicar em "Salvar Alterações"
+      async function salvarEdicaoServico(event) {
+        event.preventDefault(); // Impede a página de recarregar
+
+        const id = document.getElementById("edit-servico-id").value;
+        const novoNome = document.getElementById("edit-servico-nome").value;
+        const novoPreco = parseFloat(
+          document.getElementById("edit-servico-preco").value,
+        );
+        const novaCategoria = document.getElementById(
+          "edit-servico-categoria",
+        ).value;
+
+        try {
+          const { error } = await window.supabaseClient
+            .from("servicos")
+            .update({
+              nome: novoNome,
+              preco: novoPreco,
+              categoria: novaCategoria,
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          fecharModalEditarServico();
+          renderServicos(); // Atualiza a lista na tela
+        } catch (err) {
+          alert("Erro ao atualizar o serviço: " + err.message);
+        }
+      }
       // 1. Função Auxiliar: Responsável apenas por limpar o formulário
       function limparFormularioReserva() {
         const campos = [
