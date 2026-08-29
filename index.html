@@ -1097,7 +1097,7 @@
               <input
                 type="text"
                 id="inputNovaCategoria"
-                oninput="capitalizarInput(this)"
+                oninput="capitalizarInputAoVivo(this)"
                 placeholder="ex: Translado"
                 class="w-full p-2.5 text-sm border-2 border-blue-900 rounded-lg text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
@@ -1122,13 +1122,14 @@
               </select>
               <input
                 type="text"
-                id="inputNovaRota"
-                oninput="capitalizarInput(this)"
+                id="nomeItemInput"
+                oninput="capitalizarInputAoVivo(this)"
                 placeholder="Rota (ex: Centro x Aeroparque)"
-                class="w-full p-2.5 text-sm border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-emerald-500 transition"
+                class="w-full p-2.5 text-sm border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:border-emerald-500 transition mb-2"
               />
               <input
                 type="number"
+                step="0.01"
                 id="precoInput"
                 placeholder="Valor (R$)"
                 class="w-full p-1.5 text-sm rounded-lg border mb-2"
@@ -3624,9 +3625,29 @@
       }
 
       async function addItem() {
-        const cat = document.getElementById("catSelect").value;
-        const nomeItem = document.getElementById("nomeItemInput").value;
-        const preco = document.getElementById("precoInput").value;
+        const selectElement = document.getElementById("catSelect");
+        const nomeElement = document.getElementById("nomeItemInput");
+        const precoElement = document.getElementById("precoInput");
+
+        // 1. Trava de segurança para identificar qual ID está faltando no HTML
+        if (!selectElement || !nomeElement || !precoElement) {
+          console.error("IDs faltando:", {
+            catSelect: !!selectElement,
+            nomeItemInput: !!nomeElement,
+            precoInput: !!precoElement,
+          });
+          alert(
+            "Erro no formulário: Verifique o console. Um dos IDs não foi encontrado no HTML.",
+          );
+          return;
+        }
+
+        const cat = selectElement.value;
+        // 2. Garante a formatação capitalizada caso o usuário cole texto de fora
+        const nomeItem = nomeElement.value
+          .toLowerCase()
+          .replace(/\b\w/g, (letra) => letra.toUpperCase());
+        const preco = precoElement.value;
 
         if (cat === "Selecione uma categoria..." || !nomeItem || !preco) {
           alert("Por favor, preencha todos os campos!");
@@ -3634,7 +3655,7 @@
         }
 
         if (!window.supabaseClient) {
-          showToast("Supabase não conectado.");
+          alert("Supabase não conectado.");
           return;
         }
 
@@ -3650,12 +3671,15 @@
           alert("Erro ao salvar: " + error.message);
         } else {
           alert("Serviço adicionado com sucesso!");
-          document.getElementById("nomeItemInput").value = "";
-          document.getElementById("precoInput").value = "";
-          carregarMenuCategorias();
+          nomeElement.value = "";
+          precoElement.value = "";
+
+          // Recarrega as listas da tela
+          if (typeof carregarMenuCategorias === "function")
+            carregarMenuCategorias();
+          if (typeof renderServicos === "function") renderServicos();
         }
       }
-
       async function carregarMenuCategorias() {
         if (!window.supabaseClient) return;
 
