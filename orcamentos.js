@@ -215,6 +215,27 @@ async function salvarOrcamentoDinamico(event) {
     .join(", ");
 
   try {
+    // 1. Gera o código sequencial baseado na data de hoje (Ex: 20260829-001)
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    const prefixoData = `${ano}${mes}${dia}`;
+
+    // Busca no Supabase quantos orçamentos existem criados hoje para definir a sequência
+    const inicioDia = `${ano}-${mes}-${dia}T00:00:00`;
+    const { count, error: countError } = await window.supabaseClient
+      .from("orcamentos")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", inicioDia);
+
+    if (countError)
+      console.error("Erro ao contar propostas do dia:", countError);
+
+    const proximoNumero = (count || 0) + 1;
+    const numeroPropostaFormatado = `${prefixoData}-${String(proximoNumero).padStart(3, "0")}`;
+
+    // 2. Salva o orçamento incluindo o número formatado
     const { data, error } = await window.supabaseClient
       .from("orcamentos")
       .insert([
@@ -225,6 +246,7 @@ async function salvarOrcamentoDinamico(event) {
           servicos_solicitados: resumoServicos,
           dados_detalhados: itensOrcamentoAtual,
           status: "Pendente",
+          numero_proposta: numeroPropostaFormatado, // Salva o sequencial limpo
         },
       ])
       .select();
@@ -439,7 +461,7 @@ async function gerarPDFOrcamentoDinamico(orcamentoId) {
                   <strong style="font-size:13px;color:#0f172a;">👤 ${(orc.nome_lead || orc.cliente || "Cliente").toUpperCase()}</strong>
                 </div>
                 <div style="text-align:right;">
-                  <div style="color:#64748b;font-size:9.5px;">📋 <strong>Nº Proposta:</strong> ${String(orc.id).slice(-8)}</div>
+                  <div style="color:#64748b;font-size:9.5px;">📋 <strong>Nº Proposta:</strong> ${orc.numero_proposta || String(orc.id).slice(-8)}</div>
                   <div style="color:#64748b;font-size:9.5px;margin-top:2px;">📅 <strong>Data:</strong> ${formatarData(orc.created_at)}</div>
                 </div>
               </div>
