@@ -3001,7 +3001,7 @@
         return novoCliente.id;
       }
 
-      // 3. A Função "Maestrina": Apenas orquestra o processo
+      // 3. A Função "Maestrina": Orquestra criação ou edição
       async function saveQuickReserva(event) {
         event.preventDefault();
 
@@ -3019,43 +3019,59 @@
         // Passo 3: Salva no Supabase (ou Simulação)
         if (window.isConnectedToSupabase && window.supabaseClient) {
           try {
-            showToast("Processando reserva...", false);
+            // Monta o objeto de dados da reserva com os campos operacionais
+            const dadosReservaPayload = {
+              motorista_id: dados.driverId || null,
+              dia: dados.date,
+              hora: dados.time,
+              tipo: dados.cat,
+              localizacao: dados.hotel
+                ? `Hotel/Endereço: ${dados.hotel} | ${dados.desc}`
+                : (dados.servico ? dados.servico + " - " : "") + dados.desc,
+              voo: dados.flight,
+              valor_total: dados.valCliente,
+              valor_repasse_motorista: dados.valMotorista,
+              status: dados.driverId ? "confirmado" : "pendente",
+            };
 
-            // Resolve o cliente
-            const clientId = await processarClienteBanco(
-              dados.clientName,
-              dados.clientPhone,
-            );
+            // VERIFICAÇÃO INTELIGENTE: Se tem ID em edição, faz UPDATE sem duplicar cliente
+            if (window.reservaEmEdicaoId) {
+              showToast("Atualizando reserva...", false);
 
-            // Grava a reserva
-            const { error: erroReserva } = await window.supabaseClient
-              .from("reservas")
-              .insert([
-                {
-                  cliente_id: clientId,
-                  motorista_id: dados.driverId || null,
-                  dia: dados.date,
-                  hora: dados.time,
-                  tipo: dados.cat,
-                  // O endereço do hotel vem primeiro, depois a descrição (se tiver)
-                  localizacao: dados.hotel
-                    ? `Hotel/Endereço: ${dados.hotel} | ${dados.desc}`
-                    : (dados.servico ? dados.servico + " - " : "") + dados.desc,
-                  voo: dados.flight,
-                  valor_total: dados.valCliente,
-                  valor_repasse_motorista: dados.valMotorista,
-                  status: dados.driverId ? "confirmado" : "pendente", // Status inteligente
-                  pago_cliente: false,
-                  pago_motorista: false,
-                },
-              ]);
+              const { error: erroUpdate } = await window.supabaseClient
+                .from("reservas")
+                .update(dadosReservaPayload)
+                .eq("id", window.reservaEmEdicaoId);
 
-            if (erroReserva) throw erroReserva;
+              if (erroUpdate) throw erroUpdate;
+              showToast("Reserva atualizada com sucesso! 🚀", false);
 
-            showToast("Reserva agendada com sucesso!", false);
+              // Limpa o ID de edição após salvar
+              window.reservaEmEdicaoId = null;
+            } else {
+              showToast("Processando nova reserva...", false);
 
-            // Recarrega todos os dados do banco para atualizar as abas
+              // Novo cadastro: Resolve o cliente no banco antes de inserir
+              const clientId = await processarClienteBanco(
+                dados.clientName,
+                dados.clientPhone,
+              );
+
+              dadosReservaPayload.cliente_id = clientId;
+              dadosReservaPayload.pago_cliente = false;
+              dadosReservaPayload.pago_motorista = false;
+
+              const { error: erroInsert } = await window.supabaseClient
+                .from("reservas")
+                .insert([dadosReservaPayload]);
+
+              if (erroInsert) throw erroInsert;
+              showToast("Reserva agendada com sucesso!", false);
+            }
+
+            // Recarrega todos os dados do banco para atualizar as abas (Agenda, Dashboard e Financeiro)
             if (typeof loadRealData === "function") await loadRealData();
+            if (typeof renderFinanceiro === "function") renderFinanceiro();
           } catch (err) {
             console.error(err);
             return showToast(
@@ -3065,134 +3081,53 @@
           }
         } else {
           // Modo Offline / Simulação
-          databaseAgenda.push({
-            id: String(Date.now()),
-            dia: dados.date,
-            hora: dados.time,
-            tipo: dados.cat || "transfer",
-            cliente: dados.clientName,
-            localizacao:
-              (dados.servico ? dados.servico + " - " : "") + dados.desc,
-            motorista: dados.driverId,
-            valorCliente: dados.valCliente,
-            valorMotorista: dados.valMotorista,
-            telefone: dados.clientPhone,
-            status: dados.driverId ? "confirmado" : "pendente",
-          });
-
-          showToast("Reserva simulada com sucesso!", false);
+          if (window.reservaEmEdicaoId) {
+            const index = (window.databaseAgenda || []).findIndex(
+              (r) => String(r.id) === String(window.reservaEmEdicaoId),
+            );
+            if (index !== -1) {
+              window.databaseAgenda[index] = {
+                ...window.databaseAgenda[index],
+                dia: dados.date,
+                hora: dados.time,
+                tipo: dados.cat || "transfer",
+                cliente: dados.clientName,
+                localizacao:
+                  (dados.servico ? dados.servico + " - " : "") + dados.desc,
+                motorista: dados.driverId,
+                valorCliente: dados.valCliente,
+                valorMotorista: dados.valMotorista,
+                telefone: dados.clientPhone,
+                status: dados.driverId ? "confirmado" : "pendente",
+              };
+            }
+            window.reservaEmEdicaoId = null;
+            showToast("Reserva simulada atualizada!", false);
+          } else {
+            databaseAgenda.push({
+              id: String(Date.now()),
+              dia: dados.date,
+              hora: dados.time,
+              tipo: dados.cat || "transfer",
+              cliente: dados.clientName,
+              localizacao:
+                (dados.servico ? dados.servico + " - " : "") + dados.desc,
+              motorista: dados.driverId,
+              valorCliente: dados.valCliente,
+              valorMotorista: dados.valMotorista,
+              telefone: dados.clientPhone,
+              status: dados.driverId ? "confirmado" : "pendente",
+            });
+            showToast("Reserva simulada com sucesso!", false);
+          }
           renderAgenda();
           renderDashboard();
+          if (typeof renderFinanceiro === "function") renderFinanceiro();
         }
 
         // Passo 4: Finaliza (Limpa e fecha modal)
         limparFormularioReserva();
         closeQuickAddModal();
-      }
-      // 4. Abrir Modal de Reserva e Carregar Serviços
-      async function openQuickAddModal() {
-        const modal = document.getElementById("quickModal");
-        const inputData = document.getElementById("modalDate");
-        if (inputData) inputData.value = selectedDay;
-
-        if (modal) {
-          modal.classList.remove("opacity-0", "pointer-events-none");
-          modal.classList.add("opacity-100");
-
-          // OTIMIZAÇÃO: Carrega a lista de serviços do Supabase para o Autocomplete funcionar instantaneamente
-          if (servicosDisponiveis.length === 0 && window.supabaseClient) {
-            try {
-              const { data } = await window.supabaseClient
-                .from("servicos")
-                .select("*")
-                .order("categoria", { ascending: true });
-              if (data) servicosDisponiveis = data;
-            } catch (e) {
-              console.error("Erro ao carregar serviços para autocomplete:", e);
-            }
-          }
-        }
-      }
-
-      // 5. O Motor de Autocomplete para a Reserva (Dispara quando o HTML carrega)
-      document.addEventListener("DOMContentLoaded", () => {
-        const inputBuscaReserva = document.getElementById(
-          "input-busca-servico-reserva",
-        );
-        const dropdownReserva = document.getElementById(
-          "dropdown-servicos-reserva",
-        );
-        const hiddenCategoria = document.getElementById(
-          "reserva-select-categoria",
-        );
-
-        if (inputBuscaReserva) {
-          inputBuscaReserva.addEventListener("input", function () {
-            const termo = this.value.toLowerCase();
-            dropdownReserva.innerHTML = "";
-
-            if (termo.length === 0) {
-              dropdownReserva.classList.add("hidden");
-              hiddenCategoria.value = "";
-              document.getElementById("modalValueTotal").value = ""; // Limpa o preço
-              return;
-            }
-
-            const filtrados = servicosDisponiveis.filter(
-              (s) =>
-                (s.nome && s.nome.toLowerCase().includes(termo)) ||
-                (s.categoria && s.categoria.toLowerCase().includes(termo)),
-            );
-
-            if (filtrados.length > 0) {
-              dropdownReserva.classList.remove("hidden");
-              filtrados.forEach((s) => {
-                const li = document.createElement("li");
-                li.className =
-                  "px-3 py-2 cursor-pointer hover:bg-emerald-50 text-xs border-b border-gray-100 flex justify-between";
-                li.innerHTML = `<span><strong class="text-blue-900">${s.categoria || "Geral"}</strong> - ${s.nome}</span> <span class="text-gray-500 font-bold">R$ ${s.preco}</span>`;
-
-                li.onclick = () => {
-                  inputBuscaReserva.value = s.nome;
-                  hiddenCategoria.value = s.categoria || "Geral";
-                  // Preenche automaticamente a Cobrança Cliente (R$)
-                  document.getElementById("modalValueTotal").value = parseFloat(
-                    s.preco || 0,
-                  ).toFixed(2);
-                  dropdownReserva.classList.add("hidden");
-                };
-                dropdownReserva.appendChild(li);
-              });
-            } else {
-              dropdownReserva.classList.add("hidden");
-            }
-          });
-
-          // Fecha a lista se clicar fora dela
-          document.addEventListener("click", function (e) {
-            if (
-              !inputBuscaReserva.contains(e.target) &&
-              dropdownReserva &&
-              !dropdownReserva.contains(e.target)
-            ) {
-              dropdownReserva.classList.add("hidden");
-            }
-          });
-        }
-      });
-
-      function openDbSettingsModal() {
-        const modal = document.getElementById("dbSettingsModal");
-        document.getElementById("dbUrlInput").value =
-          localStorage.getItem("supabase_url") ||
-          "https://xjjflsdtaruzaekadqoq.supabase.co";
-        document.getElementById("dbKeyInput").value =
-          localStorage.getItem("supabase_key") || "";
-
-        if (modal) {
-          modal.classList.remove("opacity-0", "pointer-events-none");
-          modal.classList.add("opacity-100");
-        }
       }
 
       function saveDbConfig() {
