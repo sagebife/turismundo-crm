@@ -1658,13 +1658,13 @@
       </div>
     </div>
 
-    <!-- Modal: Adicionar Reserva Rápido -->
+    <!-- Modal: Adicionar Reserva Rápido (Responsivo Otimizado) -->
     <div
       id="quickModal"
-      class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 opacity-0 pointer-events-none transition duration-200"
+      class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 opacity-0 pointer-events-none transition duration-200"
     >
       <div
-        class="bg-white w-full max-w-4xl rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+        class="bg-white w-full max-w-3xl rounded-2xl p-4 sm:p-6 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto"
       >
         <div
           class="flex justify-between items-center border-b border-gray-100 pb-3"
@@ -1672,7 +1672,7 @@
           <h3 class="font-bold text-gray-900 text-lg">Agendamento Rápido</h3>
           <button
             onclick="closeQuickAddModal()"
-            class="text-gray-400 hover:text-gray-600"
+            class="text-gray-400 hover:text-gray-600 p-1"
           >
             <i class="fas fa-times text-lg"></i>
           </button>
@@ -1683,9 +1683,9 @@
           autocomplete="off"
           class="space-y-3"
         >
-          <!-- Linha 1: Cliente e Telefones (4 colunas) -->
-          <div class="grid grid-cols-4 gap-3">
-            <div class="col-span-2">
+          <!-- Linha 1: Cliente e Telefones -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2">
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
                 >👤Cliente</label
@@ -1730,9 +1730,9 @@
             </div>
           </div>
 
-          <!-- Linha 2: Endereço/Hotel junto com Pax e Malas (4 colunas) -->
-          <div class="grid grid-cols-4 gap-3">
-            <div class="col-span-2 relative">
+          <!-- Linha 2: Endereço/Hotel junto com Pax e Malas -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2 relative">
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
                 >📍 Endereço / Hotel</label
@@ -1760,7 +1760,7 @@
                 class="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm text-center focus:border-blue-500 outline-none shadow-sm"
               />
             </div>
-            <div class="grid grid-cols-2 gap-1">
+            <div class="grid grid-cols-2 gap-2">
               <div>
                 <label
                   class="block text-[10px] font-bold text-gray-400 uppercase mb-1 text-center"
@@ -1794,9 +1794,9 @@
             </div>
           </div>
 
-          <!-- Linha 3: Serviço/Rota junto com Data e Hora (4 colunas) -->
-          <div class="grid grid-cols-4 gap-3">
-            <div class="col-span-2 relative">
+          <!-- Linha 3: Serviço/Rota junto com Data e Hora -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2 relative">
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
                 >📌Serviço</label
@@ -1844,8 +1844,8 @@
             </div>
           </div>
 
-          <!-- Linha 4: Motorista, Voo e Valores (4 colunas) -->
-          <div class="grid grid-cols-4 gap-3">
+          <!-- Linha 4: Motorista, Voo e Valores -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
@@ -1853,13 +1853,13 @@
               >
               <select
                 id="modalDriverSelect"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
+                class="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm focus:border-blue-500 outline-none shadow-sm"
               ></select>
             </div>
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >✈️Voo (Opcional)</label
+                >✈️Voo</label
               >
               <input
                 type="text"
@@ -1872,7 +1872,7 @@
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >💰Valor cobrado ($)</label
+                >💰Valor ($)</label
               >
               <input
                 type="number"
@@ -1885,7 +1885,7 @@
             <div>
               <label
                 class="block text-[10px] font-bold text-gray-500 uppercase mb-1"
-                >💸Valor do repasse ($)</label
+                >💸Repasse ($)</label
               >
               <input
                 type="number"
@@ -1911,12 +1911,14 @@
             ></textarea>
           </div>
 
-          <button
-            type="submit"
-            class="w-full py-2.5 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md"
-          >
-            Confirmar e Agendar
-          </button>
+          <div class="pt-2">
+            <button
+              type="submit"
+              class="w-full py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow-md text-base"
+            >
+              Confirmar e Agendar
+            </button>
+          </div>
         </form>
       </div>
     </div>
