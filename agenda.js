@@ -172,7 +172,6 @@ async function renderAgenda() {
   try {
     let list = [];
     if (window.isConnectedToSupabase && window.supabaseClient) {
-      // CORREÇÃO: Buscando o whatsapp da tabela relacionada 'clientes'
       let { data, error } = await window.supabaseClient.from("reservas")
         .select(`
                 *,
@@ -190,7 +189,6 @@ async function renderAgenda() {
           item.cliente ||
           (item.clientes ? item.clientes.nome : null) ||
           "Cliente sem nome",
-        // CORREÇÃO: Garantindo que o telefone pegue o whatsapp do banco
         telefone:
           item.telefone ||
           (item.clientes ? item.clientes.whatsapp : null) ||
@@ -250,9 +248,35 @@ async function renderAgenda() {
       });
     }
 
-    displayList.sort((a, b) =>
-      String(a.hora || "").localeCompare(String(b.hora || "")),
-    );
+    // ORDENAÇÃO INTELIGENTE: Pendentes no topo (por horário) e Concluídos/Declinados no fim
+    displayList.sort((a, b) => {
+      const getStatusScore = (item) => {
+        const s = String(item.status || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        if (
+          s.includes("concluido") ||
+          s.includes("executado") ||
+          s.includes("finalizado") ||
+          s.includes("declinado") ||
+          s.includes("cancelado")
+        ) {
+          return 1; // Joga para o fim
+        }
+        return 0; // Pendentes ficam no topo
+      };
+
+      const scoreA = getStatusScore(a);
+      const scoreB = getStatusScore(b);
+
+      if (scoreA === scoreB) {
+        return String(a.hora || "").localeCompare(String(b.hora || ""));
+      }
+
+      return scoreA - scoreB;
+    });
 
     if (displayList.length === 0) {
       container.innerHTML = `
@@ -363,12 +387,8 @@ async function renderAgenda() {
   }
 }
 
-// ==========================================
-// AÇÃO RÁPIDA: ALTERAR STATUS DA RESERVA
-// ==========================================
 async function acaoRapidaReserva(idReserva, novoStatus) {
   try {
-    // 1. Atualiza no Banco de Dados (Supabase) se houver conexão
     if (window.isConnectedToSupabase && window.supabaseClient) {
       const { error } = await window.supabaseClient
         .from("reservas")
@@ -382,7 +402,6 @@ async function acaoRapidaReserva(idReserva, novoStatus) {
       }
     }
 
-    // 2. Atualiza imediatamente na memória global (window.databaseAgenda)
     if (window.databaseAgenda && Array.isArray(window.databaseAgenda)) {
       const item = window.databaseAgenda.find(
         (r) => String(r.id) === String(idReserva),
@@ -392,7 +411,6 @@ async function acaoRapidaReserva(idReserva, novoStatus) {
       }
     }
 
-    // 3. Atualiza também se houver uma lista filtrada ativa em tela
     if (
       typeof window.databaseAgendaFiltrada !== "undefined" &&
       Array.isArray(window.databaseAgendaFiltrada)
@@ -405,20 +423,14 @@ async function acaoRapidaReserva(idReserva, novoStatus) {
       }
     }
 
-    // 4. Redesenha a agenda instantaneamente para refletir o semáforo de cores (Verde/Amarelo/Vermelho)
     if (typeof window.renderAgenda === "function") {
       window.renderAgenda();
     }
-
-    console.log(
-      `Reserva ${idReserva} atualizada com sucesso para: ${novoStatus}`,
-    );
   } catch (e) {
     console.error("Erro crítico na ação rápida da reserva:", e);
   }
 }
 
-// Atalho global para compatibilidade com o botão "Declinado"
 window.mudarStatusReserva = function (idReserva, status) {
   acaoRapidaReserva(idReserva, status);
 };

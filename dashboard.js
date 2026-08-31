@@ -65,10 +65,35 @@ window.renderDashboard = async function () {
       return itemDia === diaAtual;
     });
 
-    // 🔴 ORDENAÇÃO CRONOLÓGICA: Do mais cedo para o mais tarde
-    hoje.sort((a, b) =>
-      String(a.hora || "").localeCompare(String(b.hora || "")),
-    );
+    // 🔴 ORDENAÇÃO INTELIGENTE: Pendentes no topo (por horário) e Concluídos/Declinados no fim
+    hoje.sort((a, b) => {
+      const getStatusScore = (item) => {
+        const s = String(item.status || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        if (
+          s.includes("concluido") ||
+          s.includes("executado") ||
+          s.includes("finalizado") ||
+          s.includes("declinado") ||
+          s.includes("cancelado")
+        ) {
+          return 1; // Joga para o fim
+        }
+        return 0; // Pendentes ficam no topo
+      };
+
+      const scoreA = getStatusScore(a);
+      const scoreB = getStatusScore(b);
+
+      if (scoreA === scoreB) {
+        return String(a.hora || "").localeCompare(String(b.hora || ""));
+      }
+
+      return scoreA - scoreB;
+    });
 
     const motoristas = window.drivers || [];
 
