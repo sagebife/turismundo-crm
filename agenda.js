@@ -371,8 +371,8 @@ async function renderAgenda() {
                         
                         <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
                             <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
-                            <span class="truncate">${item.localizacao || item.local || "Local não informado"}</span>
-                        </p>
+<span class="truncate">${item.tipo || item.category || item.servico || "Serviço"}</span>                        
+</p>
                         
                         <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
                             ${
@@ -460,3 +460,95 @@ window.mudarStatusReserva = function (idReserva, status) {
 };
 
 window.acaoRapidaReserva = acaoRapidaReserva;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const inputServico = document.getElementById("input-busca-servico-reserva");
+  const dropdownServico = document.getElementById("dropdown-servicos-reserva");
+
+  if (inputServico && dropdownServico) {
+    // Garante a largura mínima idêntica ao do orçamento
+    dropdownServico.classList.add("min-w-[350px]");
+
+    inputServico.addEventListener("input", async (e) => {
+      const termo = e.target.value.toLowerCase().trim();
+
+      if (!termo) {
+        dropdownServico.classList.add("hidden");
+        dropdownServico.innerHTML = "";
+        return;
+      }
+
+      try {
+        let servicosParaBuscar = [];
+
+        if (window.isConnectedToSupabase && window.supabaseClient) {
+          const { data, error } = await window.supabaseClient
+            .from("servicos")
+            .select("*")
+            .or(`nome.ilike.%${termo}%,categoria.ilike.%${termo}%`);
+
+          if (!error && data) {
+            servicosParaBuscar = data;
+          }
+        }
+
+        if (servicosParaBuscar.length === 0) {
+          const cacheLocal = window.databaseServicos || window.servicos || [];
+          servicosParaBuscar = cacheLocal.filter((s) => {
+            const textoTotal =
+              `${s.categoria || s.tipo || ""} ${s.nome || s.titulo || ""}`.toLowerCase();
+            return textoTotal.includes(termo);
+          });
+        }
+
+        if (servicosParaBuscar.length === 0) {
+          dropdownServico.innerHTML = `<li class="px-3 py-2 text-xs text-gray-400">Nenhum serviço encontrado</li>`;
+          dropdownServico.classList.remove("hidden");
+          return;
+        }
+
+        dropdownServico.innerHTML = servicosParaBuscar
+          .map((s) => {
+            const categoria = (
+              s.categoria ||
+              s.tipo ||
+              "SERVIÇO"
+            ).toUpperCase();
+            const detalhe = s.nome || s.titulo || "";
+            const preco = s.valor || s.preco || 0;
+
+            const textoFormatado = `${categoria} - ${detalhe} R$ ${preco}`;
+
+            return `
+            <li class="px-3 py-2.5 text-xs hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-none transition"
+                onclick="preencherServicoReservaQuick('${textoFormatado.replace(/'/g, "\\'")}', ${preco})">
+              <span class="font-bold text-blue-900">${categoria}</span>
+              <span class="text-gray-800">- ${detalhe}</span>
+              <span class="font-bold text-gray-900 float-right">R$ ${preco}</span>
+            </li>
+          `;
+          })
+          .join("");
+
+        dropdownServico.classList.remove("hidden");
+      } catch (err) {
+        console.error("Erro ao buscar serviços:", err);
+      }
+    });
+  }
+});
+
+window.preencherServicoReservaQuick = function (textoFormatado, valor) {
+  const inputServico = document.getElementById("input-busca-servico-reserva");
+  const dropdownServico = document.getElementById("dropdown-servicos-reserva");
+  const inputValorTotal = document.getElementById("modalValueTotal");
+  const inputRepasse = document.getElementById("modalValueDriver");
+
+  if (inputServico) inputServico.value = textoFormatado;
+  if (dropdownServico) dropdownServico.classList.add("hidden");
+
+  if (inputValorTotal) inputValorTotal.value = valor;
+  if (inputRepasse && valor) {
+    inputRepasse.value = Math.round(valor * 0.7);
+  }
+};
