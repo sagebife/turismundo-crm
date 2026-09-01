@@ -2,6 +2,30 @@
 // MÓDULO ISOLADO: AGENDA E RESERVAS (Supabase)
 // ==========================================
 
+// Função global para abrir o modal de Nova Reserva (Corrigido para o ID "quickModal" e classes de opacidade)
+window.openQuickAddModal = function () {
+  const modal = document.getElementById("quickModal");
+  if (modal) {
+    modal.classList.remove("opacity-0", "pointer-events-none");
+
+    // Preenche automaticamente com a data selecionada na agenda
+    const dateInput = document.getElementById("modalDate");
+    if (dateInput) {
+      dateInput.value = window.selectedDay || getHojeLocal();
+    }
+  } else {
+    console.warn("Modal de nova reserva (#quickModal) não encontrado no HTML.");
+  }
+};
+
+// Função global para fechar o modal de Nova Reserva
+window.closeQuickAddModal = function () {
+  const modal = document.getElementById("quickModal");
+  if (modal) {
+    modal.classList.add("opacity-0", "pointer-events-none");
+  }
+};
+
 // Função blindada para pegar o dia de HOJE no fuso horário local correto
 function getHojeLocal() {
   const d = new Date();
@@ -132,7 +156,7 @@ window.verDetalhesDoDia = function (diaStr) {
   }
 
   document.querySelectorAll(".fixed.z-50").forEach((modal) => {
-    if (!modal.classList.contains("hidden")) {
+    if (!modal.classList.contains("hidden") && modal.id !== "quickModal") {
       modal.classList.add("hidden");
     }
   });
@@ -282,7 +306,7 @@ async function renderAgenda() {
       container.innerHTML = `
             <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
                 <p class="text-gray-500 mb-3">Nenhuma reserva ou passeio para este filtro (${currentDay}).</p>
-                <button onclick="document.querySelector('header button.bg-emerald-500').click()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
+                <button onclick="openQuickAddModal()" class="text-blue-900 font-semibold text-sm hover:underline">+ Adicionar Agora</button>
             </div>`;
       return;
     }
