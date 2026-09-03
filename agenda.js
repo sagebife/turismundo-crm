@@ -2,21 +2,18 @@
 // MÓDULO ISOLADO: AGENDA E RESERVAS (Supabase)
 // ==========================================
 
-// Função global para abrir o modal de Nova Reserva (Corrigido para o ID "quickModal" e classes de opacidade)
+// Função global para abrir o modal de Nova Reserva
 window.openQuickAddModal = function () {
   const modal = document.getElementById("quickModal");
   if (modal) {
-    // Limpa todos os campos para evitar "memória" do cliente anterior
     const form = modal.querySelector("form");
     if (form) form.reset();
 
-    // Restaura o PAX padrão para 1 após o reset
     const inputPax = document.getElementById("modalPax");
     if (inputPax) inputPax.value = "1";
 
     modal.classList.remove("opacity-0", "pointer-events-none");
 
-    // Preenche automaticamente com a data selecionada na agenda
     const dateInput = document.getElementById("modalDate");
     if (dateInput) {
       dateInput.value = window.selectedDay || getHojeLocal();
@@ -61,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
   gerarDiasAgenda();
   renderAgenda();
 
-  // 1. Interceptador do Menu Principal: Reseta para HOJE ao clicar na aba Agenda
   document.body.addEventListener("click", (e) => {
     if (!e.isTrusted) return;
     const navItem = e.target.closest("a, button, li, .cursor-pointer");
@@ -79,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 2. Interceptador genérico para outros calendários (O GUARDA-COSTAS)
   document.body.addEventListener("click", (e) => {
     const calendarCell = e.target.closest(
       '[data-date], [data-day], td[onclick], div[onclick*="selecionar"]',
@@ -207,11 +202,11 @@ async function renderAgenda() {
     if (window.isConnectedToSupabase && window.supabaseClient) {
       let { data, error } = await window.supabaseClient.from("reservas")
         .select(`
-                *,
-                clientes (
-                    nome,
-                    whatsapp
-                )
+              *,
+              clientes (
+                  nome,
+                  whatsapp
+              )
             `);
       if (error) throw error;
 
@@ -281,7 +276,6 @@ async function renderAgenda() {
       });
     }
 
-    // ORDENAÇÃO INTELIGENTE: Pendentes no topo (por horário) e Concluídos/Declinados no fim
     displayList.sort((a, b) => {
       const getStatusScore = (item) => {
         const s = String(item.status || "")
@@ -296,9 +290,9 @@ async function renderAgenda() {
           s.includes("declinado") ||
           s.includes("cancelado")
         ) {
-          return 1; // Joga para o fim
+          return 1;
         }
-        return 0; // Pendentes ficam no topo
+        return 0;
       };
 
       const scoreA = getStatusScore(a);
@@ -330,10 +324,10 @@ async function renderAgenda() {
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "");
         const isTransfer =
-          String(item.tipo || "")
+          String(item.tipo || item.servico || "")
             .toLowerCase()
             .includes("transfer") ||
-          String(item.tipo || "")
+          String(item.tipo || item.servico || "")
             .toLowerCase()
             .includes("translado");
 
@@ -359,16 +353,34 @@ async function renderAgenda() {
 
         const nomeClienteFinal = item.cliente || "Cliente";
 
+       // EXTRATOR DEFINITIVO: Limpa o lixo dos dados antigos do banco
+        let categoriaExibida = "TRANSLADOS AEP";
+        let servicoExibido = item.servico || item.localizacao || "Serviço Padrão";
+
+        // Se o serviço estiver gravado como "Hotel/Endereço...", limpa para exibir bonito
+        if (servicoExibido.includes("Hotel/Endereço:")) {
+            servicoExibido = item.localizacao || "Translado Regular";
+        }
+
+        const textoCompleto = `${item.tipo || ""} ${item.servico || ""} ${item.localizacao || ""}`.toLowerCase();
+        if (textoCompleto.includes("tango") || textoCompleto.includes("passeio") || textoCompleto.includes("tour") || textoCompleto.includes("show")) {
+            categoriaExibida = "PASSEIOS";
+        } else if (textoCompleto.includes("eze") || textoCompleto.includes("ezeiza")) {
+            categoriaExibida = "TRANSLADOS EZEIZA";
+        } else if (textoCompleto.includes("aep") || textoCompleto.includes("aeroparque")) {
+            categoriaExibida = "TRANSLADOS AEP";
+        }
+
         return `
             <div onclick="openClientDossier('${item.cliente_id || ""}', '${nomeClienteFinal}', '${item.telefone || ""}', '')" class="w-full relative bg-white p-4 sm:p-5 rounded-2xl border ${borderStatusColor} shadow-sm mb-3 hover:shadow-md cursor-pointer transition group">
                 <div class="flex items-center gap-3 w-full">
                     
-                    <div class="text-center w-28 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
+                    <div class="text-center w-32 shrink-0 flex flex-col justify-center bg-white px-2 py-2 rounded-lg border border-gray-100 shadow-sm">
                         <span class="block text-sm font-black text-gray-900">${item.hora || "--:--"}</span>
-                        <span class="text-[9px] font-bold text-gray-400 uppercase truncate w-full block mt-0.5" title="${item.tipo || "Serviço"}">${item.tipo || "Serviço"}</span>
+                        <span class="text-[9px] font-extrabold text-blue-900 uppercase truncate w-full block mt-0.5" title="${categoriaExibida}">${categoriaExibida}</span>
                     </div>
                     
-                    <div class="space-y-1 flex-1 min-w-0">
+                    <div class="space-y-1.5 flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-2 w-full">
                             <h4 class="font-extrabold text-gray-800 text-sm leading-none group-hover:text-blue-900 transition-colors truncate">
                                 ${nomeClienteFinal}
@@ -378,35 +390,31 @@ async function renderAgenda() {
                             </div>
                         </div>
                         
-                        <p class="text-xs text-gray-600 font-medium flex items-center gap-1.5 truncate">
+                        <p class="text-xs text-gray-800 font-bold flex items-center gap-1.5 truncate">
+                            <i class="fas fa-car text-blue-900 shrink-0"></i> 
+                            <span class="truncate">${servicoExibido}</span>                        
+                        </p>
+
+                        <p class="text-[11px] text-gray-500 font-medium flex items-center gap-1.5 truncate">
                             <i class="fas fa-map-marker-alt text-gray-400 shrink-0"></i> 
-<span class="truncate">${item.tipo || item.category || item.servico || "Serviço"}</span>                        
-</p>
+                            <span class="truncate">${item.localizacao || "Endereço não informado"}</span>                        
+                        </p>
                         
                         <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
-                            ${
-                              !status.includes("concluido") &&
-                              !status.includes("declinado")
-                                ? `
+                            ${!status.includes("concluido") && !status.includes("declinado") ? `
                             <button onclick="event.stopPropagation(); acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold transition">
                                 <i class="fas fa-check"></i> Finalizar
                             </button>
                             <button onclick="event.stopPropagation(); mudarStatusReserva('${item.id}', 'Declinado')" class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-[11px] font-bold transition">
                                 Declinado
                             </button>
-                            `
-                                : ""
-                            }
+                            ` : ""}
 
-                            ${
-                              isTransfer && !status.includes("concluido")
-                                ? `
+                            ${isTransfer && !status.includes("concluido") ? `
                             <button onclick="event.stopPropagation(); alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-bold transition">
                                 <i class="fas fa-plane-arrival"></i> Pousou
                             </button>
-                            `
-                                : ""
-                            }
+                            ` : ""}
                         </div>
                     </div>
                 </div>
@@ -475,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const dropdownServico = document.getElementById("dropdown-servicos-reserva");
 
   if (inputServico && dropdownServico) {
-    // Garante a largura mínima idêntica ao do orçamento
     dropdownServico.classList.add("min-w-[350px]");
 
     inputServico.addEventListener("input", async (e) => {
@@ -569,23 +576,16 @@ function multiplicarValorPorPax() {
 
   if (!inputServico || !inputPax || !inputValor) return;
 
-  // 1. Pega o texto do serviço (ex: "MADERO TANGO - Menu VIP R$ 450" ou extrai o número de dentro dele)
   const textoServico = inputServico.value;
-
-  // 2. Tenta extrair o valor unitário usando expressão regular (procura por números após R$ ou no fim do texto)
   const matchValor = textoServico.match(/R\$\s*([\d\.,]+)/i);
 
   let precoUnitario = 0;
   if (matchValor) {
-    // Converte o formato do preço para número corretamente (troca vírgula por ponto se necessário)
     precoUnitario = parseFloat(matchValor[1].replace(",", ".")) || 0;
   } else {
-    // Se não achar no texto do input, pega o valor atual que já está no input de valor como base
     precoUnitario = parseFloat(inputValor.value) || 0;
   }
 
   const qtdPax = parseInt(inputPax.value) || 1;
-
-  // Multiplica unitário x PAX e joga no campo
   inputValor.value = precoUnitario * qtdPax;
 }
