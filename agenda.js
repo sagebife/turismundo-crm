@@ -552,3 +552,31 @@ window.preencherServicoReservaQuick = function (textoFormatado, valor) {
     inputRepasse.value = Math.round(valor * 0.7);
   }
 };
+
+function multiplicarValorPorPax() {
+  const inputServico = document.getElementById("input-busca-servico-reserva");
+  const inputPax = document.getElementById("modalPax");
+  const inputValor = document.getElementById("modalValueTotal");
+
+  if (!inputServico || !inputPax || !inputValor) return;
+
+  // 1. Pega o texto do serviço (ex: "MADERO TANGO - Menu VIP R$ 450" ou extrai o número de dentro dele)
+  const textoServico = inputServico.value;
+
+  // 2. Tenta extrair o valor unitário usando expressão regular (procura por números após R$ ou no fim do texto)
+  const matchValor = textoServico.match(/R\$\s*([\d\.,]+)/i);
+
+  let precoUnitario = 0;
+  if (matchValor) {
+    // Converte o formato do preço para número corretamente (troca vírgula por ponto se necessário)
+    precoUnitario = parseFloat(matchValor[1].replace(",", ".")) || 0;
+  } else {
+    // Se não achar no texto do input, pega o valor atual que já está no input de valor como base
+    precoUnitario = parseFloat(inputValor.value) || 0;
+  }
+
+  const qtdPax = parseInt(inputPax.value) || 1;
+
+  // Multiplica unitário x PAX e joga no campo
+  inputValor.value = precoUnitario * qtdPax;
+}
