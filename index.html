@@ -585,7 +585,7 @@
               <!-- Chegadas Hoje (Tornado Clicável) -->
               <div
                 onclick="filtrarDashboardPor('chegada')"
-                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-400 cursor-pointer transition group"
+                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-blue-400 cursor-pointer transition group flex flex-col items-center justify-center text-center"
               >
                 <p
                   class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-blue-900 transition"
@@ -593,20 +593,20 @@
                   Translados Hoje
                 </p>
                 <p
-                  class="text-2xl font-black text-blue-900"
+                  class="text-2xl font-black text-blue-900 mb-1"
                   id="dash-chegadas-hoje"
                 >
                   0
                 </p>
-                <span class="text-[10px] text-emerald-600 font-bold"
-                  ><i class="fas fa-circle text-[6px] mr-1"></i>Conectado</span
+                <span class="text-[10px] text-emerald-600 font-bold flex items-center justify-center gap-1"
+                  ><i class="fas fa-circle text-[6px]"></i>Conectado</span
                 >
               </div>
 
               <!-- Passeios Hoje (Tornado Clicável) -->
               <div
                 onclick="filtrarDashboardPor('passeio')"
-                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-orange-400 cursor-pointer transition group"
+                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-orange-400 cursor-pointer transition group flex flex-col items-center justify-center text-center"
               >
                 <p
                   class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1 group-hover:text-orange-600 transition"
@@ -614,7 +614,7 @@
                   Passeios Hoje
                 </p>
                 <p
-                  class="text-2xl font-black text-orange-600"
+                  class="text-2xl font-black text-orange-600 mb-1"
                   id="dash-passeios-hoje"
                 >
                   0
@@ -622,8 +622,9 @@
                 <span class="text-[10px] text-gray-400">Operando</span>
               </div>
 
+              <!-- Motoristas Parceiros -->
               <div
-                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center"
               >
                 <p
                   class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1"
@@ -631,7 +632,7 @@
                   Motoristas Parceiros
                 </p>
                 <p
-                  class="text-2xl font-black text-gray-900"
+                  class="text-2xl font-black text-gray-900 mb-1"
                   id="dash-drivers-count"
                 >
                   0
@@ -640,26 +641,21 @@
                   >Ativos</span
                 >
               </div>
+
               <!-- Faturamento Mês com Privacidade -->
               <div
-                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+                class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center relative"
               >
-                <div class="flex items-center justify-between mb-1">
-                  <p
-                    class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none"
-                  >
-                    Faturamento Mês
-                  </p>
-                  <button
-                    onclick="toggleFaturamento()"
-                    class="text-gray-400 hover:text-blue-900 transition focus:outline-none"
-                    title="Ocultar/Revelar Faturamento"
-                  >
-                    <i id="eyeIcon" class="fas fa-eye-slash text-xs"></i>
-                  </button>
+                <div class="absolute top-3 right-3 text-gray-400 hover:text-blue-900 transition cursor-pointer" title="Ocultar/Revelar Faturamento" onclick="toggleFaturamento()">
+                  <i id="eyeIcon" class="fas fa-eye-slash text-xs"></i>
                 </div>
                 <p
-                  class="text-2xl font-black text-emerald-600"
+                  class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-none mb-1"
+                >
+                  Faturamento Mês
+                </p>
+                <p
+                  class="text-2xl font-black text-emerald-600 mb-1"
                   id="faturamentoValor"
                 >
                   R$ •••••
@@ -774,8 +770,6 @@
               </div>
             </div>
           </section>
-        </div>
-      </div>
 
       <!-- VIEW: AGENDA -->
       <div id="view-agenda" class="view-section hidden space-y-6">
