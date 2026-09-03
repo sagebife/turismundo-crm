@@ -21,7 +21,7 @@ window.renderDashboard = async function () {
   try {
     let agenda = window.databaseAgenda || [];
 
-    // Se estiver conectado ao Supabase, busca sempre do banco para pegar o status e o telefone mais atualizados
+    // Se estiver conectado ao Supabase, busca sempre do banco
     if (window.isConnectedToSupabase && window.supabaseClient) {
       let { data, error } = await window.supabaseClient.from("reservas")
         .select(`
@@ -39,14 +39,13 @@ window.renderDashboard = async function () {
             item.cliente ||
             (item.clientes ? item.clientes.nome : null) ||
             "Cliente sem nome",
-          // CORREÇÃO: Puxa o whatsapp da tabela relacionada 'clientes'
           telefone:
             item.telefone ||
             (item.clientes ? item.clientes.whatsapp : null) ||
             "",
-          status: item.status || "Pendente", // Garante o status real do banco
+          status: item.status || "Pendente",
         }));
-        window.databaseAgenda = agenda; // Atualiza a global
+        window.databaseAgenda = agenda;
       }
     }
 
@@ -57,7 +56,7 @@ window.renderDashboard = async function () {
     const dia = String(d.getDate()).padStart(2, "0");
     const diaAtual = `${ano}-${mes}-${dia}`;
 
-    // Filtra as atividades de hoje de forma flexível (compara os 10 primeiros caracteres da data)
+    // Filtra as atividades de hoje
     const hoje = agenda.filter((item) => {
       const itemDia = String(item.dia || "")
         .trim()
@@ -65,14 +64,13 @@ window.renderDashboard = async function () {
       return itemDia === diaAtual;
     });
 
-    // 🔴 ORDENAÇÃO INTELIGENTE: Pendentes no topo (por horário) e Concluídos/Declinados no fim
+    // ORDENAÇÃO INTELIGENTE
     hoje.sort((a, b) => {
       const getStatusScore = (item) => {
         const s = String(item.status || "")
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "");
-
         if (
           s.includes("concluido") ||
           s.includes("executado") ||
@@ -80,23 +78,19 @@ window.renderDashboard = async function () {
           s.includes("declinado") ||
           s.includes("cancelado")
         ) {
-          return 1; // Joga para o fim
+          return 1;
         }
-        return 0; // Pendentes ficam no topo
+        return 0;
       };
-
       const scoreA = getStatusScore(a);
       const scoreB = getStatusScore(b);
-
       if (scoreA === scoreB) {
         return String(a.hora || "").localeCompare(String(b.hora || ""));
       }
-
       return scoreA - scoreB;
     });
 
     const motoristas = window.drivers || [];
-
     const dashChegadas = document.getElementById("dash-chegadas-hoje");
     const dashPasseios = document.getElementById("dash-passeios-hoje");
     const dashDrivers = document.getElementById("dash-drivers-count");
@@ -126,9 +120,10 @@ window.renderDashboard = async function () {
       );
     }).length;
 
-    const faturamentoTotal = agenda.reduce((sum, item) => {
-      return sum + (Number(item.valorCliente || item.valor_total) || 0);
-    }, 0);
+    const faturamentoTotal = agenda.reduce(
+      (sum, item) => sum + (Number(item.valorCliente || item.valor_total) || 0),
+      0,
+    );
 
     if (dashChegadas) dashChegadas.innerText = chegadasCount;
     if (dashPasseios) dashPasseios.innerText = passeiosCount;
@@ -148,36 +143,99 @@ window.renderDashboard = async function () {
       return;
     }
 
-    // Usa exatamente a mesma fábrica de cards da Agenda para garantir o mesmo semáforo visual!
-    if (
-      typeof window.gerarCardAtividade === "function" ||
-      typeof gerarCardAtividade === "function"
-    ) {
-      const factory = window.gerarCardAtividade || gerarCardAtividade;
-      container.innerHTML = hoje.map((item) => factory(item, false)).join("");
-    } else {
-      container.innerHTML = hoje
-        .map(
-          (item) => `
-                <div class="p-3 bg-white border border-gray-100 rounded-xl mb-2 text-sm shadow-sm flex items-center justify-between">
-                    <div>
-                        <strong class="text-blue-900">${item.hora || "--:--"}</strong> - ${item.cliente} 
-                        <span class="text-gray-500 text-xs">(${item.tipo || "Serviço"})</span>
-                    </div>
-                    <span class="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-800 font-bold">${item.status || "Pendente"}</span>
-                </div>
-            `,
-        )
-        .join("");
-    }
+    // 🔥 AQUI ESTÁ O SEGREDO: REMOVEMOS O IF/ELSE QUE BUSCAVA A FUNÇÃO VELHA 🔥
+    // O sistema é obrigado a usar esse layout novo, blindado e completo.
+    container.innerHTML = hoje
+      .map((item) => {
+        // Extrator de Serviço Blindado (Igual à Agenda)
+        let categoriaExibida = "TRANSLADOS AEP";
+        let servicoExibido =
+          item.servico || item.localizacao || "Serviço Padrão";
+
+        if (servicoExibido.includes("Hotel/Endereço:")) {
+          servicoExibido = item.localizacao || "Translado Regular";
+        }
+
+        if (servicoExibido.includes(" - ")) {
+          const partes = servicoExibido.split(" - ");
+          categoriaExibida = partes[0].trim().toUpperCase();
+          servicoExibido = partes.slice(1).join(" - ").trim();
+        }
+
+        const tipoBanco = String(item.tipo || "").trim();
+        if (
+          tipoBanco &&
+          tipoBanco.toLowerCase() !== "geral" &&
+          tipoBanco.toLowerCase() !== "translado"
+        ) {
+          categoriaExibida = tipoBanco.toUpperCase();
+        }
+
+        // Estilização dinâmica do status e da BORDA DO CARD
+        const statusStr = String(item.status || "Pendente")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        let dotColor = "bg-amber-400";
+        let badgeBorderColor = "border-amber-400 text-amber-800 bg-amber-50";
+        let cardBorderColor = "border-amber-400"; // <--- Borda amarela para pendente
+
+        if (
+          statusStr.includes("concluido") ||
+          statusStr.includes("finalizado")
+        ) {
+          dotColor = "bg-emerald-500";
+          badgeBorderColor =
+            "border-emerald-300 text-emerald-800 bg-emerald-50";
+          cardBorderColor = "border-emerald-400"; // <--- Borda verde para concluído
+        } else if (
+          statusStr.includes("declinado") ||
+          statusStr.includes("cancelado")
+        ) {
+          dotColor = "bg-red-500";
+          badgeBorderColor = "border-red-300 text-red-800 bg-red-50";
+          cardBorderColor = "border-red-400"; // <--- Borda vermelha para declinado
+        }
+
+        return `
+          <div class="p-3.5 bg-white border ${cardBorderColor} rounded-xl mb-3 shadow-sm hover:shadow-md transition">
+              <div class="flex items-start justify-between">
+                  
+                  <div class="flex-1 min-w-0 pr-2 space-y-1.5">
+                      <!-- Hora e Nome -->
+                      <div class="flex items-center gap-2">
+                          <span class="text-blue-900 font-black text-sm shrink-0">${item.hora || "--:--"}</span>
+                          <span class="font-extrabold text-gray-800 text-sm truncate max-w-[200px]">${item.cliente}</span>
+                      </div>
+
+                      <!-- Serviço e Categoria -->
+                      <div class="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+                          ${categoriaExibida ? `<span class="bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wide border border-blue-200 shrink-0">${categoriaExibida}</span>` : ""}
+                          <span class="truncate">${servicoExibido}</span>
+                      </div>
+
+                      <!-- Localização / Endereço -->
+                      <p class="text-[11px] text-gray-500 flex items-center gap-1 truncate w-full">
+                          <i class="fas fa-map-marker-alt opacity-70 shrink-0"></i> 
+                          <span class="truncate">${item.localizacao || "Endereço não informado"}</span>
+                      </p>
+                  </div>
+
+                  <!-- Status Badge -->
+                  <div class="shrink-0 pt-1">
+                      <span class="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold rounded-full border ${badgeBorderColor} uppercase tracking-wider">
+                          <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>
+                          ${item.status || "Pendente"}
+                      </span>
+                  </div>
+
+              </div>
+          </div>
+        `;
+      })
+      .join("");
   } catch (e) {
     console.error("Erro crônico ao renderizar Dashboard:", e);
   }
 };
-
-// Executa o render logo que o arquivo carrega para garantir dados na tela
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof window.renderDashboard === "function") {
-    window.renderDashboard();
-  }
-});

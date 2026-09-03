@@ -353,22 +353,54 @@ async function renderAgenda() {
 
         const nomeClienteFinal = item.cliente || "Cliente";
 
-       // EXTRATOR DEFINITIVO: Limpa o lixo dos dados antigos do banco
+        // EXTRATOR UNIVERSAL BLINDADO
         let categoriaExibida = "TRANSLADOS AEP";
-        let servicoExibido = item.servico || item.localizacao || "Serviço Padrão";
+        let servicoExibido =
+          item.servico || item.localizacao || "Serviço Padrão";
 
-        // Se o serviço estiver gravado como "Hotel/Endereço...", limpa para exibir bonito
         if (servicoExibido.includes("Hotel/Endereço:")) {
-            servicoExibido = item.localizacao || "Translado Regular";
+          servicoExibido = item.localizacao || "Translado Regular";
         }
 
-        const textoCompleto = `${item.tipo || ""} ${item.servico || ""} ${item.localizacao || ""}`.toLowerCase();
-        if (textoCompleto.includes("tango") || textoCompleto.includes("passeio") || textoCompleto.includes("tour") || textoCompleto.includes("show")) {
-            categoriaExibida = "PASSEIOS";
-        } else if (textoCompleto.includes("eze") || textoCompleto.includes("ezeiza")) {
-            categoriaExibida = "TRANSLADOS EZEIZA";
-        } else if (textoCompleto.includes("aep") || textoCompleto.includes("aeroparque")) {
-            categoriaExibida = "TRANSLADOS AEP";
+        const tipoBanco = String(item.tipo || "").trim();
+        const textoCompleto =
+          `${tipoBanco} ${item.servico || ""} ${item.localizacao || ""} ${item.servicos_solicitados || ""}`.toLowerCase();
+
+        if (
+          tipoBanco &&
+          tipoBanco.toLowerCase() !== "geral" &&
+          tipoBanco.toLowerCase() !== "translado"
+        ) {
+          categoriaExibida = tipoBanco.toUpperCase();
+        } else if (servicoExibido.includes("-")) {
+          const partes = servicoExibido.split("-");
+          categoriaExibida = partes[0].trim().toUpperCase();
+          servicoExibido = partes.slice(1).join("-").trim();
+        }
+
+        if (
+          textoCompleto.includes("tango") ||
+          textoCompleto.includes("passeio") ||
+          textoCompleto.includes("tour") ||
+          textoCompleto.includes("show") ||
+          textoCompleto.includes("fiesta") ||
+          textoCompleto.includes("tigre") ||
+          textoCompleto.includes("navegacion") ||
+          textoCompleto.includes("stadium") ||
+          textoCompleto.includes("futebol") ||
+          textoCompleto.includes("menu")
+        ) {
+          categoriaExibida = "PASSEIOS";
+        } else if (
+          textoCompleto.includes("eze") ||
+          textoCompleto.includes("ezeiza")
+        ) {
+          categoriaExibida = "TRANSLADOS EZEIZA";
+        } else if (
+          textoCompleto.includes("aep") ||
+          textoCompleto.includes("aeroparque")
+        ) {
+          categoriaExibida = "TRANSLADOS AEP";
         }
 
         return `
@@ -401,20 +433,29 @@ async function renderAgenda() {
                         </p>
                         
                         <div class="mt-3 pt-2 border-t border-gray-100/60 flex flex-wrap items-center gap-2">
-                            ${!status.includes("concluido") && !status.includes("declinado") ? `
+                            ${
+                              !status.includes("concluido") &&
+                              !status.includes("declinado")
+                                ? `
                             <button onclick="event.stopPropagation(); acaoRapidaReserva('${item.id}', 'Concluído')" class="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold transition">
                                 <i class="fas fa-check"></i> Finalizar
                             </button>
                             <button onclick="event.stopPropagation(); mudarStatusReserva('${item.id}', 'Declinado')" class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded text-[11px] font-bold transition">
                                 Declinado
                             </button>
-                            ` : ""}
+                            `
+                                : ""
+                            }
 
-                            ${isTransfer && !status.includes("concluido") ? `
+                            ${
+                              isTransfer && !status.includes("concluido")
+                                ? `
                             <button onclick="event.stopPropagation(); alertaVooPousou('${item.id}', '${nomeClienteFinal}')" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-bold transition">
                                 <i class="fas fa-plane-arrival"></i> Pousou
                             </button>
-                            ` : ""}
+                            `
+                                : ""
+                            }
                         </div>
                     </div>
                 </div>

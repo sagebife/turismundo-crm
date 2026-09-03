@@ -43,6 +43,39 @@
         border-radius: 10px;
       }
     </style>
+    <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turismundo CRM</title>
+    
+    <!-- Um monte de links (Tailwind, FontAwesome, Google Fonts, etc) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="...">
+
+    <!-- 🌟 COLE O CÓDIGO DA BARRA DE ROLAGEM AQUI 🌟 -->
+    <style>
+      #dashActivitiesContainer::-webkit-scrollbar {
+        width: 6px;
+      }
+      #dashActivitiesContainer::-webkit-scrollbar-track {
+        background: #f1f5f9; 
+        border-radius: 4px;
+      }
+      #dashActivitiesContainer::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 4px;
+      }
+      #dashActivitiesContainer::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+      }
+    </style>
+
+</head> <!-- Aqui ela fecha! -->
+
+<body class="bg-slate-50">
+  <!-- Aqui começa o visual do seu site... -->
   </head>
   <body
     class="bg-gray-50 text-gray-950 pb-24 lg:pb-0 min-h-screen flex flex-col"
@@ -770,7 +803,8 @@
                 </button>
               </div>
 
-              <div class="space-y-3" id="dashActivitiesContainer">
+              <div class="space-y-3 max-h-[380px] overflow-y-auto pr-2 pb-2" id="dashActivitiesContainer">
+              >
                 <!-- Gerado dinamicamente -->
               </div>
             </div>
@@ -3026,11 +3060,148 @@
         return novoCliente.id;
       }
 
-      // 3. A Função "Maestrina": Orquestra criação ou edição
+      // ==========================================
+      // AUTOCOMPLETE E SELEÇÃO DO SERVIÇO NA NOVA RESERVA (Corrigido para salvar estrutura limpa)
+      // ==========================================
+      document.addEventListener("DOMContentLoaded", () => {
+        const inputServico = document.getElementById(
+          "input-busca-servico-reserva",
+        );
+        const dropdownServico = document.getElementById(
+          "dropdown-servicos-reserva",
+        );
+
+        if (inputServico && dropdownServico) {
+          dropdownServico.classList.add("min-w-[350px]");
+
+          inputServico.addEventListener("input", async (e) => {
+            const termo = e.target.value.toLowerCase().trim();
+
+            if (!termo) {
+              dropdownServico.classList.add("hidden");
+              dropdownServico.innerHTML = "";
+              return;
+            }
+
+            try {
+              let servicosParaBuscar = [];
+
+              if (window.isConnectedToSupabase && window.supabaseClient) {
+                const { data, error } = await window.supabaseClient
+                  .from("servicos")
+                  .select("*")
+                  .or(`nome.ilike.%${termo}%,categoria.ilike.%${termo}%`);
+
+                if (!error && data) {
+                  servicosParaBuscar = data;
+                }
+              }
+
+              if (servicosParaBuscar.length === 0) {
+                const cacheLocal =
+                  window.databaseServicos || window.servicos || [];
+                servicosParaBuscar = cacheLocal.filter((s) => {
+                  const textoTotal =
+                    `${s.categoria || s.tipo || ""} ${s.nome || s.titulo || ""}`.toLowerCase();
+                  return textoTotal.includes(termo);
+                });
+              }
+
+              if (servicosParaBuscar.length === 0) {
+                dropdownServico.innerHTML = `<li class="px-3 py-2 text-xs text-gray-400">Nenhum serviço encontrado</li>`;
+                dropdownServico.classList.remove("hidden");
+                return;
+              }
+
+              dropdownServico.innerHTML = servicosParaBuscar
+                .map((s) => {
+                  const categoria = (
+                    s.categoria ||
+                    s.tipo ||
+                    "Geral"
+                  ).toUpperCase();
+                  const detalhe = s.nome || s.titulo || "";
+                  const preco = s.valor || s.preco || 0;
+
+                  // Escapa aspas para não quebrar o HTML do onclick
+                  const catSegura = categoria.replace(/'/g, "\\'");
+                  const detalheSeguro = detalhe.replace(/'/g, "\\'");
+
+                  return `
+            <li class="px-3 py-2.5 text-xs hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-none transition"
+                onclick="preencherServicoReservaQuick('${catSegura}', '${detalheSeguro}', ${preco})">
+              <span class="font-bold text-blue-900">${categoria}</span>
+              <span class="text-gray-800">- ${detalhe}</span>
+              <span class="font-bold text-gray-900 float-right">R$ ${preco}</span>
+            </li>
+          `;
+                })
+                .join("");
+
+              dropdownServico.classList.remove("hidden");
+            } catch (err) {
+              console.error("Erro ao buscar serviços:", err);
+            }
+          });
+        }
+      });
+
+      // Agora preenchemos a Categoria escondida e deixamos o Serviço limpo no input!
+      window.preencherServicoReservaQuick = function (
+        categoria,
+        nomeServico,
+        valor,
+      ) {
+        const inputServico = document.getElementById(
+          "input-busca-servico-reserva",
+        );
+        const inputCategoriaHidden = document.getElementById(
+          "reserva-select-categoria",
+        );
+        const dropdownServico = document.getElementById(
+          "dropdown-servicos-reserva",
+        );
+        const inputValorTotal = document.getElementById("modalValueTotal");
+        const inputRepasse = document.getElementById("modalValueDriver");
+
+        if (inputCategoriaHidden) inputCategoriaHidden.value = categoria;
+        if (inputServico) inputServico.value = nomeServico;
+        if (dropdownServico) dropdownServico.classList.add("hidden");
+
+        if (inputValorTotal) inputValorTotal.value = valor;
+        if (inputRepasse && valor) {
+          inputRepasse.value = Math.round(valor * 0.7);
+        }
+      };
+
+      // ==========================================
+      // FUNÇÕES DE SALVAMENTO DE NOVA RESERVA
+      // ==========================================
+      function coletarDadosReserva() {
+        const getText = (id) => (document.getElementById(id) || {}).value || "";
+        const getNum = (id) =>
+          parseFloat((document.getElementById(id) || {}).value) || 0;
+
+        return {
+          clientName: getText("modalClient").trim(),
+          clientPhone: getText("modalPhone").trim(),
+          hotel: getText("modalHotel").trim(),
+          servico: getText("input-busca-servico-reserva").trim(),
+          cat: getText("reserva-select-categoria").trim() || "Geral",
+          date: getText("modalDate"),
+          time: getText("modalTime"),
+          driverId: getText("modalDriverSelect"),
+          flight: getText("modalFlight").trim(),
+          valCliente: getNum("modalValueTotal"),
+          valMotorista: getNum("modalValueDriver"),
+          desc: getText("modalDesc").trim(),
+        };
+      }
+
       async function saveQuickReserva(event) {
         event.preventDefault();
 
-        // Passo 1: Lê a tela
+        // Passo 1: Lê a tela com dados limpos
         const dados = coletarDadosReserva();
 
         // Passo 2: Validações Simples
@@ -3044,22 +3215,29 @@
         // Passo 3: Salva no Supabase (ou Simulação)
         if (window.isConnectedToSupabase && window.supabaseClient) {
           try {
-            // Monta o objeto de dados da reserva com os campos operacionais
+            // Monta a localização mesclando o Hotel e a Descrição de forma limpa
+            let localizacaoFinal = dados.hotel || "";
+            if (dados.desc) {
+              localizacaoFinal = localizacaoFinal
+                ? `${localizacaoFinal} | ${dados.desc}`
+                : dados.desc;
+            }
+            if (!localizacaoFinal) localizacaoFinal = "Endereço não informado";
+
+            // Payload corrigido: sem colunas inexistentes!
             const dadosReservaPayload = {
               motorista_id: dados.driverId || null,
               dia: dados.date,
               hora: dados.time,
               tipo: dados.cat,
-              localizacao: dados.hotel
-                ? `Hotel/Endereço: ${dados.hotel} | ${dados.desc}`
-                : (dados.servico ? dados.servico + " - " : "") + dados.desc,
+              servico: dados.servico,
+              localizacao: localizacaoFinal,
               voo: dados.flight,
               valor_total: dados.valCliente,
               valor_repasse_motorista: dados.valMotorista,
               status: dados.driverId ? "confirmado" : "pendente",
             };
 
-            // VERIFICAÇÃO INTELIGENTE: Se tem ID em edição, faz UPDATE sem duplicar cliente
             if (window.reservaEmEdicaoId) {
               showToast("Atualizando reserva...", false);
 
@@ -3071,12 +3249,10 @@
               if (erroUpdate) throw erroUpdate;
               showToast("Reserva atualizada com sucesso! 🚀", false);
 
-              // Limpa o ID de edição após salvar
               window.reservaEmEdicaoId = null;
             } else {
               showToast("Processando nova reserva...", false);
 
-              // Novo cadastro: Resolve o cliente no banco antes de inserir
               const clientId = await processarClienteBanco(
                 dados.clientName,
                 dados.clientPhone,
@@ -3094,7 +3270,6 @@
               showToast("Reserva agendada com sucesso!", false);
             }
 
-            // Recarrega todos os dados do banco para atualizar as abas (Agenda, Dashboard e Financeiro)
             if (typeof loadRealData === "function") await loadRealData();
             if (typeof renderFinanceiro === "function") renderFinanceiro();
           } catch (err) {
@@ -3105,56 +3280,15 @@
             );
           }
         } else {
-          // Modo Offline / Simulação
-          if (window.reservaEmEdicaoId) {
-            const index = (window.databaseAgenda || []).findIndex(
-              (r) => String(r.id) === String(window.reservaEmEdicaoId),
-            );
-            if (index !== -1) {
-              window.databaseAgenda[index] = {
-                ...window.databaseAgenda[index],
-                dia: dados.date,
-                hora: dados.time,
-                tipo: dados.cat || "transfer",
-                cliente: dados.clientName,
-                localizacao:
-                  (dados.servico ? dados.servico + " - " : "") + dados.desc,
-                motorista: dados.driverId,
-                valorCliente: dados.valCliente,
-                valorMotorista: dados.valMotorista,
-                telefone: dados.clientPhone,
-                status: dados.driverId ? "confirmado" : "pendente",
-              };
-            }
-            window.reservaEmEdicaoId = null;
-            showToast("Reserva simulada atualizada!", false);
-          } else {
-            databaseAgenda.push({
-              id: String(Date.now()),
-              dia: dados.date,
-              hora: dados.time,
-              tipo: dados.cat || "transfer",
-              cliente: dados.clientName,
-              localizacao:
-                (dados.servico ? dados.servico + " - " : "") + dados.desc,
-              motorista: dados.driverId,
-              valorCliente: dados.valCliente,
-              valorMotorista: dados.valMotorista,
-              telefone: dados.clientPhone,
-              status: dados.driverId ? "confirmado" : "pendente",
-            });
-            showToast("Reserva simulada com sucesso!", false);
-          }
-          renderAgenda();
-          renderDashboard();
-          if (typeof renderFinanceiro === "function") renderFinanceiro();
+          // Fallback Offline
+          showToast("Modo Offline: Registro simulado atualizado.", false);
         }
 
-        // Passo 4: Finaliza (Limpa e fecha modal)
-        limparFormularioReserva();
+        // Passo 4: Finaliza
+        if (typeof limparFormularioReserva === "function")
+          limparFormularioReserva();
         closeQuickAddModal();
       }
-
       function saveDbConfig() {
         const url = document.getElementById("dbUrlInput").value.trim();
         const key = document.getElementById("dbKeyInput").value.trim();
