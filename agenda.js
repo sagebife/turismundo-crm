@@ -6,6 +6,14 @@
 window.openQuickAddModal = function () {
   const modal = document.getElementById("quickModal");
   if (modal) {
+    // Limpa todos os campos para evitar "memória" do cliente anterior
+    const form = modal.querySelector("form");
+    if (form) form.reset();
+
+    // Restaura o PAX padrão para 1 após o reset
+    const inputPax = document.getElementById("modalPax");
+    if (inputPax) inputPax.value = "1";
+
     modal.classList.remove("opacity-0", "pointer-events-none");
 
     // Preenche automaticamente com a data selecionada na agenda
@@ -19,12 +27,13 @@ window.openQuickAddModal = function () {
 };
 
 // Função global para fechar o modal de Nova Reserva
-window.closeQuickAddModal = function () {
+function closeQuickAddModal() {
   const modal = document.getElementById("quickModal");
-  if (modal) {
-    modal.classList.add("opacity-0", "pointer-events-none");
-  }
-};
+  const form = modal.querySelector("form");
+  if (form) form.reset();
+
+  modal.classList.add("opacity-0", "pointer-events-none");
+}
 
 // Função blindada para pegar o dia de HOJE no fuso horário local correto
 function getHojeLocal() {
