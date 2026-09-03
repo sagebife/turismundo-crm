@@ -598,7 +598,8 @@
                 >
                   0
                 </p>
-                <span class="text-[10px] text-emerald-600 font-bold flex items-center justify-center gap-1"
+                <span
+                  class="text-[10px] text-emerald-600 font-bold flex items-center justify-center gap-1"
                   ><i class="fas fa-circle text-[6px]"></i>Conectado</span
                 >
               </div>
@@ -646,7 +647,11 @@
               <div
                 class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center relative"
               >
-                <div class="absolute top-3 right-3 text-gray-400 hover:text-blue-900 transition cursor-pointer" title="Ocultar/Revelar Faturamento" onclick="toggleFaturamento()">
+                <div
+                  class="absolute top-3 right-3 text-gray-400 hover:text-blue-900 transition cursor-pointer"
+                  title="Ocultar/Revelar Faturamento"
+                  onclick="toggleFaturamento()"
+                >
                   <i id="eyeIcon" class="fas fa-eye-slash text-xs"></i>
                 </div>
                 <p
@@ -770,6 +775,10 @@
               </div>
             </div>
           </section>
+        </div>
+        <!-- FECHA O GRID DO DASHBOARD -->
+      </div>
+      <!-- FECHA O DASHBOARD DEFINITIVAMENTE -->
 
       <!-- VIEW: AGENDA -->
       <div id="view-agenda" class="view-section hidden space-y-6">
@@ -2363,96 +2372,108 @@
         }
       }
 
-      async function switchTab(tabId) {
-        if (typeof loadRealData === "function") {
-          await loadRealData();
-        }
+      window.switchTab = function (tabId) {
+        console.log(
+          "=== INICIANDO TROCA DE ABA PARA:",
+          tabId.toUpperCase(),
+          "===",
+        );
 
-        document.querySelectorAll(".view-section").forEach((view) => {
+        // 1. Oculta todas as telas
+        const allViews = document.querySelectorAll(".view-section");
+        console.log(
+          " Passo 1: Encontrei " +
+            allViews.length +
+            " seções (.view-section) e ocultei todas.",
+        );
+
+        allViews.forEach((view) => {
           view.classList.add("hidden");
+          view.style.display = "none";
         });
 
+        // 2. Tenta revelar a tela clicada
         const element = document.getElementById("view-" + tabId);
         if (element) {
+          console.log(
+            " Passo 2: O elemento alvo (view-" +
+              tabId +
+              ") FOI ENCONTRADO no HTML!",
+          );
           element.classList.remove("hidden");
+          element.style.display = "block";
+          console.log(
+            " Passo 3: Classes finais aplicadas no elemento:",
+            element.className,
+          );
+        } else {
+          console.error(
+            " ERRO FATAL: O elemento 'view-" +
+              tabId +
+              "' NÃO EXISTE no seu HTML!",
+          );
         }
 
-        const navDash = document.getElementById("nav-dash");
-        const navAgenda = document.getElementById("nav-agenda");
-        const navMoto = document.getElementById("nav-moto");
-        const navFin = document.getElementById("nav-fin");
-        const navServ = document.getElementById("nav-serv");
-        const navClientes = document.getElementById("nav-clientes");
-        const navOrcamentos = document.getElementById("nav-orcamentos");
-
-        if (navOrcamentos)
-          navOrcamentos.className =
-            tabId === "orcamentos"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "text-blue-200 hover:text-white font-semibold transition-colors";
-
-        if (navDash)
-          navDash.className =
-            tabId === "dashboard"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-        if (navAgenda)
-          navAgenda.className =
-            tabId === "agenda"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-        if (navMoto)
-          navMoto.className =
-            tabId === "motoristas"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-        if (navServ)
-          navServ.className =
-            tabId === "servicos"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-        if (navFin)
-          navFin.className =
-            tabId === "financeiro"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-        if (navClientes)
-          navClientes.className =
-            tabId === "clientes"
-              ? "text-white font-bold border-b-2 border-white pb-1 transition"
-              : "";
-
-        if (tabId === "dashboard") {
-          const hojeObj = new Date();
-          const ano = hojeObj.getFullYear();
-          const mes = String(hojeObj.getMonth() + 1).padStart(2, "0");
-          const dia = String(hojeObj.getDate()).padStart(2, "0");
-          selectedDay = `${ano}-${mes}-${dia}`;
-
-          if (typeof renderDashboard === "function") {
-            renderDashboard();
+        // 3. Atualiza cores dos botões
+        const ids = [
+          "dashboard",
+          "agenda",
+          "motoristas",
+          "servicos",
+          "financeiro",
+          "clientes",
+          "orcamentos",
+        ];
+        ids.forEach((id) => {
+          const btn = document.getElementById(
+            "nav-" +
+              (id === "dashboard"
+                ? "dash"
+                : id === "motoristas"
+                  ? "moto"
+                  : id === "servicos"
+                    ? "serv"
+                    : id === "financeiro"
+                      ? "fin"
+                      : id),
+          );
+          if (btn) {
+            btn.className =
+              tabId === id
+                ? "text-white font-bold border-b-2 border-white pb-1 transition"
+                : "text-blue-200 hover:text-white font-semibold transition-colors";
           }
-        } else if (tabId === "servicos") {
-          renderServicos();
-        } else if (tabId === "agenda") {
-          const hoje = new Date();
-          const ano = hoje.getFullYear();
-          const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-          const dia = String(hoje.getDate()).padStart(2, "0");
-          selectedDay = `${ano}-${mes}-${dia}`;
-        } else if (tabId === "motoristas") {
-          renderDrivers();
-        } else if (tabId === "financeiro") {
-          renderFinanceiro();
-        } else if (tabId === "clientes") {
-          renderClientes();
-        } else if (tabId === "orcamentos") {
-          if (typeof carregarOrcamentos === "function") {
-            carregarOrcamentos();
-          }
-        }
-      }
+        });
 
+        // 4. Libera renderizações locais sem travar
+        setTimeout(() => {
+          try {
+            if (tabId === "dashboard" && typeof renderDashboard === "function")
+              renderDashboard();
+            if (tabId === "agenda" && typeof renderAgenda === "function")
+              renderAgenda();
+            if (tabId === "motoristas" && typeof renderDrivers === "function")
+              renderDrivers();
+            if (
+              tabId === "financeiro" &&
+              typeof renderFinanceiro === "function"
+            )
+              renderFinanceiro();
+            if (tabId === "servicos" && typeof renderServicos === "function")
+              renderServicos();
+            if (tabId === "clientes" && typeof renderClientes === "function")
+              renderClientes();
+            if (
+              tabId === "orcamentos" &&
+              typeof carregarOrcamentos === "function"
+            )
+              carregarOrcamentos();
+            console.log(" Passo 4: Funções de renderização concluídas.");
+          } catch (err) {
+            console.error(" Erro dentro da renderização de aba:", err);
+          }
+        }, 50);
+      };
       // FUNÇÃO 1: Muda o status para Concluído ou outro
       window.acaoRapidaReserva = async function (idReserva, novoStatus) {
         if (!idReserva || idReserva === "undefined")
