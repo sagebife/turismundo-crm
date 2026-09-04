@@ -130,46 +130,113 @@ function gerarDiasAgenda() {
         `;
   }
 }
+window.selectDay = function (day) {
+  window.selectedDay = day;
 
-window.selectDay = function (diaStr, moverCarrossel = true) {
-  window.selectedDay = diaStr;
+  // Atualiza visualmente os dias do carrossel horizontal
+  document.querySelectorAll("#containerDiasAgenda > div").forEach((btn) => {
+    const isSelected = btn.getAttribute("data-date") === day;
+    const spans = btn.querySelectorAll("span");
 
-  if (moverCarrossel) {
-    window.carrosselAnchorDate = new Date(diaStr + "T00:00:00");
-  }
-
-  gerarDiasAgenda();
-  renderAgenda();
-};
-
-window.verDetalhesDoDia = function (diaStr) {
-  let dataForte = String(diaStr).trim();
-  if (dataForte.length <= 2) {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-    dataForte = `${ano}-${mes}-${dataForte.padStart(2, "0")}`;
-  }
-
-  document.querySelectorAll(".view-section").forEach((view) => {
-    view.classList.add("hidden");
-  });
-  const viewAgenda = document.getElementById("view-agenda");
-  if (viewAgenda) {
-    viewAgenda.classList.remove("hidden");
-  }
-
-  document.querySelectorAll(".fixed.z-50").forEach((modal) => {
-    if (!modal.classList.contains("hidden") && modal.id !== "quickModal") {
-      modal.classList.add("hidden");
+    if (isSelected) {
+      btn.className =
+        "day-btn snap-center cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-blue-900 text-white shadow-md border border-blue-900";
+      if (spans[0])
+        spans[0].className = "block text-xs uppercase text-blue-200";
+      if (spans[1]) spans[1].className = "text-lg font-bold text-white";
+    } else {
+      btn.className =
+        "day-btn snap-center cursor-pointer min-w-[65px] p-3 rounded-xl text-center transition bg-white hover:bg-gray-100 text-gray-700 border border-gray-100";
+      if (spans[0])
+        spans[0].className = "block text-xs uppercase text-gray-500";
+      if (spans[1]) spans[1].className = "text-lg font-bold text-gray-800";
     }
   });
 
-  window.selectedDay = dataForte;
-  window.carrosselAnchorDate = new Date(dataForte + "T00:00:00");
+  // Atualiza o título da data
+  const labelEl = document.getElementById("tituloDiaSelecionado");
+  if (labelEl) {
+    const [ano, mes, d] = String(window.selectedDay).split("-");
+    if (ano && mes && d) {
+      const dataObj = new Date(Number(ano), Number(mes) - 1, Number(d));
+      const nomeFormatado = dataObj.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      });
+      labelEl.innerText = `Agenda: ${nomeFormatado.charAt(0).toUpperCase() + nomeFormatado.slice(1)}`;
+    } else {
+      labelEl.innerText = `Agenda: ${window.selectedDay}`;
+    }
+  }
 
-  gerarDiasAgenda();
-  renderAgenda();
+  // 🔥 RENDERIZA APENAS A AGENDA (Fim do cabo de guerra com o Dashboard)
+  if (typeof window.renderAgenda === "function") window.renderAgenda();
+
+  // Centraliza o dia selecionado de forma blindada (pelo data-date)
+  setTimeout(() => {
+    const container = document.getElementById("containerDiasAgenda");
+    if (container) {
+      const btnAtivo = container.querySelector(
+        `[data-date="${window.selectedDay}"]`,
+      );
+      if (btnAtivo) {
+        btnAtivo.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+    }
+  }, 100);
+};
+
+window.verDetalhesDoDia = function (diaStr, event) {
+  // 1. O Escudo Nuclear: Impede que o clique ative os resets do menu
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  let dataForte = String(diaStr).trim();
+  if (dataForte.length <= 2) {
+    const hoje = new Date();
+    dataForte = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${dataForte.padStart(2, "0")}`;
+  }
+
+  // 2. Transição Forçada no DOM
+  document
+    .querySelectorAll(".view-section, [id^='view-']")
+    .forEach((v) => v.classList.add("hidden"));
+  const viewAgenda = document.getElementById("view-agenda");
+  if (viewAgenda) viewAgenda.classList.remove("hidden");
+
+  // Fecha modais
+  if (typeof window.fecharCalendario === "function") window.fecharCalendario();
+
+  // Atualiza botões do menu superior
+  document.querySelectorAll("nav a, nav button, .menu-item").forEach((link) => {
+    if (link.innerText && link.innerText.trim().toLowerCase() === "agenda") {
+      link.classList.add("text-white", "font-bold");
+      link.classList.remove("text-blue-200", "font-medium");
+    } else {
+      link.classList.remove("text-white", "font-bold");
+      link.classList.add("text-blue-200", "font-medium");
+    }
+  });
+
+  // 3. Trava de Execução (Timeout Lock) - Garante a data contra o reset
+  const forcarData = () => {
+    window.selectedDay = dataForte;
+    window.carrosselAnchorDate = new Date(dataForte + "T12:00:00");
+    if (typeof window.gerarDiasAgenda === "function") window.gerarDiasAgenda();
+    if (typeof window.renderAgenda === "function") window.renderAgenda();
+  };
+
+  // Dispara instantaneamente e depois aciona a trava após os milissegundos críticos
+  forcarData();
+  setTimeout(forcarData, 50);
+  setTimeout(forcarData, 150);
 };
 
 window.selecionarDiaCalendario = function (diaStr) {
