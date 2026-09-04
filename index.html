@@ -2749,120 +2749,107 @@
         }
       }
 
-      async function renderServicos() {
-        const container = document.getElementById("catalogList");
-        if (!container) return;
+     async function renderServicos() {
+  const container = document.getElementById("catalogList");
+  if (!container) return;
 
-        if (!window.supabaseClient) {
-          container.innerHTML = `<p class="text-gray-500 text-center py-8">Supabase não conectado.</p>`;
-          return;
-        }
+  if (!window.supabaseClient) {
+    container.innerHTML = `<p class="text-gray-500 text-center py-8">Supabase não conectado.</p>`;
+    return;
+  }
 
-        // 1. Busca Categorias já ordenadas no Banco
-        const { data: categoriasData, error: catError } =
-          await window.supabaseClient
-            .from("categorias_servicos")
-            .select("nome")
-            .order("nome", { ascending: true });
+  // 1. Busca Categorias já ordenadas no Banco
+  const { data: categoriasData, error: catError } = await window.supabaseClient
+    .from("categorias_servicos")
+    .select("nome")
+    .order("nome", { ascending: true });
 
-        if (catError) {
-          console.error("Erro ao carregar categorias:", catError.message);
-        }
+  if (catError) {
+    console.error("Erro ao carregar categorias:", catError.message);
+  }
 
-        // Atualiza o Select do Formulário (garante que fique em ordem alfabética)
-        const catSelect = document.getElementById("catSelect");
-        if (catSelect) {
-          catSelect.innerHTML =
-            '<option value="">Selecione uma categoria...</option>';
-          if (categoriasData) {
-            categoriasData.forEach((c) => {
-              catSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-            });
-          }
-        }
+  // Atualiza o Select do Formulário (garante que fique em ordem alfabética)
+  const catSelect = document.getElementById("catSelect");
+  if (catSelect) {
+    catSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+    if (categoriasData) {
+      categoriasData.forEach((c) => {
+        catSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+      });
+    }
+  }
 
-        // 2. Busca os Serviços e ordena pelo nome (A-Z) para garantir a ordem interna
-        const { data: servicosData, error: servError } =
-          await window.supabaseClient
-            .from("servicos")
-            .select("*")
-            .order("nome", { ascending: true });
+  // 2. Busca os Serviços e ordena pelo nome (A-Z) para garantir a ordem interna
+  const { data: servicosData, error: servError } = await window.supabaseClient
+    .from("servicos")
+    .select("*")
+    .order("nome", { ascending: true });
 
-        if (servError) {
-          console.error("Erro ao carregar serviços:", servError.message);
-          container.innerHTML = `<p class="text-red-500 text-center py-8">Erro ao carregar os serviços.</p>`;
-          return;
-        }
+  if (servError) {
+    console.error("Erro ao carregar serviços:", servError.message);
+    container.innerHTML = `<p class="text-red-500 text-center py-8">Erro ao carregar os serviços.</p>`;
+    return;
+  }
 
-        // 3. Monta a lista final e ordena de A-Z no JavaScript para garantir 100% de precisão
-        const categoriasSet = new Set();
-        if (categoriasData)
-          categoriasData.forEach((c) => categoriasSet.add(c.nome));
-        if (servicosData) {
-          servicosData.forEach((s) => {
-            if (s.categoria) categoriasSet.add(s.categoria);
-          });
-        }
+  // 3. Monta a lista final e ordena de A-Z no JavaScript para garantir 100% de precisão
+  const categoriasSet = new Set();
+  if (categoriasData) categoriasData.forEach((c) => categoriasSet.add(c.nome));
+  if (servicosData) {
+    servicosData.forEach((s) => {
+      if (s.categoria) categoriasSet.add(s.categoria);
+    });
+  }
 
-        // Converte para Array e força a ordenação alfabética
-        const listaCategorias = Array.from(categoriasSet).sort((a, b) =>
-          a.localeCompare(b),
-        );
+  // Converte para Array e força a ordenação alfabética
+  const listaCategorias = Array.from(categoriasSet).sort((a, b) => a.localeCompare(b));
 
-        if (listaCategorias.length === 0) {
-          container.innerHTML = `<div class="text-center py-12 text-gray-400"><i class="fas fa-box-open text-4xl mb-3"></i><p>Nenhuma categoria cadastrada até o momento.</p></div>`;
-          return;
-        }
+  if (listaCategorias.length === 0) {
+    container.innerHTML = `<div class="text-center py-12 text-gray-400"><i class="fas fa-box-open text-4xl mb-3"></i><p>Nenhuma categoria cadastrada até o momento.</p></div>`;
+    return;
+  }
 
-        const servicosPorCategoria = {};
-        listaCategorias.forEach((cat) => {
-          servicosPorCategoria[cat] = [];
-        });
+  const servicosPorCategoria = {};
+  listaCategorias.forEach((cat) => {
+    servicosPorCategoria[cat] = [];
+  });
 
-        if (servicosData) {
-          servicosData.forEach((servico) => {
-            const cat = servico.categoria || "GERAL";
-            if (!servicosPorCategoria[cat]) {
-              servicosPorCategoria[cat] = [];
-            }
-            servicosPorCategoria[cat].push(servico);
-          });
-        }
+  if (servicosData) {
+    servicosData.forEach((servico) => {
+      const cat = servico.categoria || "GERAL";
+      if (!servicosPorCategoria[cat]) {
+        servicosPorCategoria[cat] = [];
+      }
+      servicosPorCategoria[cat].push(servico);
+    });
+  }
 
-        // 4. Desenha na tela (tudo já ordenado)
-        container.innerHTML = listaCategorias
-          .map((categoria) => {
-            const itens = servicosPorCategoria[categoria] || [];
+  // 4. Desenha na tela COM A MÁGICA DA ROLAGEM 
+  const conteudoLista = listaCategorias.map((categoria) => {
+    const itens = servicosPorCategoria[categoria] || [];
+    const itensHTML = itens.length > 0
+      ? itens.map((servico) => `
+        <div class="px-5 py-4 flex justify-between items-center hover:bg-blue-50/50 transition-colors group">
+            <div class="flex-1">
+                <h4 class="font-medium text-gray-800 text-sm">${servico.nome}</h4>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm whitespace-nowrap">
+                    R$ ${parseFloat(servico.preco || 0).toFixed(2)}
+                </span>
+                <div class="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded-md hover:bg-blue-100 transition" title="Editar Serviço">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onclick="deletarServico('${servico.id}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-100 transition" title="Excluir Serviço">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+      `).join("")
+      : `<div class="px-5 py-4 text-center text-gray-400 text-sm italic">Nenhum serviço cadastrado nesta categoria.</div>`;
 
-            const itensHTML =
-              itens.length > 0
-                ? itens
-                    .map(
-                      (servico) => `
-              <div class="px-5 py-4 flex justify-between items-center hover:bg-blue-50/50 transition-colors group">
-                  <div class="flex-1">
-                      <h4 class="font-medium text-gray-800 text-sm">${servico.nome}</h4>
-                  </div>
-                  <div class="flex items-center gap-4">
-                      <span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm whitespace-nowrap">
-                          R$ ${parseFloat(servico.preco || 0).toFixed(2)}
-                      </span>
-                      <div class="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                          <button onclick="editarServico('${servico.id}', '${servico.nome}', '${servico.preco}', '${servico.categoria}')" class="text-gray-400 hover:text-blue-600 p-1.5 rounded-md hover:bg-blue-100 transition" title="Editar Serviço">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                          </button>
-                          <button onclick="deletarServico('${servico.id}')" class="text-gray-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-100 transition" title="Excluir Serviço">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          </button>
-                      </div>
-                  </div>
-              </div>
-            `,
-                    )
-                    .join("")
-                : `<div class="px-5 py-4 text-center text-gray-400 text-sm italic">Nenhum serviço cadastrado nesta categoria.</div>`;
-
-            return `
+    return `
       <div class="mb-5 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center group">
               <h3 class="text-xs font-bold text-red-600 uppercase tracking-widest">${categoria}</h3>
@@ -2879,10 +2866,16 @@
               ${itensHTML}
           </div>
       </div>
-      `;
-          })
-          .join("");
-      }
+    `;
+  }).join("");
+
+  // 🔥 INJEÇÃO DO WRAPPER DE ROLAGEM 🔥
+  container.innerHTML = `
+    <div class="overflow-y-auto max-h-[calc(100vh-320px)] pr-2 pb-10">
+        ${conteudoLista}
+    </div>
+  `;
+}
       // 1. O segredo da formatação ao vivo (mantém o cursor no lugar certo)
       function capitalizarInputAoVivo(elemento) {
         let inicio = elemento.selectionStart;
